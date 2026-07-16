@@ -56,7 +56,7 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 
 | Resource | Path | Description |
 |----------|------|-------------|
-| 🎨 **Slides** | [`slides/lecture_01_llm_embeddings.html`](slides/lecture_01_llm_embeddings.html) | Open in browser — reveal.js presentation |
+| 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_01_llm_embeddings.html) | Click to view slides in your browser |
 | 🔬 **Lab notebook** | [`lab_01_embeddings/lab_01_embeddings.py`](lab_01_embeddings/lab_01_embeddings.py) | Python script — run locally |
 
 ---
