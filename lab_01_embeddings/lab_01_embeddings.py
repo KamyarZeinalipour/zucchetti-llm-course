@@ -29,7 +29,7 @@
 # | How embedding dimensions affect quality | Section 3: Why Dimensions Matter |
 #
 #
-# ⏱ **Duration:** ~50 minutes · 🔒 **No API key needed** — runs 100% locally
+# ⏱ **Duration:** ~20 minutes · 🔒 **No API key needed** — runs 100% locally
 
 # %% [markdown]
 # ---
