@@ -1,0 +1,52 @@
+# ============================================================
+# LLM Course — Shared Dependencies
+# ============================================================
+# Install all: pip install -r requirements.txt
+# ============================================================
+
+# --- Core ---
+openai>=1.30.0                 # DeepSeek API (OpenAI-compatible)
+python-dotenv>=1.0.0           # Load .env files
+requests>=2.31.0               # HTTP calls
+rich>=13.7.0                   # Beautiful terminal output
+tqdm>=4.66.0                   # Progress bars
+
+# --- Embeddings & Vector DB ---
+sentence-transformers>=3.0.0   # Local embedding models
+chromadb>=0.5.0                # Vector database
+numpy>=1.26.0                  # Numerical operations
+scikit-learn>=1.4.0            # Metrics, cosine similarity
+
+# --- Document Processing ---
+pypdf>=4.0.0                   # PDF parsing
+tiktoken>=0.7.0                # Token counting
+
+# --- Knowledge Graphs (Lab 05) ---
+networkx>=3.2.0                # Graph operations (lightweight, no Neo4j needed)
+matplotlib>=3.8.0              # Visualization
+pyvis>=0.3.2                   # Interactive graph visualization
+
+# --- Evaluation (Lab 07) ---
+ragas>=0.1.10                  # RAG evaluation framework
+datasets>=2.18.0               # HuggingFace datasets
+
+# --- Fine-Tuning (Lab 08) — Optional, GPU recommended ---
+# Uncomment these if you have a GPU:
+# peft>=0.11.0                 # Parameter-efficient fine-tuning
+# bitsandbytes>=0.43.0         # Quantization (Linux/Mac only)
+# transformers>=4.41.0         # HuggingFace Transformers
+# accelerate>=0.30.0           # Training acceleration
+# trl>=0.8.0                   # Trainer for LLMs
+
+# --- Production (Lab 10) ---
+fastapi>=0.111.0               # API framework
+uvicorn>=0.29.0                # ASGI server
+aiohttp>=3.9.0                 # Async HTTP client (load testing)
+
+# --- Jupyter (optional) ---
+jupyter>=1.0.0                 # Notebook interface
+ipykernel>=6.29.0              # Jupyter kernel
+rank_bm25
+tenacity
+streamlit
+pytest

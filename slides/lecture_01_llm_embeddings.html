@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 1: LLM & Embeddings Fundamentals</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --r-background-color: #0a0a1a;
+            --r-main-font: 'Inter', sans-serif;
+            --r-heading-font: 'Inter', sans-serif;
+            --r-code-font: 'JetBrains Mono', monospace;
+            --r-main-font-size: 24px;
+            --r-heading-color: #fff;
+            --r-main-color: #e0e0e8;
+            --r-link-color: #64b5f6;
+            --accent: #6c63ff;
+            --accent2: #e94560;
+            --accent3: #00d9ff;
+            --surface: rgba(255,255,255,0.05);
+        }
+        .reveal { font-weight: 300; }
+        .reveal .slides > section, .reveal .slides > section > section { padding: 10px 20px; box-sizing: border-box; overflow: hidden; }
+        .reveal .slides > section > *, .reveal .slides > section > section > * { max-width: 100%; box-sizing: border-box; }
+        .reveal h1 { font-size: 2em; font-weight: 700; background: linear-gradient(135deg, #6c63ff, #00d9ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.3em; }
+        .reveal h2 { font-size: 1.4em; font-weight: 600; color: #fff; margin-bottom: 0.4em; }
+        .reveal h3 { font-size: 1.05em; font-weight: 500; color: var(--accent3); margin-bottom: 0.3em; }
+        .reveal .subtitle { font-size: 0.65em; color: #888; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
+        .reveal .highlight { color: var(--accent3); font-weight: 500; }
+        .reveal .warn { color: var(--accent2); font-weight: 500; }
+        .reveal ul { list-style: none; padding-left: 0; margin: 0.3em 0; }
+        .reveal ul li { padding: 0.2em 0; padding-left: 1.3em; position: relative; font-size: 0.82em; }
+        .reveal ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+        .reveal .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; text-align: left; max-width: 100%; overflow: hidden; }
+        .reveal .card { background: var(--surface); border: 1px solid rgba(108,99,255,0.2); border-radius: 10px; padding: 0.8em 1em; margin: 0.3em 0; }
+        .reveal .card h3 { margin-top: 0; margin-bottom: 0.3em; }
+        .reveal code { font-family: var(--r-code-font); background: rgba(108,99,255,0.15); padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.85em; }
+        .reveal pre code { background: #1a1a2e; padding: 0.8em; border-radius: 8px; font-size: 0.5em; line-height: 1.5; }
+        .reveal .emoji { font-size: 1.3em; margin-right: 0.2em; }
+        .reveal .agenda-item { display: flex; align-items: center; gap: 0.8em; padding: 0.45em 0.8em; margin: 0.3em 0; background: var(--surface); border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.75em; }
+        .reveal .agenda-item .time { color: var(--accent3); font-weight: 500; min-width: 55px; }
+        .reveal .big-number { font-size: 2.5em; font-weight: 700; color: var(--accent); }
+        .reveal .formula { background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; padding: 0.5em 1.2em; font-size: 1em; text-align: center; margin: 0.5em auto; font-family: var(--r-code-font); color: var(--accent3); }
+        .reveal .vs-table { width: 100%; border-collapse: collapse; font-size: 0.65em; table-layout: fixed; word-wrap: break-word; }
+        .reveal .vs-table th { background: rgba(108,99,255,0.2); padding: 0.45em; text-align: left; font-weight: 500; }
+        .reveal .vs-table td { padding: 0.4em 0.5em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .reveal .vs-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+        .reveal .takeaway { background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,217,255,0.1)); border: 1px solid rgba(108,99,255,0.3); border-radius: 10px; padding: 0.6em 1em; margin-top: 0.5em; text-align: left; font-size: 0.82em; }
+        .reveal .takeaway::before { content: '💡 KEY TAKEAWAY'; display: block; font-size: 0.55em; font-weight: 600; color: var(--accent); letter-spacing: 0.15em; margin-bottom: 0.3em; }
+        .reveal .section-title { font-size: 0.5em; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 0.2em; }
+        .reveal .progress-bar { display: flex; gap: 4px; margin: 0.6em 0; }
+        .reveal .progress-bar .step { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); }
+        .reveal .progress-bar .step.active { background: var(--accent); }
+        .reveal .progress-bar .step.done { background: var(--accent3); }
+        .slide-number { color: #555 !important; font-size: 14px !important; }
+        .reveal .footer-info { position: absolute; bottom: 1em; left: 1em; font-size: 0.4em; color: #555; }
+        .reveal .paper-ref { font-size: 0.5em; color: #888; margin-top: 8px; font-style: italic; }
+        .reveal .paper-ref a { color: var(--accent); }
+        .reveal p { margin: 0.3em 0; }
+        .reveal br { display: block; content: ''; margin: 0.2em 0; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================ -->
+<!-- TITLE SLIDE -->
+<!-- ============================================ -->
+<section>
+    <p class="section-title">Zucchetti LLM Course — Lecture 1 of 10</p>
+    <h1>LLM & Embeddings<br>Fundamentals</h1>
+    <p class="subtitle">How Large Language Models work under the hood</p>
+    <br>
+    <p style="font-size:0.6em; color:#666;">Kamyar Zeinalipour · 2 hours</p>
+</section>
+
+<!-- ============================================ -->
+<!-- AGENDA -->
+<!-- ============================================ -->
+<section>
+    <h2>Today's Agenda</h2>
+    <div style="max-width:600px; margin:0 auto; text-align:left;">
+        <div class="agenda-item"><span class="time">35 min</span> The Transformer Blueprint</div>
+        <div class="agenda-item"><span class="time">20 min</span> Tokenization & Its Consequences</div>
+        <div class="agenda-item"><span class="time">25 min</span> Embeddings & Similarity</div>
+        <div class="agenda-item" style="border-left-color: #888; background:rgba(255,255,255,0.03);"><span class="time" style="background:#555;">10 min</span> ☕ Break</div>
+        <div class="agenda-item" style="border-left-color: var(--accent2);"><span class="time">20 min</span> 🔬 Hands-on Lab: Embeddings Exploration</div>
+        <div class="agenda-item" style="border-left-color: #555;"><span class="time">10 min</span> Summary & Q&A</div>
+    </div>
+    <div style="margin-top:15px; font-size:0.55em; color:#888;">Total: 2 hours (120 min)</div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 1: TRANSFORMER BLUEPRINT -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 1 of 4</p>
+        <h1>The Transformer<br>Blueprint</h1>
+        <p class="subtitle">The architecture that changed everything</p>
+    </section>
+
+    <section>
+        <h2>What is an LLM, Really?</h2>
+        <p style="font-size:0.8em; color:#aaa;">Think of it as the world's most sophisticated <span class="highlight">autocomplete</span></p>
+        <div class="card" style="text-align:center; font-size:0.85em;">
+            <p style="color:#888;">Your phone keyboard:</p>
+            <p>"See you" → <span class="highlight">tomorrow</span> | later | soon</p>
+            <p style="color:#888; margin-top:0.4em;">An LLM (same idea, but trained on the entire internet):</p>
+            <p>"Explain quantum computing" → <span class="highlight">generates a full, coherent answer</span></p>
+        </div>
+        <div class="two-col" style="font-size:0.7em;">
+            <div class="card">
+                <h3>What it IS</h3>
+                <ul>
+                    <li>A statistical model trained on text</li>
+                    <li>Predicts the most likely next word</li>
+                    <li>Very good at patterns and language</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>What it is NOT</h3>
+                <ul>
+                    <li>Not a database of facts</li>
+                    <li>Not reasoning from first principles</li>
+                    <li>Not guaranteed to be correct</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Before Transformers</h2>
+        <div class="two-col">
+            <div class="card">
+                <h3>RNNs / LSTMs</h3>
+                <ul>
+                    <li>Process words <span class="warn">one by one</span></li>
+                    <li>Sequential = slow</li>
+                    <li>Long texts → forget the beginning</li>
+                    <li>Hard to parallelize on GPUs</li>
+                </ul>
+            </div>
+            <div class="card" style="border-color: rgba(0,217,255,0.3);">
+                <h3>Transformers (2017)</h3>
+                <ul>
+                    <li>Process <span class="highlight">all words at once</span></li>
+                    <li>Parallel = fast</li>
+                    <li>Attention spans the full context</li>
+                    <li>GPU-native architecture</li>
+                </ul>
+            </div>
+        </div>
+        <div class="takeaway">Transformers made it possible to train on trillions of tokens — that's what enabled GPT, LLaMA, and everything we use today.</div>
+    </section>
+
+    <section>
+        <h2>The Timeline: How We Got Here</h2>
+        <div style="font-size:0.75em;">
+            <div class="agenda-item" style="border-left-color: #555;"><span class="time" style="min-width:80px;">2017</span> 📄 "Attention Is All You Need" paper — Transformers invented</div>
+            <div class="agenda-item" style="border-left-color: #555;"><span class="time" style="min-width:80px;">2018</span> BERT (Google) — first big pre-trained language model</div>
+            <div class="agenda-item" style="border-left-color: #555;"><span class="time" style="min-width:80px;">2020</span> GPT-3 (OpenAI) — 175B params, showed emergent abilities</div>
+            <div class="agenda-item" style="border-left-color: var(--accent);"><span class="time" style="min-width:80px;">2022</span> ChatGPT launched — AI goes mainstream</div>
+            <div class="agenda-item" style="border-left-color: var(--accent);"><span class="time" style="min-width:80px;">2023</span> GPT-4, LLaMA 2, Mistral — open-source revolution begins</div>
+            <div class="agenda-item" style="border-left-color: var(--accent3);"><span class="time" style="min-width:80px;">2024-25</span> LLaMA 3, Gemini, Claude, DeepSeek — multimodal, agents, reasoning</div>
+        </div>
+        <div class="takeaway">Everything happened in <span class="highlight">just 8 years</span>. The Transformer architecture is the single most important invention in modern AI.</div>
+    </section>
+
+    <!-- NEW: KEY PAPERS -->
+    <section>
+        <h2>The Papers That Built Modern AI</h2>
+        <p style="font-size:0.7em; color:#aaa;">Each paper built on the previous one. Understanding this <span class="highlight">lineage</span> helps you understand why current models work.</p>
+        <table class="vs-table" style="font-size:0.6em;">
+            <tr><th>Year</th><th>Paper</th><th>Key Innovation</th><th>Citations</th></tr>
+            <tr><td>2013</td><td><span class="highlight">Word2Vec</span> (Mikolov et al.)</td><td>Words as vectors — similar meaning = similar direction</td><td>45,000+</td></tr>
+            <tr><td>2017</td><td><span class="highlight">Attention Is All You Need</span> (Vaswani et al.)</td><td>Transformer architecture — parallel attention replaces RNNs</td><td>130,000+</td></tr>
+            <tr><td>2018</td><td><span class="highlight">BERT</span> (Devlin et al., Google)</td><td>Pre-train once → fine-tune for any task</td><td>95,000+</td></tr>
+            <tr><td>2020</td><td><span class="highlight">GPT-3</span> (Brown et al., OpenAI)</td><td>In-context learning — no fine-tuning needed, just examples</td><td>30,000+</td></tr>
+            <tr><td>2022</td><td><span class="highlight">InstructGPT</span> (Ouyang et al.)</td><td>RLHF — train models to follow human instructions</td><td>8,000+</td></tr>
+            <tr><td>2023</td><td><span class="highlight">LLaMA</span> (Touvron et al., Meta)</td><td>Open-source foundation models — democratized LLMs</td><td>12,000+</td></tr>
+        </table>
+        <div class="takeaway">These 6 papers define the entire field. Everything in this course connects back to them.</div>
+    </section>
+
+    <section>
+        <h2>The Transformer Architecture</h2>
+        <img src="img_transformer_arch.png" style="max-height: 520px; border-radius: 12px; border: 1px solid rgba(108,99,255,0.2);">
+        <p style="font-size:0.55em; color:#666; margin-top:0.5em;">The original encoder-decoder architecture from "Attention Is All You Need" (Vaswani et al., 2017)</p>
+    </section>
+
+    <!-- NEW: TRANSFORMER BLOCK -->
+    <section>
+        <h2>Inside One Transformer Block</h2>
+        <p style="font-size:0.7em; color:#aaa;">The model stacks <span class="highlight">N identical blocks</span>. Each block has the same structure:</p>
+        <div style="max-width:580px; margin:0 auto; font-size:0.65em;">
+            <div class="card" style="border-left:4px solid var(--accent3); margin:4px 0; padding:8px 14px;">
+                <strong style="color:var(--accent3);">Step 1: Multi-Head Self-Attention</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0;">x₁ = x + MultiHeadAttention(LayerNorm(x))</div>
+                <p style="color:#888; font-size:0.85em;">Residual connection (+x) lets information flow directly through — solves vanishing gradient</p>
+            </div>
+            <div style="text-align:center; color:#555;">⬇️</div>
+            <div class="card" style="border-left:4px solid var(--accent); margin:4px 0; padding:8px 14px;">
+                <strong style="color:var(--accent);">Step 2: Feed-Forward Network (FFN)</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0;">x₂ = x₁ + FFN(LayerNorm(x₁))</div>
+                <p style="color:#888; font-size:0.85em;">FFN is the "memory" — where the model stores learned facts and patterns</p>
+            </div>
+            <div style="text-align:center; color:#555;">⬇️</div>
+            <div class="card" style="border-left:4px solid var(--accent2); margin:4px 0; padding:8px 14px;">
+                <strong style="color:var(--accent2);">FFN internally:</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0;">FFN(x) = max(0, xW₁ + b₁) · W₂ + b₂</div>
+                <p style="color:#888; font-size:0.85em;">ReLU activation — simple but effective. Two linear layers with a nonlinearity.</p>
+            </div>
+        </div>
+        <div class="two-col" style="font-size:0.55em; margin-top:6px;">
+            <div class="card"><strong>BERT:</strong> 12 blocks, 12 heads, 110M params</div>
+            <div class="card"><strong>GPT-3:</strong> 96 blocks, 96 heads, 175B params</div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Self-Attention</h2>
+        <p style="font-size:0.75em; color:#aaa;">When you read "it" in a sentence, your brain looks back to find what "it" refers to. <span class="highlight">Self-attention does this for every word simultaneously.</span></p>
+        <div class="card" style="text-align:center;">
+            <p style="font-size:1.1em; font-family: var(--r-code-font);">
+                "The <span class="highlight">bank</span> approved the <span class="warn">loan</span> for the new <span class="highlight">house</span>"
+            </p>
+            <p style="font-size:0.7em; color:#888; margin-top:0.5em;">
+                ← bank attends to loan (financial context, not river bank)<br>
+                ← loan attends to bank AND house (loan purpose connects to house)
+            </p>
+        </div>
+        <div class="two-col" style="font-size:0.65em; margin-top:0.3em;">
+            <div class="card">
+                <h3>📚 Library Search Analogy</h3>
+                <ul>
+                    <li><strong style="color:var(--accent3);">Query (Q):</strong> "I need info about Italian cooking"</li>
+                    <li><strong style="color:var(--accent);">Key (K):</strong> Each book's label/title</li>
+                    <li><strong style="color:var(--accent2);">Value (V):</strong> The actual book content</li>
+                </ul>
+                <p style="color:#888; font-size:0.9em;">Match your query against all keys → read the best-matching values</p>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div class="formula" style="font-size:0.9em;">Attention(Q, K, V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>) · V</div>
+                <p style="color:#888; font-size:0.85em; margin-top:0.3em;">In a transformer, every word simultaneously plays all 3 roles:<br>it asks questions (Q), advertises its content (K), and provides answers (V)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW: MULTI-HEAD ATTENTION -->
+    <section>
+        <h2>Multi-Head Attention — The Full Picture</h2>
+        <p style="font-size:0.7em; color:#aaa;">One attention head learns one type of relationship. <span class="highlight">Multiple heads</span> learn different patterns simultaneously.</p>
+        <div class="formula" style="font-size:0.8em; padding:0.6em 1em;">MultiHead(Q, K, V) = Concat(head₁, ..., headₕ) · W<sup>O</sup></div>
+        <div class="formula" style="font-size:0.75em; padding:0.4em 1em; margin-top:4px;">where headᵢ = Attention(Q·Wᵢ<sup>Q</sup>, K·Wᵢ<sup>K</sup>, V·Wᵢ<sup>V</sup>)</div>
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px; font-size:0.6em;">
+            <div class="card" style="text-align:center; flex:1; min-width:120px; padding:8px;">
+                <p style="font-size:1.5em;">🔗</p>
+                <p><strong style="color:var(--accent3);">Head 1</strong></p>
+                <p style="color:#888;">Syntax</p>
+                <p style="font-size:0.85em;">subject↔verb agreement</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:120px; padding:8px;">
+                <p style="font-size:1.5em;">🧠</p>
+                <p><strong style="color:var(--accent);">Head 2</strong></p>
+                <p style="color:#888;">Semantics</p>
+                <p style="font-size:0.85em;">meaning relationships</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:120px; padding:8px;">
+                <p style="font-size:1.5em;">📍</p>
+                <p><strong style="color:var(--accent2);">Head 3</strong></p>
+                <p style="color:#888;">Position</p>
+                <p style="font-size:0.85em;">nearby word context</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:120px; padding:8px;">
+                <p style="font-size:1.5em;">🔙</p>
+                <p><strong style="color:#4CAF50;">Head 4</strong></p>
+                <p style="color:#888;">Reference</p>
+                <p style="font-size:0.85em;">pronoun↔noun links</p>
+            </div>
+        </div>
+        <div class="takeaway">Each head has its OWN W<sup>Q</sup>, W<sup>K</sup>, W<sup>V</sup> matrices — they learn independently. The concatenation combines all perspectives.</div>
+    </section>
+
+    <section>
+        <h2>Attention in Action</h2>
+        <img src="img_self_attention.svg" style="max-height: 500px; border-radius: 12px;">
+        <p style="font-size:0.6em; color:#888; margin-top:0.5em;">Each row = a word's attention distribution. Notice <span style="color:#00d9ff;">bank ↔ loan = 0.40</span> in both directions (symmetric). "The" attends mostly to itself (0.50).</p>
+    </section>
+
+    <!-- NEW: POSITIONAL ENCODING -->
+    <section>
+        <h2>Positional Encoding — How Models Know Word Order</h2>
+        <p style="font-size:0.7em; color:#aaa;">Transformers process all words at once — they need <span class="highlight">explicit position information</span>.</p>
+        <div class="formula" style="font-size:0.8em; padding:0.5em 1em;">
+            PE(pos, 2i) = sin(pos / 10000<sup>2i/d</sup>)
+        </div>
+        <div class="formula" style="font-size:0.8em; padding:0.5em 1em; margin-top:4px;">
+            PE(pos, 2i+1) = cos(pos / 10000<sup>2i/d</sup>)
+        </div>
+        <div class="two-col" style="font-size:0.6em; margin-top:8px;">
+            <div class="card">
+                <h3>Why sin/cos?</h3>
+                <ul>
+                    <li>Each dimension has a <span class="highlight">different frequency</span> — like Fourier transform</li>
+                    <li>Relative positions become linear functions: PE(pos+k) = f(PE(pos))</li>
+                    <li>Can generalize to longer sequences than training data</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Modern alternative: RoPE</h3>
+                <ul>
+                    <li><span class="highlight">Rotary Position Embedding</span> — used in LLaMA, Gemini</li>
+                    <li>Encodes position by rotating the Q and K vectors</li>
+                    <li>Better at handling very long contexts (100K+ tokens)</li>
+                </ul>
+            </div>
+        </div>
+        <p class="paper-ref">📄 Vaswani et al., 2017 (original PE) &nbsp;|&nbsp; Su et al., "RoFormer: Enhanced Transformer with Rotary Position Embedding", 2021</p>
+    </section>
+
+    <section>
+        <h2>Encoder vs. Decoder — The Big Picture</h2>
+        <img src="img_encoder_decoder.png" style="max-height: 520px; border-radius: 12px; border: 1px solid rgba(108,99,255,0.2);">
+        <p style="font-size:0.55em; color:#888; margin-top:0.5em;">Three architecture families: different attention patterns, different capabilities, different use cases.</p>
+    </section>
+
+    <section>
+        <h2>Encoder vs. Decoder — Details</h2>
+        <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
+            <!-- ENCODER-ONLY -->
+            <div style="flex:1; min-width:180px; max-width:280px; background:rgba(108,99,255,0.1); border:2px solid rgba(108,99,255,0.4); border-radius:12px; padding:16px; text-align:center;">
+                <div style="font-size:0.7em; color:#6c63ff; font-weight:bold; margin-bottom:10px;">ENCODER-ONLY</div>
+                <div style="background:rgba(108,99,255,0.15); border-radius:8px; padding:8px; font-size:0.55em; margin:6px 0;">
+                    "machine learning"
+                </div>
+                <div style="font-size:1.2em;">⬇️</div>
+                <div style="background:rgba(108,99,255,0.3); border-radius:8px; padding:10px; font-size:0.6em; font-weight:bold;">
+                    🔲 ENCODER<br><span style="font-size:0.8em; font-weight:normal;">Bidirectional — sees all tokens</span>
+                </div>
+                <div style="font-size:1.2em;">⬇️</div>
+                <div style="background:rgba(108,99,255,0.15); border-radius:8px; padding:8px; font-size:0.5em; font-family:monospace;">
+                    [0.23, -0.45, ...] <strong>384 dims</strong>
+                </div>
+                <div style="font-size:0.5em; color:#888; margin-top:8px;">BERT · MiniLM · RoBERTa</div>
+                <div style="font-size:0.45em; margin-top:4px;">Best for: <span class="highlight" style="font-size:1em;">embeddings</span>, search, classification</div>
+            </div>
+
+            <!-- DECODER-ONLY -->
+            <div style="flex:1; min-width:180px; max-width:280px; background:rgba(255,152,0,0.1); border:2px solid rgba(255,152,0,0.4); border-radius:12px; padding:16px; text-align:center;">
+                <div style="font-size:0.7em; color:#FF9800; font-weight:bold; margin-bottom:10px;">DECODER-ONLY</div>
+                <div style="background:rgba(255,152,0,0.15); border-radius:8px; padding:8px; font-size:0.55em; margin:6px 0;">
+                    "The capital of Italy is"
+                </div>
+                <div style="font-size:1.2em;">⬇️</div>
+                <div style="background:rgba(255,152,0,0.3); border-radius:8px; padding:10px; font-size:0.6em; font-weight:bold;">
+                    🔲 DECODER<br><span style="font-size:0.8em; font-weight:normal;">Causal — sees only past tokens</span>
+                </div>
+                <div style="font-size:1.2em;">⬇️</div>
+                <div style="background:rgba(255,152,0,0.15); border-radius:8px; padding:8px; font-size:0.55em;">
+                    "The capital of Italy is <strong>Rome</strong>"
+                </div>
+                <div style="font-size:0.5em; color:#888; margin-top:8px;">GPT-4 · LLaMA · Mistral</div>
+                <div style="font-size:0.45em; margin-top:4px;">Best for: <span class="warn" style="font-size:1em;">chat</span>, generation, code</div>
+            </div>
+
+            <!-- ENCODER-DECODER -->
+            <div style="flex:1; min-width:180px; max-width:280px; background:rgba(76,175,80,0.1); border:2px solid rgba(76,175,80,0.4); border-radius:12px; padding:16px; text-align:center;">
+                <div style="font-size:0.7em; color:#4CAF50; font-weight:bold; margin-bottom:10px;">ENCODER-DECODER</div>
+                <div style="background:rgba(76,175,80,0.15); border-radius:8px; padding:8px; font-size:0.55em; margin:6px 0;">
+                    "Machine learning is..."
+                </div>
+                <div style="font-size:1.2em;">⬇️</div>
+                <div style="background:rgba(76,175,80,0.3); border-radius:8px; padding:6px; font-size:0.55em; font-weight:bold;">
+                    🔲 ENCODER → hidden states
+                </div>
+                <div style="font-size:1em;">⬇️</div>
+                <div style="background:rgba(76,175,80,0.3); border-radius:8px; padding:6px; font-size:0.55em; font-weight:bold;">
+                    🔲 DECODER → uses hidden states
+                </div>
+                <div style="font-size:1.2em;">⬇️</div>
+                <div style="background:rgba(76,175,80,0.15); border-radius:8px; padding:8px; font-size:0.55em;">
+                    "Maschinelles Lernen ist..."
+                </div>
+                <div style="font-size:0.5em; color:#888; margin-top:8px;">T5 · BART · mBART</div>
+                <div style="font-size:0.45em; margin-top:4px;">Best for: <span style="color:#4CAF50; font-size:1em;">translation</span>, summarization</div>
+            </div>
+        </div>
+        <div class="takeaway" style="margin-top:15px;">Most modern LLMs are <span class="warn">decoder-only</span> — they predict the next token. For <span class="highlight">embeddings</span>, we use encoder-only models.</div>
+    </section>
+
+    <section>
+        <h2>How LLMs Actually Work</h2>
+        <div class="two-col">
+            <div class="card" style="text-align:center; font-size:0.85em;">
+                <p>Input: <code>"The capital of Italy is"</code></p>
+                <br>
+                <p>→ <span class="highlight">probability distribution</span>:</p>
+                <table class="vs-table" style="max-width:300px; margin: 0.3em auto;">
+                    <tr><td><strong>Rome</strong></td><td style="color:var(--accent3);">87.3%</td></tr>
+                    <tr><td>Milan</td><td>4.1%</td></tr>
+                    <tr><td>Roma</td><td>3.8%</td></tr>
+                    <tr><td>the</td><td>1.2%</td></tr>
+                    <tr><td>...</td><td>3.6%</td></tr>
+                </table>
+            </div>
+            <div class="card" style="font-size:0.7em;">
+                <h3>The Generation Loop</h3>
+                <div style="font-family:var(--r-code-font); font-size:0.9em; line-height:1.8;">
+                    <span style="color:#888;">1.</span> Tokenize input<br>
+                    <span style="color:#888;">2.</span> Process through transformer layers<br>
+                    <span style="color:#888;">3.</span> Compute probabilities for <em>next</em> token<br>
+                    <span style="color:#888;">4.</span> Sample → <span class="highlight">"Rome"</span><br>
+                    <span style="color:#888;">5.</span> Append to input → <span style="color:var(--accent3);">repeat from step 2</span>
+                </div>
+                <p style="color:#888; font-size:0.85em; margin-top:0.5em;">This is called <strong>autoregressive</strong> generation — one token at a time, each conditioned on all previous tokens.</p>
+            </div>
+        </div>
+        <div class="takeaway">An LLM is a <span class="highlight">next-token predictor</span>. It doesn't know facts — it predicts what text is likely to come next, based on patterns in training data.</div>
+    </section>
+
+    <!-- NEW: CROSS-ENTROPY LOSS -->
+    <section>
+        <h2>The Training Objective — What Is the Model Actually Learning?</h2>
+        <p style="font-size:0.7em; color:#aaa;">During training, the model optimizes a single objective: <span class="highlight">predict the next token</span>.</p>
+        <div class="formula" style="font-size:0.85em; padding:0.6em 1em;">
+            L(θ) = − <span style="font-size:1.2em;">Σ</span><sub>t=1</sub><sup>T</sup> log P(x<sub>t</sub> | x<sub>1</sub>, ..., x<sub>t-1</sub>; θ)
+        </div>
+        <div class="two-col" style="font-size:0.6em; margin-top:8px;">
+            <div class="card">
+                <h3>What each part means</h3>
+                <ul>
+                    <li><strong>θ</strong> = all model parameters (weights)</li>
+                    <li><strong>x<sub>t</sub></strong> = the actual next token in the training data</li>
+                    <li><strong>P(x<sub>t</sub>|...)</strong> = model's predicted probability for that token</li>
+                    <li><strong>log</strong> = penalizes wrong predictions more than it rewards correct ones</li>
+                    <li><strong>-Σ</strong> = sum over ALL positions, minimize total loss</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>The surprising consequence</h3>
+                <ul>
+                    <li>The model ONLY learns "what comes next"</li>
+                    <li>Everything else is <span class="highlight">emergent</span>:</li>
+                    <li>Following instructions → emergent</li>
+                    <li>Writing code → emergent</li>
+                    <li>Translating languages → emergent</li>
+                    <li>Reasoning → emergent</li>
+                </ul>
+            </div>
+        </div>
+        <div class="takeaway">A model trained on "predict the next word" learns grammar, facts, reasoning, and code — all as <span class="highlight">byproducts</span> of next-token prediction.</div>
+    </section>
+
+    <section>
+        <h2>🚨 Hallucination</h2>
+        <p style="font-size:0.8em; color:#aaa;">Because LLMs predict <em>plausible</em> text — not <em>truthful</em> text — they can <span class="warn">confidently generate false information</span>.</p>
+        <br>
+        <div class="card" style="font-size:0.8em;">
+            <h3>Real Examples of Hallucination</h3>
+            <ul>
+                <li>📚 Citing academic papers that <span class="warn">don't exist</span></li>
+                <li>💻 Importing Python libraries that <span class="warn">were never written</span></li>
+                <li>📊 Stating revenue figures that are <span class="warn">completely fabricated</span></li>
+                <li>⚖️ A US lawyer submitted AI-generated brief with <span class="warn">6 fake case citations</span> (2023)</li>
+            </ul>
+        </div>
+        <br>
+        <div class="two-col" style="font-size:0.75em;">
+            <div class="card">
+                <h3>❌ Why It Happens</h3>
+                <p>The model doesn't <em>know</em> facts — it predicts likely-sounding text. If the training data is sparse, it fills gaps with plausible fiction.</p>
+            </div>
+            <div class="card" style="border-color: rgba(0,217,255,0.3);">
+                <h3>✅ How to Mitigate</h3>
+                <ul>
+                    <li><span class="highlight">RAG</span> (Lecture 3) — ground answers in real documents</li>
+                    <li><span class="highlight">Temperature = 0</span> — reduce randomness</li>
+                    <li><span class="highlight">Fact-checking</span> — always verify critical outputs</li>
+                </ul>
+            </div>
+        </div>
+        <div class="takeaway">Never deploy an LLM without a way to <span class="warn">verify its outputs</span>. This is why we build RAG systems in this course.</div>
+    </section>
+
+    <section>
+        <h2>Temperature: Controlling Creativity</h2>
+        <p style="font-size:0.75em; color:#aaa;">The model outputs probabilities. <span class="highlight">Temperature</span> controls how we pick from them.</p>
+        <div class="two-col" style="font-size:0.7em;">
+            <div>
+                <div class="card" style="border-color: rgba(0,217,255,0.3);">
+                    <h3>❄️ Temperature = 0</h3>
+                    <p>Always picks the highest probability token.</p>
+                    <p style="color:var(--accent3);">Deterministic, consistent, factual</p>
+                    <p style="color:#888; font-size:0.85em;">Best for: data extraction, classification</p>
+                </div>
+                <div class="card">
+                    <h3>🎯 Temperature = 0.7</h3>
+                    <p>Balanced sampling from the distribution.</p>
+                    <p style="color:var(--accent);">Creative but still coherent</p>
+                    <p style="color:#888; font-size:0.85em;">Best for: writing, brainstorming, chat</p>
+                </div>
+            </div>
+            <div>
+                <div class="card" style="border-color: rgba(233,69,96,0.3);">
+                    <h3>🌋 Temperature = 1.5+</h3>
+                    <p>Flattens probabilities — rare tokens become likely.</p>
+                    <p style="color:var(--accent2);">Wild, surprising, often incoherent</p>
+                    <p style="color:#888; font-size:0.85em;">Rarely used in production</p>
+                </div>
+                <div class="card" style="text-align:center;">
+                    <p style="font-size:0.85em;">Think of it as a <span class="highlight">creativity dial</span></p>
+                    <p style="font-family: var(--r-code-font); font-size:1em;">❄️ 0 ── 0.7 ── 1.0 ── 1.5+ 🌋</p>
+                    <p style="font-size:0.7em; color:#888;">precise ←→ creative</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Scale Makes the Difference</h2>
+        <div class="two-col">
+            <div>
+                <table class="vs-table">
+                    <tr><th>Model</th><th>Parameters</th><th>Training Data</th></tr>
+                    <tr><td>BERT (2018)</td><td>340M</td><td>16 GB</td></tr>
+                    <tr><td>GPT-3 (2020)</td><td>175B</td><td>570 GB</td></tr>
+                    <tr><td>LLaMA 3 (2024)</td><td>405B</td><td>15T tokens</td></tr>
+                    <tr><td>GPT-4 (2023)</td><td>~1.8T*</td><td>~13T tokens</td></tr>
+                </table>
+                <p style="font-size:0.5em; color:#555;">*estimated</p>
+            </div>
+            <div>
+                <div class="card">
+                    <h3>Emergent Abilities</h3>
+                    <ul>
+                        <li>At ~10B params: Chain-of-thought reasoning</li>
+                        <li>At ~100B params: Code generation, translation</li>
+                        <li>At ~1T params: Complex multi-step reasoning</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW: PERPLEXITY -->
+    <section>
+        <h2>Perplexity — How We Measure LLMs</h2>
+        <p style="font-size:0.7em; color:#aaa;">The standard metric: "on average, how many tokens is the model <span class="highlight">choosing between</span>?"</p>
+        <div class="formula" style="font-size:0.85em; padding:0.6em 1em;">PPL = exp(−1/N · <span style="font-size:1.2em;">Σ</span><sub>t</sub> log P(x<sub>t</sub> | x<sub>&lt;t</sub>))</div>
+        <div class="two-col" style="font-size:0.6em; margin-top:8px;">
+            <div>
+                <table class="vs-table">
+                    <tr><th>Model</th><th>PPL (WikiText-103)</th></tr>
+                    <tr><td>GPT-2 (2019)</td><td>29.41</td></tr>
+                    <tr><td>GPT-3 175B (2020)</td><td>20.50</td></tr>
+                    <tr><td style="color:var(--accent3);">LLaMA 7B (2023)</td><td style="color:var(--accent3);">7.20</td></tr>
+                    <tr><td style="color:var(--accent3);">LLaMA 65B (2023)</td><td style="color:var(--accent3); font-weight:600;">3.53</td></tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Intuition</h3>
+                <ul>
+                    <li>PPL = 10 → model is ~90% sure of the next token</li>
+                    <li>PPL = 100 → choosing among ~100 options</li>
+                    <li><span class="highlight">Lower = better</span></li>
+                    <li>A random model: PPL ≈ vocab size (~50,000)</li>
+                </ul>
+            </div>
+        </div>
+        <p class="paper-ref">📄 Touvron et al., "LLaMA: Open and Efficient Foundation Language Models", Meta 2023</p>
+    </section>
+
+    <section>
+        <h2>📏 Context Window</h2>
+        <p style="font-size:0.8em; color:#aaa;">The context window is the model's <span class="highlight">working memory</span> — how much text it can "see" at once.</p>
+        <br>
+        <table class="vs-table" style="font-size:0.75em;">
+            <tr><th>Model</th><th>Context Window</th><th>≈ Pages of Text</th></tr>
+            <tr><td>GPT-3.5</td><td>4K tokens</td><td>~3 pages</td></tr>
+            <tr><td>GPT-4</td><td>128K tokens</td><td>~100 pages</td></tr>
+            <tr><td>Claude 3.5</td><td>200K tokens</td><td>~150 pages</td></tr>
+            <tr><td>Gemini 1.5</td><td>1M+ tokens</td><td>~750 pages</td></tr>
+        </table>
+        <br>
+        <div class="card" style="font-size:0.8em;">
+            <h3>What happens when you exceed it?</h3>
+            <ul>
+                <li>Text gets <span class="warn">truncated</span> — the model "forgets" earlier content</li>
+                <li><span class="warn">"Lost in the middle"</span> — models pay more attention to the start and end of context, less to the middle</li>
+                <li>Larger windows = <span class="warn">more expensive</span> (more tokens to process)</li>
+                <li>This is WHY we need <span class="highlight">RAG</span> (Lecture 3) — to fit only relevant info into the window</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <h2>🔧 The Training Pipeline</h2>
+        <p style="font-size:0.75em; color:#aaa;">Three ways to get an LLM to do what you want — with very different costs:</p>
+        <br>
+        <div style="max-width:650px; margin:0 auto;">
+            <div class="card" style="border-left:4px solid var(--accent2); font-size:0.75em;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3>1. Pre-training</h3>
+                        <p>Train from scratch on massive internet data</p>
+                    </div>
+                    <div style="text-align:right; color:#888; font-size:0.85em;">Months<br><span class="warn">$2M–$100M+</span></div>
+                </div>
+            </div>
+            <div style="text-align:center; font-size:0.8em; color:#666;">⬇️ adapt to your domain</div>
+            <div class="card" style="border-left:4px solid var(--accent); font-size:0.75em;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3>2. Fine-tuning</h3>
+                        <p>Adapt a pre-trained model with your data → <span class="highlight">Lectures 8–9</span></p>
+                    </div>
+                    <div style="text-align:right; color:#888; font-size:0.85em;">Hours–Days<br><span style="color:var(--accent);">$10–$1,000</span></div>
+                </div>
+            </div>
+            <div style="text-align:center; font-size:0.8em; color:#666;">⬇️ steer with instructions</div>
+            <div class="card" style="border-left:4px solid var(--accent3); font-size:0.75em;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3>3. Prompting</h3>
+                        <p>No training — just clever instructions → <span class="highlight">Lecture 2</span></p>
+                    </div>
+                    <div style="text-align:right; color:#888; font-size:0.85em;">Seconds<br><span style="color:var(--accent3);">$0.001</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="takeaway">Most enterprise use cases start with <span class="highlight">prompting</span>, add <span class="highlight">RAG</span> for accuracy, and only fine-tune when needed.</div>
+    </section>
+
+    <!-- NEW: RLHF -->
+    <section>
+        <h2>RLHF &mdash; How Models Learn to Follow Instructions</h2>
+        <p style="font-size:0.7em; color:#aaa;">Pre-training alone produces a text completer, not an assistant. <span class="highlight">RLHF</span> bridges the gap.</p>
+        <div style="max-width:580px; margin:0 auto; font-size:0.6em;">
+            <div class="card" style="border-left:4px solid var(--accent2); margin:4px 0; padding:8px 14px;">
+                <strong style="color:var(--accent2);">Step 1: Pre-training</strong> &mdash; predict next token on internet text
+                <p style="color:#888; font-size:0.85em;">Result: knows language, facts, patterns. But not helpful yet.</p>
+            </div>
+            <div style="text-align:center; color:#555;">&darr;</div>
+            <div class="card" style="border-left:4px solid var(--accent); margin:4px 0; padding:8px 14px;">
+                <strong style="color:var(--accent);">Step 2: SFT</strong> &mdash; train on human-written Q&amp;A pairs
+                <p style="color:#888; font-size:0.85em;">Result: can answer questions. But sometimes verbose or unhelpful.</p>
+            </div>
+            <div style="text-align:center; color:#555;">&darr;</div>
+            <div class="card" style="border-left:4px solid var(--accent3); margin:4px 0; padding:8px 14px;">
+                <strong style="color:var(--accent3);">Step 3: RLHF</strong> &mdash; humans rank outputs, train reward model, optimize via PPO
+                <p style="color:#888; font-size:0.85em;">Result: helpful, harmless, honest. This is ChatGPT.</p>
+            </div>
+        </div>
+        <div class="formula" style="font-size:0.7em; padding:0.5em 1em; margin-top:6px;">L<sub>RLHF</sub> = &minus;E[r(x, y)] + &beta; &middot; KL[&pi;<sub>&theta;</sub> || &pi;<sub>ref</sub>]</div>
+        <p style="font-size:0.5em; color:#888; text-align:center;">Maximize reward while staying close to original model via KL divergence penalty</p>
+        <p class="paper-ref">&#128196; Ouyang et al., "Training language models to follow instructions with human feedback", NeurIPS 2022</p>
+    </section>
+
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 2: TOKENIZATION -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 2 of 4</p>
+        <h1>Tokenization &<br>Its Consequences</h1>
+        <p class="subtitle">The invisible bottleneck most practitioners ignore</p>
+    </section>
+
+    <section>
+        <h2>What is Tokenization?</h2>
+        <p style="font-size:0.8em; color:#aaa;">LLMs don't see words or characters — they see <span class="highlight">tokens</span></p>
+        <br>
+        <div class="card" style="text-align:center; font-family: var(--r-code-font); font-size:0.9em;">
+            <p style="color:#888;">Input text:</p>
+            <p>"<span class="highlight">Hello</span>, <span class="warn">how</span> <span style="color:#a0e;">are</span> <span style="color:#0f9;">you</span>?"</p>
+            <br>
+            <p style="color:#888;">Token IDs:</p>
+            <p>[<span class="highlight">9906</span>, <span style="color:#666;">11</span>, <span class="warn">1268</span>, <span style="color:#a0e;">527</span>, <span style="color:#0f9;">499</span>, <span style="color:#666;">30</span>]</p>
+        </div>
+        <br>
+        <div class="two-col" style="font-size:0.75em;">
+            <div class="card">
+                <h3>BPE (Byte-Pair Encoding)</h3>
+                <p>Used by GPT, LLaMA — starts from characters, merges frequent pairs</p>
+            </div>
+            <div class="card">
+                <h3>WordPiece / SentencePiece</h3>
+                <p>Used by BERT, T5 — similar idea, slightly different merge strategy</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW: BPE ALGORITHM -->
+    <section>
+        <h2>BPE Algorithm — Step by Step</h2>
+        <p style="font-size:0.7em; color:#aaa;">BPE starts from characters and <span class="highlight">merges the most frequent pair</span> at each step.</p>
+        <div class="card" style="font-family:var(--r-code-font); font-size:0.6em; line-height:2;">
+            <p><span style="color:var(--accent);">Vocabulary:</span> {l, o, w, e, r, s, t, n}</p>
+            <p><span style="color:#888;">Step 0:</span> [l, o, w, e, r] &nbsp;&nbsp;&nbsp; <span style="color:#555;">(start from characters)</span></p>
+            <p><span style="color:#888;">Step 1:</span> [<span class="highlight">lo</span>, w, e, r] &nbsp;&nbsp; <span style="color:#555;">(merge most frequent pair: l+o)</span></p>
+            <p><span style="color:#888;">Step 2:</span> [<span class="highlight">low</span>, e, r] &nbsp;&nbsp;&nbsp; <span style="color:#555;">(merge lo+w)</span></p>
+            <p><span style="color:#888;">Step 3:</span> [low, <span class="highlight">er</span>] &nbsp;&nbsp;&nbsp;&nbsp; <span style="color:#555;">(merge e+r)</span></p>
+            <p><span style="color:#888;">Step 4:</span> [<span class="highlight">lower</span>] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:#555;">(merge low+er → done!)</span></p>
+        </div>
+        <div class="two-col" style="font-size:0.6em; margin-top:6px;">
+            <div class="card">
+                <h3>Vocabulary sizes</h3>
+                <ul>
+                    <li>GPT-2: <span class="highlight">50,257</span> tokens</li>
+                    <li>GPT-4: ~100,000 tokens</li>
+                    <li>LLaMA 3: <span class="highlight">128,256</span> tokens</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>The tradeoff</h3>
+                <ul>
+                    <li>Larger vocab → fewer tokens per text → faster</li>
+                    <li>Larger vocab → bigger embedding matrix → more memory</li>
+                    <li>Sweet spot: 32K–128K tokens</li>
+                </ul>
+            </div>
+        </div>
+        <p class="paper-ref">📄 Sennrich et al., "Neural Machine Translation of Rare Words with Subword Units", ACL 2016</p>
+    </section>
+
+    <section>
+        <h2>Why Tokenization Matters</h2>
+        <h3>Problem 1: Non-English = More Tokens</h3>
+        <div class="card" style="font-family: var(--r-code-font); font-size:0.8em;">
+            <table class="vs-table">
+                <tr><th>Text</th><th>Language</th><th>Tokens (GPT-4)</th></tr>
+                <tr><td>"heart failure"</td><td>English</td><td><span class="highlight">2</span> tokens</td></tr>
+                <tr><td>"insufficienza cardiaca"</td><td>Italian</td><td><span class="warn">5</span> tokens</td></tr>
+                <tr><td>"心不全"</td><td>Japanese</td><td><span class="warn">4</span> tokens</td></tr>
+            </table>
+        </div>
+        <br>
+        <div class="card">
+            <h3>This means for non-English languages:</h3>
+            <ul>
+                <li><span class="warn">Higher cost</span> — more tokens = more API charges</li>
+                <li><span class="warn">Less context</span> — fewer words fit in the context window</li>
+                <li><span class="warn">Lower quality</span> — less non-English data in training</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <h2>Why Tokenization Matters</h2>
+        <h3>Problem 2: Numbers are Unreliable</h3>
+        <div class="card" style="font-family: var(--r-code-font); font-size:0.85em; text-align:center;">
+            <p><span style="color:#888;">Tokenizing:</span> "Revenue grew <span class="warn">15.7</span>% this quarter"</p>
+            <br>
+            <p>→ ["Revenue", " grew", " <span class="warn">15</span>", "<span class="warn">.</span>", "<span class="warn">7</span>", "%", " this", " quarter"]</p>
+        </div>
+        <br>
+        <p style="font-size:0.8em; color:#aaa;">The number <code>15.7</code> is split into <span class="warn">3 separate tokens</span>. The model has no concept of "15.7" as a single number.</p>
+        <br>
+        <div class="takeaway">Never trust an LLM for arithmetic. Always use code for calculations and let the LLM decide <em>what</em> to calculate.</div>
+    </section>
+
+    <section>
+        <h2>Try It Yourself!</h2>
+        <p style="font-size:0.85em; color:#aaa;">See how different models tokenize the same text:</p>
+        <br>
+        <div class="card" style="text-align:center;">
+            <p style="font-size:1.5em;">🔗</p>
+            <p><a href="https://platform.openai.com/tokenizer" style="color:var(--accent3); font-size:1.1em;">platform.openai.com/tokenizer</a></p>
+            <br>
+            <p style="font-size:0.8em; color:#888;">Try pasting these and compare the token count:</p>
+            <p style="font-size:0.75em; font-family: var(--r-code-font); color:var(--accent);">
+                "The quarterly revenue report shows a 15.7% increase"<br>
+                "Il rapporto trimestrale mostra un aumento del 15,7%"
+            </p>
+        </div>
+        <div class="takeaway">Every token costs money and takes up context window space. Understanding tokenization helps you <span class="highlight">optimize cost</span> and <span class="highlight">design better prompts</span>.</div>
+    </section>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 3: VECTOR SPACES -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 3 of 4</p>
+        <h1>Embeddings &<br>Similarity</h1>
+        <p class="subtitle">Translating meaning into geometry</p>
+    </section>
+
+    <section>
+        <h2>What is an Embedding?</h2>
+        <p style="font-size:0.75em; color:#aaa;">Think of it like <span class="highlight">GPS coordinates for meaning</span></p>
+        <div class="two-col" style="font-size:0.75em;">
+            <div class="card">
+                <h3>📍 GPS</h3>
+                <p>Rome → [41.9, 12.5]</p>
+                <p>Naples → [40.8, 14.3]</p>
+                <p style="color:var(--accent3);">Close coords = close cities</p>
+            </div>
+            <div class="card">
+                <h3>🧠 Embeddings</h3>
+                <p>"machine learning" → [0.23, -0.45, ...]</p>
+                <p>"deep learning" → [0.21, -0.42, ...]</p>
+                <p style="color:var(--accent3);">Close vectors = similar meaning</p>
+            </div>
+        </div>
+        <p style="font-size:0.7em; color:#aaa;">Instead of 2 dimensions, embeddings use <span class="highlight">hundreds or thousands of dimensions</span> (depending on the model) to capture nuances of meaning.</p>
+        <div class="card" style="font-family: var(--r-code-font); font-size:0.65em; text-align:center;">
+            <p style="color:#888;">Similar meaning → similar vectors:</p>
+            <p><span style="color:#888;">"machine learning"</span> → [0.23, -0.45, 0.12, 0.89, ..., -0.31]</p>
+            <p><span style="color:#888;">"deep learning"</span>&nbsp;&nbsp;&nbsp; → [0.21, -0.42, 0.15, 0.87, ..., -0.28]</p>
+            <p style="color:var(--accent3);">↑ nearly identical numbers! ↑</p>
+            <br>
+            <p style="color:#888;">Unrelated meaning → different vectors:</p>
+            <p><span style="color:#888;">"coffee machine"</span>&nbsp;&nbsp; → [-0.67, 0.33, 0.55, -0.12, ..., 0.71]</p>
+            <p style="color:var(--accent2);">↑ completely different numbers ↑</p>
+        </div>
+        <div class="takeaway">Texts with similar meanings have vectors that point in <span class="highlight">similar directions</span>. This is the foundation of semantic search.</div>
+    </section>
+
+    <!-- NEW: WORD2VEC -->
+    <section>
+        <h2>Word2Vec — Where Embeddings Started</h2>
+        <p style="font-size:0.7em; color:#aaa;">The 2013 paper that started the <span class="highlight">embedding revolution</span>.</p>
+        <div class="card" style="text-align:center; font-size:0.9em; margin:6px 0;">
+            <p style="font-family:var(--r-code-font); font-size:1.1em;">king − man + woman ≈ <span class="highlight">queen</span></p>
+            <p style="font-size:0.65em; color:#888; margin-top:4px;">Vector arithmetic captures semantic relationships!</p>
+        </div>
+        <div class="two-col" style="font-size:0.6em;">
+            <div class="card">
+                <h3>Skip-gram Objective</h3>
+                <div class="formula" style="font-size:0.8em; margin:4px 0;">max <span style="font-size:1.2em;">Σ</span><sub>t</sub> <span style="font-size:1.2em;">Σ</span><sub>j∈window</sub> log P(w<sub>t+j</sub> | w<sub>t</sub>)</div>
+                <p style="color:#888;">Given a word, predict its neighbors. Words that appear in similar contexts get similar vectors.</p>
+            </div>
+            <div class="card">
+                <h3>Key insight</h3>
+                <ul>
+                    <li><strong>"You shall know a word by the company it keeps"</strong> — Firth, 1957</li>
+                    <li>"dog" and "cat" appear near similar words ("pet", "food", "vet")</li>
+                    <li>So their vectors end up close together</li>
+                    <li>This idea powers ALL modern embeddings</li>
+                </ul>
+            </div>
+        </div>
+        <p class="paper-ref">📄 Mikolov et al., "Efficient Estimation of Word Representations in Vector Space", Google 2013 &nbsp;|&nbsp; Pennington et al., "GloVe: Global Vectors", Stanford EMNLP 2014</p>
+    </section>
+
+    <section>
+        <h2>Visualizing Embedding Clusters</h2>
+        <img src="img_embedding_clusters.png" style="max-height: 500px; border-radius: 12px; border: 1px solid rgba(108,99,255,0.2);">
+        <p style="font-size:0.6em; color:#888; margin-top:0.5em;">High-dimensional vectors projected to 2D. Related terms naturally cluster together.</p>
+    </section>
+
+    <section>
+        <h2>Cosine Similarity</h2>
+        <p style="font-size:0.75em; color:#aaa;">Measures the <span class="highlight">angle between two vectors</span>. Same direction = similar meaning.</p>
+        <div class="formula">cos(θ) = (A · B) / (||A|| × ||B||)</div>
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:0.5em; flex-wrap:wrap;">
+            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
+                <p style="font-size:1.8em; color:var(--accent3);">0.90+</p>
+                <p style="font-size:0.7em; color:var(--accent3);">Near-duplicate</p>
+                <p style="font-size:0.6em; color:#888;">"car" ↔ "automobile"</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
+                <p style="font-size:1.8em; color:#4CAF50;">0.70–0.90</p>
+                <p style="font-size:0.7em; color:#4CAF50;">Same topic</p>
+                <p style="font-size:0.6em; color:#888;">"machine learning" ↔ "deep learning"</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
+                <p style="font-size:1.8em; color:#FF9800;">0.40–0.70</p>
+                <p style="font-size:0.7em; color:#FF9800;">Loosely related</p>
+                <p style="font-size:0.6em; color:#888;">"machine learning" ↔ "stock market"</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
+                <p style="font-size:1.8em; color:var(--accent2);">< 0.40</p>
+                <p style="font-size:0.7em; color:var(--accent2);">Unrelated</p>
+                <p style="font-size:0.6em; color:#888;">"car" ↔ "pizza"</p>
+            </div>
+        </div>
+        <div class="takeaway">In RAG systems, you'll typically set a <span class="highlight">threshold of ~0.70</span> to filter relevant results. You'll practice this in Lecture 3.</div>
+    </section>
+
+    <!-- NEW: DISTANCE METRICS -->
+    <section>
+        <h2>Distance Metrics — Cosine vs Dot Product vs Euclidean</h2>
+        <p style="font-size:0.7em; color:#aaa;">Three ways to measure similarity. <span class="highlight">Choosing the right one</span> matters for your search system.</p>
+        <div style="font-size:0.6em;">
+            <div class="card" style="border-left:4px solid var(--accent3); margin:4px 0; padding:8px 14px;">
+                <strong style="color:var(--accent3);">Cosine Similarity</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0;">sim(A,B) = (A·B) / (||A|| × ||B||)</div>
+                <p style="color:#888;">Measures the <strong>angle</strong> between vectors. Ignores vector length. <span class="highlight">Default for most embedding models.</span></p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--accent); margin:4px 0; padding:8px 14px;">
+                <strong style="color:var(--accent);">Dot Product</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0;">sim(A,B) = A·B = <span style="font-size:1.1em;">Σ</span><sub>i</sub> a<sub>i</sub> · b<sub>i</sub></div>
+                <p style="color:#888;">Sensitive to vector <strong>magnitude</strong>. Longer vectors score higher. Use when length = importance.</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--accent2); margin:4px 0; padding:8px 14px;">
+                <strong style="color:var(--accent2);">Euclidean Distance</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0;">dist(A,B) = ||A − B||₂ = √(<span style="font-size:1.1em;">Σ</span><sub>i</sub> (a<sub>i</sub> − b<sub>i</sub>)²)</div>
+                <p style="color:#888;">L2 distance in vector space. <strong>Smaller = more similar</strong> (opposite direction from cosine).</p>
+            </div>
+        </div>
+        <div class="takeaway">Most embedding models (including ours) <span class="highlight">normalize vectors to unit length</span>. When normalized: cosine similarity = dot product. Use cosine as your default.</div>
+    </section>
+
+    <section>
+        <h2>Embedding Models Landscape</h2>
+        <table class="vs-table" style="font-size:0.7em;">
+            <tr>
+                <th>Model</th>
+                <th>Dimensions</th>
+                <th>Languages</th>
+                <th>Best for</th>
+            </tr>
+            <tr>
+                <td><span class="highlight">all-MiniLM-L6-v2</span></td>
+                <td>384</td>
+                <td>English</td>
+                <td>Fast, lightweight, English-only tasks</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">multilingual-MiniLM</span></td>
+                <td>384</td>
+                <td>50+ languages</td>
+                <td>Multilingual, runs locally ✅</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">BGE-M3</span></td>
+                <td>1024</td>
+                <td>100+ languages</td>
+                <td>State-of-the-art multilingual</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">text-embedding-3-large</span></td>
+                <td>3072</td>
+                <td>Multilingual</td>
+                <td>OpenAI API (highest quality)</td>
+            </tr>
+        </table>
+        <div class="takeaway">For this course, we use <code>paraphrase-multilingual-MiniLM-L12-v2</code> — it runs locally, supports 50+ languages, and is fast on CPU.</div>
+    </section>
+
+    <section>
+        <h2>Why Dimensions Matter</h2>
+        <div class="two-col">
+            <div class="card">
+                <h3>Lower dimensions (e.g. 384)</h3>
+                <ul>
+                    <li>Faster to compute</li>
+                    <li>Less storage needed</li>
+                    <li>Good for most tasks</li>
+                    <li>May lose fine-grained distinctions</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Higher dimensions (e.g. 3072)</h3>
+                <ul>
+                    <li>Captures subtle differences</li>
+                    <li>Better for specialized domains</li>
+                    <li>Slower and more expensive</li>
+                    <li>Needs more training data to fill</li>
+                </ul>
+            </div>
+        </div>
+        <p style="font-size:0.7em; color:#888; text-align:center; margin-top:1em;">Think of it like resolution: 384-dim = "720p", 3072-dim = "4K" — more detail, but more cost.</p>
+    </section>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 4: MULTILINGUAL -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
+        <p class="section-title">Section 4 of 4</p>
+        <h1>Multilingual &<br>Domain Alignment</h1>
+        <p class="subtitle">When your data doesn't speak English</p>
+    </section>
+
+    <section>
+        <h2>Cross-Lingual Alignment</h2>
+        <p style="font-size:0.8em; color:#aaa;">Multilingual models map different languages into a <span class="highlight">shared vector space</span></p>
+        <br>
+        <div class="card" style="text-align:center; font-size:0.9em;">
+            <p><code>"heart failure"</code> (English)</p>
+            <p style="color:var(--accent3);">≈ same vector as ≈</p>
+            <p><code>"insufficienza cardiaca"</code> (Italian)</p>
+        </div>
+        <br>
+        <div class="two-col" style="font-size:0.8em;">
+            <div class="card">
+                <h3>✅ Multilingual Models</h3>
+                <ul>
+                    <li>One model handles many languages</li>
+                    <li>Cross-lingual search works</li>
+                    <li>Good for mixed-language data</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>⚠️ Translation Pipeline</h3>
+                <ul>
+                    <li>Translate to English first</li>
+                    <li>Use English-only model</li>
+                    <li>Adds latency + translation errors</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Domain-Specific Challenges</h2>
+        <div class="card" style="font-size:0.85em;">
+            <h3>The Problem</h3>
+            <p>General models are trained on Wikipedia, news, books — not on your domain's jargon.</p>
+        </div>
+        <br>
+        <div class="two-col" style="font-size:0.75em;">
+            <div class="card">
+                <h3>General Model</h3>
+                <p><code>"ERP"</code> and <code>"SAP"</code> → low similarity 😕</p>
+                <p style="color:#888; font-size:0.85em;">(doesn't know they're related enterprise systems)</p>
+            </div>
+            <div class="card" style="border-color: rgba(0,217,255,0.3);">
+                <h3>Domain-Adapted Model</h3>
+                <p><code>"ERP"</code> and <code>"SAP"</code> → high similarity ✅</p>
+                <p style="color:#888; font-size:0.85em;">(trained on enterprise data, knows the relationship)</p>
+            </div>
+        </div>
+        <div class="takeaway">
+            For enterprise applications, you'll often need to <span class="highlight">fine-tune</span> embedding models on your domain data. We'll cover this in <span class="highlight">Lecture 9</span>.
+        </div>
+    </section>
+
+    <section>
+        <h2>Practical Guidance</h2>
+        <h3>Which model should you use?</h3>
+        <br>
+        <table class="vs-table" style="font-size:0.75em;">
+            <tr><th>Scenario</th><th>Recommended Model</th><th>Why</th></tr>
+            <tr>
+                <td>English-only, fast prototyping</td>
+                <td><code>all-MiniLM-L6-v2</code></td>
+                <td>Fast, lightweight, good enough</td>
+            </tr>
+            <tr>
+                <td>Multilingual content</td>
+                <td><code>multilingual-MiniLM</code></td>
+                <td>50+ languages, runs locally</td>
+            </tr>
+            <tr>
+                <td>Production, high accuracy</td>
+                <td><code>BGE-M3</code> or OpenAI</td>
+                <td>State-of-the-art quality</td>
+            </tr>
+            <tr>
+                <td>Specialized domain</td>
+                <td>Fine-tuned model</td>
+                <td>Trained on your data (Lecture 9)</td>
+            </tr>
+        </table>
+    </section>
+</section>
+
+<!-- ============================================ -->
+<!-- WHY THIS MATTERS -->
+<!-- ============================================ -->
+<section>
+    <h2>Why This Matters for Your Work</h2>
+    <br>
+    <div class="card" style="font-size:0.85em;">
+        <ul>
+            <li><span class="highlight">Embeddings power search</span> — find relevant documents by meaning, not just keywords. This is the core of Lectures 3–8.</li>
+            <li><span class="highlight">Tokenization drives cost</span> — understanding how your text gets tokenized helps you optimize API spend and design better prompts.</li>
+            <li><span class="highlight">Model choice is a daily decision</span> — multilingual vs. English-only, small vs. large, local vs. cloud. You'll make this call on every project.</li>
+            <li><span class="highlight">"LLMs predict, they don't know"</span> — this mental model prevents you from trusting LLMs with tasks they can't handle (math, fresh facts, guaranteed correctness).</li>
+        </ul>
+    </div>
+    <br>
+    <div class="card" style="border-color: rgba(0,217,255,0.3); text-align:center; font-size:0.85em;">
+        <p>Everything from Lecture 2 onward <span class="highlight">builds on these fundamentals</span>.</p>
+        <p style="color:#888; font-size:0.85em;">Prompting, RAG, Agents, Fine-Tuning — they all depend on embeddings and understanding how LLMs work.</p>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- BREAK -->
+<!-- ============================================ -->
+<section>
+    <div style="text-align:center;">
+        <p style="font-size:4em; margin-bottom:0.2em;">☕</p>
+        <h1>10-Minute Break</h1>
+        <p class="subtitle" style="margin-top:0.5em;">Stretch, grab a coffee, check your phone</p>
+        <br>
+        <p style="font-size:0.7em; color:#666;">We'll start the hands-on lab when we come back</p>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- LAB SECTION -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div></div>
+        <p class="section-title">Hands-on Lab</p>
+        <h1>🔬 Lab 01:<br>Embeddings Exploration</h1>
+        <p class="subtitle">50 minutes · Runs 100% locally</p>
+    </section>
+
+    <section>
+        <h2>Lab Overview</h2>
+        <p style="font-size:0.7em; color:#aaa; margin-bottom:0.5em;">Open in Colab, run each cell, observe the results</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.65em;">
+            <div class="agenda-item"><span class="time">Step 1</span> Load 20 terms across 4 categories</div>
+            <div class="agenda-item"><span class="time">Step 2</span> Tokenization: EN vs IT visual breakdown</div>
+            <div class="agenda-item" style="border-left-color: var(--accent3);"><span class="time">Step 3</span> 🔬 3 architectures live demo (GPT-2, T5, MiniLM)</div>
+            <div class="agenda-item"><span class="time">Step 4</span> Generate embeddings + bar chart</div>
+            <div class="agenda-item"><span class="time">Step 5</span> Dimensions & storage comparison</div>
+            <div class="agenda-item"><span class="time">Step 6</span> Cosine similarity matrix</div>
+            <div class="agenda-item" style="border-left-color: var(--accent3);"><span class="time">Step 7</span> 🗺️ 2D cluster map (PCA)</div>
+            <div class="agenda-item"><span class="time">Step 8</span> Top similar pairs</div>
+            <div class="agenda-item" style="border-left-color: var(--accent3);"><span class="time">Step 9</span> 🔍 Semantic search</div>
+            <div class="agenda-item" style="border-left-color: #555;"><span class="time">Step 10</span> Model comparison (bonus)</div>
+        </div>
+        <br>
+        <div class="card" style="text-align:center; font-size:0.8em;">
+            <p>Open the notebook in <span class="highlight">Google Colab</span> and run each cell:</p>
+            <p style="font-family: var(--r-code-font); font-size:0.85em; color:var(--accent3); margin-top:0.3em;">lab_01_embeddings.ipynb</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>What You'll See</h2>
+        <div class="two-col" style="font-size:0.7em;">
+            <div class="card" style="text-align:center;">
+                <h3>🔍 Token Breakdown</h3>
+                <p>Colored boxes showing how the tokenizer splits words</p>
+                <p style="color:#888; font-size:0.85em;">EN: 2 tokens vs IT: 5 tokens</p>
+            </div>
+            <div class="card" style="text-align:center;">
+                <h3>🔬 3 Architectures</h3>
+                <p>GPT-2 generates text, T5 translates, MiniLM embeds</p>
+                <p style="color:#888; font-size:0.85em;">See encoder hidden states live</p>
+            </div>
+            <div class="card" style="text-align:center;">
+                <h3>🗺️ Cluster Map</h3>
+                <p>384-dim → 2D: see terms cluster by category</p>
+                <p style="color:#888; font-size:0.85em;">PCA scatter plot with labels</p>
+            </div>
+            <div class="card" style="text-align:center;">
+                <h3>🔍 Semantic Search</h3>
+                <p>Type any sentence → find closest terms by meaning</p>
+                <p style="color:#888; font-size:0.85em;">"I love football" → soccer, basketball</p>
+            </div>
+        </div>
+        <div class="takeaway">Everything runs hands-on — just run each cell and observe the results. No coding required.</div>
+    </section>
+</section>
+
+<!-- ============================================ -->
+<!-- SUMMARY -->
+<!-- ============================================ -->
+<section>
+    <h2>Lecture 1 — Key Takeaways</h2>
+    <br>
+    <div class="card">
+        <ul>
+            <li><span class="highlight">Transformers</span> process all tokens in parallel using self-attention — this is what made modern AI possible</li>
+            <li>LLMs are <span class="warn">next-token predictors</span> — they don't "understand", they predict</li>
+            <li><span class="highlight">Tokenization</span> is the invisible bottleneck — non-English text costs more tokens</li>
+            <li><span class="highlight">Embeddings</span> map text to vectors — similar meanings = similar directions</li>
+            <li><span class="highlight">Cosine similarity</span> measures semantic closeness in vector space</li>
+            <li>Use <span class="highlight">multilingual models</span> for non-English data, not English-only models</li>
+        </ul>
+    </div>
+    <br>
+    <div class="card" style="border-color: rgba(0,217,255,0.3); text-align:center;">
+        <p style="font-size:0.9em;">Next lecture → <span class="highlight">Lecture 2: Prompt Engineering</span></p>
+        <p style="font-size:0.7em; color:#888;">How to communicate effectively with LLMs</p>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- THANK YOU -->
+<!-- ============================================ -->
+<section>
+    <h1>Questions?</h1>
+    <br>
+    <p style="font-size:0.8em; color:#888;">Repository: <a href="https://github.com/KamyarZeinalipour/zucchetti-llm-course">github.com/KamyarZeinalipour/zucchetti-llm-course</a></p>
+    <br>
+    <p class="subtitle">Lecture 1 of 10 · Zucchetti LLM Course</p>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        width: 960,
+        height: 700,
+        margin: 0.04,
+        transition: 'slide',
+        transitionSpeed: 'default',
+        plugins: [RevealHighlight],
+        // Nested slides go down
+        navigationMode: 'linear',
+    });
+</script>
+</body>
+</html>

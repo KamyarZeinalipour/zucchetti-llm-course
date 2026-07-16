@@ -1,0 +1,109 @@
+{
+  "metadata": {
+    "source": "Curated bilingual term set for embedding exercises",
+    "description": "20 Italian/English terms across 4 categories for embedding comparison exercises",
+    "license": "Public domain (educational use)"
+  },
+  "terms": [
+    {
+      "it": "apprendimento automatico",
+      "en": "machine learning",
+      "category": "technology"
+    },
+    {
+      "it": "rete neurale",
+      "en": "neural network",
+      "category": "technology"
+    },
+    {
+      "it": "apprendimento profondo",
+      "en": "deep learning",
+      "category": "technology"
+    },
+    {
+      "it": "intelligenza artificiale",
+      "en": "artificial intelligence",
+      "category": "technology"
+    },
+    {
+      "it": "algoritmo di classificazione",
+      "en": "classification algorithm",
+      "category": "technology"
+    },
+    {
+      "it": "mercato azionario",
+      "en": "stock market",
+      "category": "finance"
+    },
+    {
+      "it": "portafoglio di investimenti",
+      "en": "investment portfolio",
+      "category": "finance"
+    },
+    {
+      "it": "tasso di interesse",
+      "en": "interest rate",
+      "category": "finance"
+    },
+    {
+      "it": "bilancio aziendale",
+      "en": "company balance sheet",
+      "category": "finance"
+    },
+    {
+      "it": "criptovaluta",
+      "en": "cryptocurrency",
+      "category": "finance"
+    },
+    {
+      "it": "calcio",
+      "en": "football",
+      "category": "sports"
+    },
+    {
+      "it": "pallacanestro",
+      "en": "basketball",
+      "category": "sports"
+    },
+    {
+      "it": "nuoto",
+      "en": "swimming",
+      "category": "sports"
+    },
+    {
+      "it": "atletica leggera",
+      "en": "athletics",
+      "category": "sports"
+    },
+    {
+      "it": "tennis",
+      "en": "tennis",
+      "category": "sports"
+    },
+    {
+      "it": "pizza",
+      "en": "pizza",
+      "category": "food"
+    },
+    {
+      "it": "sushi",
+      "en": "sushi",
+      "category": "food"
+    },
+    {
+      "it": "hamburger",
+      "en": "burger",
+      "category": "food"
+    },
+    {
+      "it": "pasta",
+      "en": "pasta",
+      "category": "food"
+    },
+    {
+      "it": "cioccolato",
+      "en": "chocolate",
+      "category": "food"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac OS
+.DS_Store
+
+# Databases
+*.sqlite3
+# hospital.db is small and synthetic, so we could commit it, 
+# but generally best practice to ignore DBs. We'll leave it 
+# un-ignored so students have it without running setup_db.py.
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# ChromaDB storage (vector database)
+chroma_db/
+qdrant_storage/
+
+# Logs
+*.log
+
+# =============================================
+# FUTURE LECTURES — remove as each is released
+# =============================================
+
+# Lecture 2+ labs (not yet released)
+lab_02_prompt_engineering/
+lab_03_*/
+lab_04_*/
+lab_05_*/
+lab_06_*/
+lab_07_*/
+lab_08_*/
+lab_09_*/
+lab_10_*/
+
+# Lecture 2+ slides (not yet released)
+slides/lecture_02_*
+slides/lecture_03_*
+slides/lecture_04_*
+slides/lecture_05_*
+slides/lecture_06_*
+slides/lecture_07_*
+slides/lecture_08_*
+slides/lecture_09_*
+slides/lecture_10_*
+
+# All speaker notes (instructor only — not for students)
+slides/*_notes.md
+
+# Course planning docs (instructor only)
+LLM_Course_Plan_20h.md
+LLM_Course_Plan_20h.pdf
+LLM_Course_Executive_Summary.md
+LLM_Course_Executive_Summary.pdf
+docker-compose.yml
+tests/
