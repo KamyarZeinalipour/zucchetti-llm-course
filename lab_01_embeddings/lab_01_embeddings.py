@@ -23,11 +23,22 @@
 # ## What You'll Learn
 # | Concept | Slide Reference |
 # |---|---|
-# | Embeddings as "GPS coordinates for meaning" | Section 3: Vector Spaces |
-# | Cosine similarity: angle between two arrows | Section 3: Cosine Similarity |
-# | Why multilingual models matter for non-English text | Section 4: Multilingual Alignment |
+# | Embeddings as "GPS coordinates for meaning" | Section 3: What is an Embedding? |
+# | Word2Vec: king − man + woman ≈ queen | Section 3: Word2Vec — Where Embeddings Started |
+# | Cosine similarity & distance metrics | Section 3: Cosine Similarity + Distance Metrics |
+# | BPE tokenization algorithm | Section 2: BPE Algorithm — Step by Step |
+# | Why multilingual models matter | Section 4: Cross-Lingual Alignment |
 # | How embedding dimensions affect quality | Section 3: Why Dimensions Matter |
+# | Transformer architectures (encoder/decoder) | Section 1: Encoder vs Decoder |
 #
+# ### Theory Slides You Should Know (covered in lecture)
+# | Topic | Key Formula |
+# |---|---|
+# | Multi-Head Attention | MultiHead(Q,K,V) = Concat(heads)·W^O |
+# | Positional Encoding | PE(pos,2i) = sin(pos / 10000^(2i/d)) |
+# | Cross-Entropy Loss | L(θ) = −Σ log P(xₜ | x₁...xₜ₋₁) |
+# | Perplexity | PPL = exp(−1/N · Σ log P) |
+# | RLHF | L_RLHF = −E[r(x,y)] + β·KL[π_θ || π_ref] |
 #
 # ⏱ **Duration:** ~20 minutes · 🔒 **No API key needed** — runs 100% locally
 
@@ -121,6 +132,11 @@ display(HTML(f"""
 #
 # Before we generate embeddings, let's see **tokenization** in action.
 # From the slides: LLMs don't see words — they see **tokens**.
+#
+# > 📄 **From the slides — BPE Algorithm:**
+# > The tokenizer uses **Byte-Pair Encoding** (Sennrich et al., ACL 2016).
+# > It starts from characters and merges the most frequent pairs:
+# > `[l, o, w, e, r]` → `[lo, w, e, r]` → `[low, er]` → `[lower]`
 #
 # Key insight: **Non-English text uses more tokens** for the same meaning,
 # which means higher cost and less context window.
@@ -412,6 +428,14 @@ display(HTML(f"""
 #
 # $$\cos(\theta) = \frac{A \cdot B}{\|A\| \times \|B\|}$$
 #
+# > 📄 **From the slides — Distance Metrics:**
+# > There are 3 ways to measure vector similarity:
+# > - **Cosine**: angle between vectors (ignores magnitude) ← *we use this*
+# > - **Dot Product**: magnitude-sensitive (longer vectors score higher)
+# > - **Euclidean**: L2 distance (smaller = more similar)
+# >
+# > When vectors are normalized (ours are!), cosine = dot product.
+#
 # - **1.0** = identical direction → same meaning ("car" ↔ "automobile")
 # - **0.0** = perpendicular → unrelated ("car" ↔ "happiness")
 # - In practice, similar texts score **0.7–0.95**
@@ -643,7 +667,53 @@ semantic_search("building a neural network with Python", data["terms"], embeddin
 
 # %% [markdown]
 # ---
-# ## Step 10: Model Comparison (Bonus) 🏆
+# ## Step 10: Word2Vec Analogy — The Classic Demo 👑
+#
+# > 📄 **From the slides — Word2Vec (Mikolov et al., Google 2013):**
+# > The paper that started the embedding revolution showed that vector
+# > arithmetic captures semantic relationships:
+# > `king − man + woman ≈ queen`
+#
+# Let's try this with our model!
+
+# %%
+_analogy_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
+def word2vec_analogy(word_a, word_b, word_c, model, top_k=3):
+    """Compute: word_a - word_b + word_c ≈ ?"""
+    vecs = model.encode([word_a, word_b, word_c])
+    # Perform vector arithmetic
+    result_vec = vecs[0] - vecs[1] + vecs[2]
+    result_vec = result_vec.reshape(1, -1)
+    
+    # Find closest words from a candidate list
+    candidates = ["queen", "king", "man", "woman", "prince", "princess",
+                  "boy", "girl", "emperor", "empress", "husband", "wife",
+                  "father", "mother", "son", "daughter", "Rome", "Italy",
+                  "Paris", "France", "Berlin", "Germany", "Madrid", "Spain"]
+    cand_vecs = model.encode(candidates)
+    from sklearn.metrics.pairwise import cosine_similarity
+    scores = cosine_similarity(result_vec, cand_vecs)[0]
+    ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)[:top_k]
+    
+    result_str = " | ".join(f"<strong>{w}</strong> ({s:.3f})" for w, s in ranked)
+    display(HTML(f"""
+    <div style="font-family:sans-serif; padding:12px; background:#f3e5f5; border-radius:8px; max-width:600px; margin:6px 0;">
+      <code style="font-size:1.1em;">{word_a} − {word_b} + {word_c} ≈ ?</code><br>
+      <div style="margin-top:8px;">→ {result_str}</div>
+    </div>
+    """))
+
+print("👑 Word2Vec-style analogies:")
+word2vec_analogy("king", "man", "woman", _analogy_model)
+word2vec_analogy("Paris", "France", "Germany", _analogy_model)
+word2vec_analogy("husband", "man", "woman", _analogy_model)
+
+del _analogy_model
+
+# %% [markdown]
+# ---
+# ## Step 11: Model Comparison (Bonus) 🏆
 #
 # Compare how a **multilingual** model vs an **English-only** model handles
 # the same terms in **Italian**. From the slides:
