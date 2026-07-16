@@ -30,7 +30,7 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 
 ## 📖 Lecture 1: LLM & Embeddings Fundamentals
 
-**Duration:** 2 hours (80 min theory + 10 min break + 20 min lab + 10 min Q&A)
+**Duration:** 2 hours — theory and code demos are **interleaved** (no separate lab block)
 
 ### 🎯 What You'll Learn
 

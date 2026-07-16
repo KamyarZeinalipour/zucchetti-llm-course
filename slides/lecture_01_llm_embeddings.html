@@ -85,15 +85,18 @@
 <!-- ============================================ -->
 <section>
     <h2>Today's Agenda</h2>
-    <div style="max-width:600px; margin:0 auto; text-align:left;">
-        <div class="agenda-item"><span class="time">35 min</span> The Transformer Blueprint</div>
-        <div class="agenda-item"><span class="time">20 min</span> Tokenization & Its Consequences</div>
-        <div class="agenda-item"><span class="time">25 min</span> Embeddings & Similarity</div>
+    <div style="max-width:620px; margin:0 auto; text-align:left;">
+        <div class="agenda-item"><span class="time">30 min</span> The Transformer Blueprint</div>
+        <div class="agenda-item" style="border-left-color: var(--accent2);"><span class="time">5 min</span> 🔬 Code Demo 1: Three Architectures in Action</div>
+        <div class="agenda-item"><span class="time">15 min</span> Tokenization &amp; Its Consequences</div>
+        <div class="agenda-item" style="border-left-color: var(--accent2);"><span class="time">5 min</span> 🔬 Code Demo 2: How the Tokenizer Sees Text</div>
         <div class="agenda-item" style="border-left-color: #888; background:rgba(255,255,255,0.03);"><span class="time" style="background:#555;">10 min</span> ☕ Break</div>
-        <div class="agenda-item" style="border-left-color: var(--accent2);"><span class="time">20 min</span> 🔬 Hands-on Lab: Embeddings Exploration</div>
-        <div class="agenda-item" style="border-left-color: #555;"><span class="time">10 min</span> Summary & Q&A</div>
+        <div class="agenda-item"><span class="time">20 min</span> Embeddings &amp; Similarity</div>
+        <div class="agenda-item" style="border-left-color: var(--accent2);"><span class="time">10 min</span> 🔬 Code Demo 3: Embeddings, Similarity &amp; Search</div>
+        <div class="agenda-item"><span class="time">10 min</span> Multilingual &amp; Practical Guidance</div>
+        <div class="agenda-item" style="border-left-color: #555;"><span class="time">15 min</span> Summary &amp; Q&amp;A</div>
     </div>
-    <div style="margin-top:15px; font-size:0.55em; color:#888;">Total: 2 hours (120 min)</div>
+    <div style="margin-top:10px; font-size:0.55em; color:#888;">Total: 2 hours (120 min) &middot; Theory and code are <span class="highlight">interleaved</span> &mdash; no separate lab block</div>
 </section>
 
 <!-- ============================================ -->
@@ -667,6 +670,23 @@
 </section>
 
 <!-- ============================================ -->
+<!-- CODE DEMO 1: Three Architectures -->
+<!-- ============================================ -->
+<section>
+    <h2 style="color:var(--accent2);">🔬 Code Demo 1</h2>
+    <h1 style="font-size:1.6em;">Three Architectures<br>in Action</h1>
+    <p class="subtitle">Let's see what we just learned &mdash; live in Colab</p>
+    <div style="max-width:500px; margin:1em auto; font-size:0.65em;">
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 1</span> Load 20 terms across 4 categories</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 3</span> Run encoder-only, decoder-only, and encoder-decoder side by side</div>
+    </div>
+    <div class="card" style="text-align:center; font-size:0.75em; max-width:450px; margin:0.5em auto;">
+        <p>Open <span class="highlight">Google Colab</span> &rarr; run cells for <strong>Code Demo 1</strong></p>
+        <p style="font-family:var(--r-code-font); font-size:0.85em; color:var(--accent3);">lab_01_embeddings.ipynb</p>
+    </div>
+</section>
+
+<!-- ============================================ -->
 <!-- SECTION 2: TOKENIZATION -->
 <!-- ============================================ -->
 <section>
@@ -786,6 +806,21 @@
         </div>
         <div class="takeaway">Every token costs money and takes up context window space. Understanding tokenization helps you <span class="highlight">optimize cost</span> and <span class="highlight">design better prompts</span>.</div>
     </section>
+</section>
+
+<!-- ============================================ -->
+<!-- CODE DEMO 2: Tokenization -->
+<!-- ============================================ -->
+<section>
+    <h2 style="color:var(--accent2);">🔬 Code Demo 2</h2>
+    <h1 style="font-size:1.6em;">How the Tokenizer<br>Sees Text</h1>
+    <p class="subtitle">EN vs IT &mdash; see the token cost difference live</p>
+    <div style="max-width:500px; margin:1em auto; font-size:0.65em;">
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 2</span> Colored token boxes: "machine learning" vs "apprendimento automatico"</div>
+    </div>
+    <div class="card" style="text-align:center; font-size:0.75em; max-width:450px; margin:0.5em auto;">
+        <p>Switch to <span class="highlight">Colab</span> &rarr; run cells for <strong>Code Demo 2</strong></p>
+    </div>
 </section>
 
 <!-- ============================================ -->
@@ -980,6 +1015,24 @@
 </section>
 
 <!-- ============================================ -->
+<!-- CODE DEMO 3: Embeddings & Search -->
+<!-- ============================================ -->
+<section>
+    <h2 style="color:var(--accent2);">🔬 Code Demo 3</h2>
+    <h1 style="font-size:1.6em;">Embeddings, Similarity<br>&amp; Search</h1>
+    <p class="subtitle">The core skills that power RAG, search, and recommendations</p>
+    <div style="max-width:520px; margin:1em auto; font-size:0.65em;">
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Steps 4-5</span> Generate embeddings + cosine similarity heatmap</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 7</span> 2D cluster map &mdash; see the "meaning space"</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 10</span> Word2Vec analogy: king &minus; man + woman &asymp; queen</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 9</span> Semantic search &mdash; find by meaning, not keywords</div>
+    </div>
+    <div class="card" style="text-align:center; font-size:0.75em; max-width:450px; margin:0.5em auto;">
+        <p>Switch to <span class="highlight">Colab</span> &rarr; run cells for <strong>Code Demo 3</strong></p>
+    </div>
+</section>
+
+<!-- ============================================ -->
 <!-- SECTION 4: MULTILINGUAL -->
 <!-- ============================================ -->
 <section>
@@ -1108,66 +1161,7 @@
     </div>
 </section>
 
-<!-- ============================================ -->
-<!-- LAB SECTION -->
-<!-- ============================================ -->
-<section>
-    <section>
-        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div></div>
-        <p class="section-title">Hands-on Lab</p>
-        <h1>🔬 Lab 01:<br>Embeddings Exploration</h1>
-        <p class="subtitle">50 minutes · Runs 100% locally</p>
-    </section>
 
-    <section>
-        <h2>Lab Overview</h2>
-        <p style="font-size:0.7em; color:#aaa; margin-bottom:0.5em;">Open in Colab, run each cell, observe the results</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.65em;">
-            <div class="agenda-item"><span class="time">Step 1</span> Load 20 terms across 4 categories</div>
-            <div class="agenda-item"><span class="time">Step 2</span> Tokenization: EN vs IT visual breakdown</div>
-            <div class="agenda-item" style="border-left-color: var(--accent3);"><span class="time">Step 3</span> 🔬 3 architectures live demo (GPT-2, T5, MiniLM)</div>
-            <div class="agenda-item"><span class="time">Step 4</span> Generate embeddings + bar chart</div>
-            <div class="agenda-item"><span class="time">Step 5</span> Dimensions & storage comparison</div>
-            <div class="agenda-item"><span class="time">Step 6</span> Cosine similarity matrix</div>
-            <div class="agenda-item" style="border-left-color: var(--accent3);"><span class="time">Step 7</span> 🗺️ 2D cluster map (PCA)</div>
-            <div class="agenda-item"><span class="time">Step 8</span> Top similar pairs</div>
-            <div class="agenda-item" style="border-left-color: var(--accent3);"><span class="time">Step 9</span> 🔍 Semantic search</div>
-            <div class="agenda-item" style="border-left-color: #555;"><span class="time">Step 10</span> Model comparison (bonus)</div>
-        </div>
-        <br>
-        <div class="card" style="text-align:center; font-size:0.8em;">
-            <p>Open the notebook in <span class="highlight">Google Colab</span> and run each cell:</p>
-            <p style="font-family: var(--r-code-font); font-size:0.85em; color:var(--accent3); margin-top:0.3em;">lab_01_embeddings.ipynb</p>
-        </div>
-    </section>
-
-    <section>
-        <h2>What You'll See</h2>
-        <div class="two-col" style="font-size:0.7em;">
-            <div class="card" style="text-align:center;">
-                <h3>🔍 Token Breakdown</h3>
-                <p>Colored boxes showing how the tokenizer splits words</p>
-                <p style="color:#888; font-size:0.85em;">EN: 2 tokens vs IT: 5 tokens</p>
-            </div>
-            <div class="card" style="text-align:center;">
-                <h3>🔬 3 Architectures</h3>
-                <p>GPT-2 generates text, T5 translates, MiniLM embeds</p>
-                <p style="color:#888; font-size:0.85em;">See encoder hidden states live</p>
-            </div>
-            <div class="card" style="text-align:center;">
-                <h3>🗺️ Cluster Map</h3>
-                <p>384-dim → 2D: see terms cluster by category</p>
-                <p style="color:#888; font-size:0.85em;">PCA scatter plot with labels</p>
-            </div>
-            <div class="card" style="text-align:center;">
-                <h3>🔍 Semantic Search</h3>
-                <p>Type any sentence → find closest terms by meaning</p>
-                <p style="color:#888; font-size:0.85em;">"I love football" → soccer, basketball</p>
-            </div>
-        </div>
-        <div class="takeaway">Everything runs hands-on — just run each cell and observe the results. No coding required.</div>
-    </section>
-</section>
 
 <!-- ============================================ -->
 <!-- SUMMARY -->

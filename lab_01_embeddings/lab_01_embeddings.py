@@ -40,7 +40,13 @@
 # | Perplexity | PPL = exp(−1/N · Σ log P) |
 # | RLHF | L_RLHF = −E[r(x,y)] + β·KL[π_θ || π_ref] |
 #
-# ⏱ **Duration:** ~20 minutes · 🔒 **No API key needed** — runs 100% locally
+# ⏱ **Duration:** Code demos are woven into the lecture — no separate lab block
+#
+# ### How This Notebook Is Used
+# This notebook is run in **3 code demos** during the lecture, not all at once:
+# - 🔬 **Code Demo 1** (after Transformer slides): Steps 1 + 3
+# - 🔬 **Code Demo 2** (after Tokenization slides): Step 2
+# - 🔬 **Code Demo 3** (after Embeddings slides): Steps 4-10
 
 # %% [markdown]
 # ---
@@ -73,6 +79,13 @@ from pathlib import Path
 from IPython.display import display, HTML
 import matplotlib.pyplot as plt
 import matplotlib
+
+# %% [markdown]
+# ---
+# # ═══════════════════════════════════════════════
+# # 🔬 CODE DEMO 1: Three Architectures
+# # Run after: Transformer Blueprint slides
+# # ═══════════════════════════════════════════════
 
 # %% [markdown]
 # ---
@@ -125,6 +138,13 @@ display(HTML(f"""
 </table>
 </div>
 """))
+
+# %% [markdown]
+# ---
+# # ═══════════════════════════════════════════════
+# # 🔬 CODE DEMO 2: Tokenization
+# # Run after: Tokenization & BPE slides
+# # ═══════════════════════════════════════════════
 
 # %% [markdown]
 # ---
@@ -418,6 +438,13 @@ display(HTML(f"""
 <p style="color:#888; font-size:13px; margin-top:8px;">→ {3072//n_dims}x more storage for higher-dim models. Like 720p vs 4K — more detail, but more cost.</p>
 </div>
 """))
+
+# %% [markdown]
+# ---
+# # ═══════════════════════════════════════════════
+# # 🔬 CODE DEMO 3: Embeddings, Similarity & Search
+# # Run after: Embeddings & Similarity slides
+# # ═══════════════════════════════════════════════
 
 # %% [markdown]
 # ---
