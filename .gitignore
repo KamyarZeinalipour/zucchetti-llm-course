@@ -59,6 +59,9 @@ slides/lecture_10_*
 
 # All speaker notes (instructor only — not for students)
 slides/*_notes.md
+slides/*_notes.pdf
+lab_*/*_notes.md
+lab_*/*_notes.pdf
 
 # Course planning docs (instructor only)
 LLM_Course_Plan_20h.md

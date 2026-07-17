@@ -40,13 +40,12 @@
 # | Perplexity | PPL = exp(−1/N · Σ log P) |
 # | RLHF | L_RLHF = −E[r(x,y)] + β·KL[π_θ || π_ref] |
 #
-# ⏱ **Duration:** Code demos are woven into the lecture — no separate lab block
+# ⏱ **Duration:** ~25 minutes
 #
-# ### How This Notebook Is Used
-# This notebook is run in **3 code demos** during the lecture, not all at once:
-# - 🔬 **Code Demo 1** (after Transformer slides): Steps 1 + 3
-# - 🔬 **Code Demo 2** (after Tokenization slides): Step 2
-# - 🔬 **Code Demo 3** (after Embeddings slides): Steps 4-10
+# ### How This Notebook Works
+# This notebook covers all the hands-on exercises for Lecture 1.
+# Each step builds on the previous one — just run the cells in order.
+# Steps 1–9 are the core lab. Step 10 is a bonus.
 
 # %% [markdown]
 # ---
@@ -57,7 +56,7 @@
 
 # %%
 # --- Run this cell in Google Colab ---
-!pip install -q sentence-transformers transformers numpy scikit-learn matplotlib
+!pip install -q sentence-transformers transformers numpy scikit-learn matplotlib pandas tabulate
 
 # Clone the repo and navigate to the lab directory
 import os
@@ -75,17 +74,10 @@ else:
 # %%
 import json
 import numpy as np
+import pandas as pd
 from pathlib import Path
-from IPython.display import display, HTML
 import matplotlib.pyplot as plt
 import matplotlib
-
-# %% [markdown]
-# ---
-# # ═══════════════════════════════════════════════
-# # 🔬 CODE DEMO 1: Three Architectures
-# # Run after: Transformer Blueprint slides
-# # ═══════════════════════════════════════════════
 
 # %% [markdown]
 # ---
@@ -98,7 +90,7 @@ import matplotlib
 #
 # > 💡 **From the slides:** Remember that tokenization affects non-English languages
 # > differently. Italian text uses more tokens than English for the same meaning.
-# > We'll see this effect hands-on below and again in the bonus Step 7.
+# > We'll see this effect hands-on below and again in the bonus Step 10.
 
 # %%
 def load_terms(data_path: str = None) -> dict:
@@ -116,35 +108,13 @@ def load_terms(data_path: str = None) -> dict:
 
 data = load_terms()
 
-# Build HTML table for the dataset
-cat_colors = {"technology": "#2196F3", "finance": "#4CAF50", "sports": "#FF9800", "food": "#E91E63"}
-rows_html = ""
-for i, t in enumerate(data["terms"], 1):
-    cat = t["category"]
-    badge = f'<span style="background:{cat_colors.get(cat,"#888")}; color:white; padding:2px 8px; border-radius:10px; font-size:12px;">{cat}</span>'
-    rows_html += f"<tr><td>{i}</td><td><strong>{t['en']}</strong></td><td style='color:#888;'>{t['it']}</td><td>{badge}</td></tr>"
-
-display(HTML(f"""
-<div style="font-family:sans-serif;">
-<h3>📋 Terms Dataset — {len(data['terms'])} terms across {len(cat_colors)} categories</h3>
-<table style="border-collapse:collapse; width:100%; max-width:650px;">
-<tr style="background:#f5f5f5; border-bottom:2px solid #ddd;">
-  <th style="padding:8px; text-align:left;">#</th>
-  <th style="padding:8px; text-align:left;">English</th>
-  <th style="padding:8px; text-align:left;">Italian</th>
-  <th style="padding:8px; text-align:left;">Category</th>
-</tr>
-{rows_html}
-</table>
-</div>
-"""))
-
-# %% [markdown]
-# ---
-# # ═══════════════════════════════════════════════
-# # 🔬 CODE DEMO 2: Tokenization
-# # Run after: Tokenization & BPE slides
-# # ═══════════════════════════════════════════════
+# Display as a pandas DataFrame
+df_terms = pd.DataFrame([
+    {"#": i, "English": t["en"], "Italian": t["it"], "Category": t["category"]}
+    for i, t in enumerate(data["terms"], 1)
+])
+print(f"📋 Terms Dataset — {len(data['terms'])} terms across {len(df_terms['Category'].unique())} categories\n")
+df_terms
 
 # %% [markdown]
 # ---
@@ -168,25 +138,19 @@ from transformers import AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("bert-base-multilingual-cased")
 
-TOKEN_COLORS = [
-    "#a8d8ea", "#aa96da", "#fcbad3", "#ffffd2", "#b5eaea",
-    "#f6c6c6", "#c9e4de", "#d4a5a5", "#e8d5b7", "#b8e0d2",
-]
-
-def render_tokens_html(text, tokenizer):
-    """Render tokenized text as colored HTML boxes."""
-    token_ids = tokenizer.encode(text, add_special_tokens=False)
-    tokens = tokenizer.convert_ids_to_tokens(token_ids)
-    spans = []
-    for i, tok in enumerate(tokens):
-        color = TOKEN_COLORS[i % len(TOKEN_COLORS)]
-        display_tok = tok.replace("##", "·")
-        spans.append(
-            f'<span style="background:{color}; padding:3px 6px; margin:2px; '
-            f'border-radius:4px; font-family:monospace; font-size:14px; '
-            f'display:inline-block;">{display_tok}</span>'
-        )
-    return "".join(spans)
+def compare_tokens(en: str, it: str):
+    """Compare tokenization between English and Italian text."""
+    en_tokens = tokenizer.tokenize(en)
+    it_tokens = tokenizer.tokenize(it)
+    return {
+        "English": en,
+        "EN tokens": len(en_tokens),
+        "EN breakdown": " | ".join(en_tokens),
+        "Italian": it,
+        "IT tokens": len(it_tokens),
+        "IT breakdown": " | ".join(t.replace("##", "·") for t in it_tokens),
+        "Extra tokens": f"+{len(it_tokens) - len(en_tokens)}",
+    }
 
 examples = [
     ("machine learning",           "apprendimento automatico"),
@@ -194,36 +158,19 @@ examples = [
     ("investment portfolio",       "portafoglio di investimenti"),
 ]
 
-html_parts = [
-    '<div style="font-family:sans-serif; max-width:700px;">',
-    '<h3>🔍 How the Tokenizer Splits Text</h3>',
-]
+df_tokens = pd.DataFrame([compare_tokens(en, it) for en, it in examples])
+print("🔍 How the Tokenizer Splits Text")
+print("   · = subword boundary (the tokenizer split a word into pieces)")
+print("   More tokens = higher API cost + less fits in the context window\n")
+df_tokens
 
-for en, it in examples:
-    en_tokens = tokenizer.encode(en, add_special_tokens=False)
-    it_tokens = tokenizer.encode(it, add_special_tokens=False)
-    html_parts.append(
-        f'<div style="margin:12px 0; padding:12px; background:#f8f8f8; border-radius:8px;">'
-        f'<div style="margin-bottom:8px;">'
-        f'<strong style="color:#2196F3;">EN</strong> "{en}" → '
-        f'<strong>{len(en_tokens)} tokens</strong></div>'
-        f'<div style="margin-bottom:10px;">{render_tokens_html(en, tokenizer)}</div>'
-        f'<div style="margin-bottom:8px;">'
-        f'<strong style="color:#FF9800;">IT</strong> "{it}" → '
-        f'<strong>{len(it_tokens)} tokens</strong> '
-        f'<span style="color:red;">(+{len(it_tokens) - len(en_tokens)})</span></div>'
-        f'<div>{render_tokens_html(it, tokenizer)}</div>'
-        f'</div>'
-    )
+# %% [markdown]
+# ### 🧪 Try it yourself!
+# Add your own English / Italian pair below and re-run:
 
-html_parts.append(
-    '<p style="color:#888; font-size:13px; margin-top:8px;">'
-    '· = subword boundary (the tokenizer split a word into pieces)<br>'
-    'More tokens = higher API cost + less fits in the context window</p>'
-    '</div>'
-)
-
-display(HTML("".join(html_parts)))
+# %%
+# ✏️ Change these and re-run!
+pd.DataFrame([compare_tokens("deep learning", "apprendimento profondo")])
 
 # %% [markdown]
 # ---
@@ -256,96 +203,95 @@ display(HTML("".join(html_parts)))
 # Let's see all **3 architectures in action** with small examples:
 
 # %%
-from transformers import pipeline
-
-# --- 1. DECODER-ONLY: Text Generation (like ChatGPT) ---
-print("⟳ Loading decoder-only model (GPT-2)...")
-generator = pipeline("text-generation", model="gpt2", max_new_tokens=30, do_sample=True, temperature=0.7)
-prompt = "Artificial intelligence will"
-result = generator(prompt)[0]["generated_text"]
-
-# --- 2. ENCODER-DECODER: Text Transformation (like T5) ---
-# We'll show BOTH parts: what the encoder produces AND what the decoder generates
-print("⟳ Loading encoder-decoder model (T5)...")
-from transformers import T5ForConditionalGeneration, T5Tokenizer
+from transformers import pipeline, T5ForConditionalGeneration, T5Tokenizer
+from sentence_transformers import SentenceTransformer
 import torch
 
+# Load all 3 models once
+print("⟳ Loading decoder-only model (GPT-2)...")
+generator = pipeline("text-generation", model="gpt2", max_new_tokens=30, do_sample=True, temperature=0.7)
+
+print("⟳ Loading encoder-decoder model (T5)...")
 t5_tokenizer = T5Tokenizer.from_pretrained("t5-small")
 t5_model = T5ForConditionalGeneration.from_pretrained("t5-small")
 
-en_text = "translate English to German: Machine learning is a subset of artificial intelligence."
-t5_inputs = t5_tokenizer(en_text, return_tensors="pt")
-
-# Step A: Run the ENCODER → get hidden states (the intermediate representation)
-with torch.no_grad():
-    encoder_outputs = t5_model.encoder(**t5_inputs)
-encoder_hidden = encoder_outputs.last_hidden_state  # shape: (1, seq_len, 512)
-
-# Step B: Run the DECODER → generate translation from those hidden states
-output_ids = t5_model.generate(**t5_inputs, max_length=50)
-translation = t5_tokenizer.decode(output_ids[0], skip_special_tokens=True)
-
-# Format encoder hidden states for display
-enc_shape = encoder_hidden.shape
-enc_vals = encoder_hidden[0][0][:5].tolist()  # first token, first 5 dims
-enc_vals_str = ", ".join(f"{v:.4f}" for v in enc_vals)
-
-# --- 3. ENCODER-ONLY: Embeddings (what we use!) ---
-from sentence_transformers import SentenceTransformer
 print("⟳ Loading encoder-only model (MiniLM)...")
-_demo_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
-_demo_emb = _demo_model.encode(["machine learning"])
+embedding_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+print("✓ All 3 models loaded!\n")
 
-# Display all 3 results
-display(HTML(f"""
-<div style="font-family:sans-serif; max-width:800px;">
-<h3>🔬 Three Transformer Architectures in Action</h3>
 
-<div style="margin:10px 0; padding:14px; background:#fff3e0; border-left:4px solid #FF9800; border-radius:4px;">
-  <strong style="color:#FF9800;">1. Decoder-only</strong> (GPT-2) — <em>Generates text token by token</em><br>
-  <code style="background:#f5f5f5; padding:2px 6px; border-radius:3px;">Input: "{prompt}"</code><br>
-  <div style="margin-top:6px; padding:8px; background:#f5f5f5; border-radius:4px; font-family:monospace;">{result}</div>
-  <div style="color:#888; font-size:12px; margin-top:4px;">→ This is how ChatGPT, LLaMA, and Mistral work</div>
-</div>
+# --- Reusable functions for each architecture ---
 
-<div style="margin:10px 0; padding:14px; background:#e8f5e9; border-left:4px solid #4CAF50; border-radius:4px;">
-  <strong style="color:#4CAF50;">2. Encoder-Decoder</strong> (T5) — <em>Two-stage: encode then decode</em><br>
-  <code style="background:#f5f5f5; padding:2px 6px; border-radius:3px;">Input: "Machine learning is a subset of artificial intelligence."</code>
+def demo_decoder(prompt: str):
+    """🟠 Decoder-only (GPT-2): generates text from a prompt."""
+    result = generator(prompt)[0]["generated_text"]
+    print(f"🟠 Decoder-only (GPT-2) — Generates text token by token")
+    print(f"   Input:  \"{prompt}\"")
+    print(f"   Output: {result}")
+    print(f"   → This is how ChatGPT, LLaMA, and Mistral work\n")
 
-  <div style="margin:10px 0; padding:10px; background:#c8e6c9; border-radius:4px;">
-    <strong>Stage 1 — ENCODER</strong> (understands the input):<br>
-    <div style="font-family:monospace; font-size:12px; margin-top:4px;">
-      Input tokens: {enc_shape[1]} tokens → Hidden states: <strong>{enc_shape[1]} × {enc_shape[2]} dimensions</strong><br>
-      Each token gets a rich representation: [{enc_vals_str}, ...]
-    </div>
-    <div style="color:#2e7d32; font-size:11px; margin-top:2px;">↓ These hidden states are passed to the decoder ↓</div>
-  </div>
 
-  <div style="margin:10px 0; padding:10px; background:#c8e6c9; border-radius:4px;">
-    <strong>Stage 2 — DECODER</strong> (generates the output from hidden states):<br>
-    <div style="font-family:monospace; font-size:13px; margin-top:4px;">
-      Output: <strong>{translation}</strong>
-    </div>
-  </div>
-  <div style="color:#888; font-size:12px;">→ Used for translation, summarization, Q&A</div>
-</div>
+def demo_encoder_decoder(text: str):
+    """🟢 Encoder-Decoder (T5): translates text EN → DE."""
+    full_input = f"translate English to German: {text}"
+    inputs = t5_tokenizer(full_input, return_tensors="pt")
+    with torch.no_grad():
+        enc_out = t5_model.encoder(**inputs)
+    hidden = enc_out.last_hidden_state
+    output_ids = t5_model.generate(**inputs, max_length=50)
+    translation = t5_tokenizer.decode(output_ids[0], skip_special_tokens=True)
 
-<div style="margin:10px 0; padding:14px; background:#e3f2fd; border-left:4px solid #2196F3; border-radius:4px;">
-  <strong style="color:#2196F3;">3. Encoder-only</strong> (MiniLM) — <em>Understands text → produces embeddings</em><br>
-  <code style="background:#f5f5f5; padding:2px 6px; border-radius:3px;">Input: "machine learning"</code><br>
-  <div style="margin-top:6px; padding:8px; background:#f5f5f5; border-radius:4px; font-family:monospace;">Output: [{_demo_emb[0][0]:.4f}, {_demo_emb[0][1]:.4f}, {_demo_emb[0][2]:.4f}, ...] ({_demo_emb.shape[1]} dims)</div>
-  <div style="color:#888; font-size:12px; margin-top:4px;">→ This is what we use in this lab! ✅</div>
-</div>
+    vals = hidden[0][0][:5].tolist()
+    vals_str = ", ".join(f"{v:.4f}" for v in vals)
 
-<div style="margin-top:12px; padding:10px; background:#fafafa; border-radius:8px; border:1px solid #ddd;">
-  <strong>💡 Key insight:</strong> The encoder-decoder's <em>encoder hidden states</em> are similar to embeddings!
-  The difference is that encoder-decoder feeds them to a decoder for generation,
-  while encoder-only models return them directly for tasks like search and similarity.
-</div>
-</div>
-"""))
+    print(f"🟢 Encoder-Decoder (T5) — Two-stage: encode then decode")
+    print(f"   Input:  \"{text}\"")
+    print(f"   ENCODER → {hidden.shape[1]} tokens × {hidden.shape[2]} dims: [{vals_str}, ...]")
+    print(f"   DECODER → \"{translation}\"")
+    print(f"   → Used for translation, summarization, Q&A\n")
 
-del generator, t5_model, t5_tokenizer, _demo_model, _demo_emb  # free memory
+
+def demo_encoder(text: str):
+    """🔵 Encoder-only (MiniLM): produces an embedding vector."""
+    emb = embedding_model.encode([text])
+    print(f"🔵 Encoder-only (MiniLM) — Understands text → produces embeddings")
+    print(f"   Input:  \"{text}\"")
+    print(f"   Output: [{emb[0][0]:.4f}, {emb[0][1]:.4f}, {emb[0][2]:.4f}, ...] ({emb.shape[1]} dims)")
+    print(f"   → This is what we use for search and similarity! ✅\n")
+
+
+# --- Run the demo with default inputs ---
+print("=" * 60)
+print("🔬 Three Transformer Architectures in Action")
+print("=" * 60 + "\n")
+
+demo_decoder("Artificial intelligence will")
+demo_encoder_decoder("Machine learning is a subset of artificial intelligence.")
+demo_encoder("machine learning")
+
+print("💡 The encoder-decoder's hidden states are similar to embeddings!")
+print("   The difference: encoder-decoder feeds them to a decoder,")
+print("   encoder-only returns them directly for search and similarity.")
+
+# %% [markdown]
+# ### 🧪 Try it yourself!
+# Change the text below and re-run the cell to see how each architecture responds:
+
+# %%
+# ✏️ Change these inputs and re-run!
+demo_decoder("The future of healthcare is")
+
+# %%
+# ✏️ Try translating different sentences:
+demo_encoder_decoder("Deep learning models can understand images and text.")
+
+# %%
+# ✏️ Try embedding different terms:
+demo_encoder("stock market crash")
+
+# %%
+# Free memory from the generation models (we keep embedding_model for later)
+del generator, t5_model, t5_tokenizer
 
 
 # %% [markdown]
@@ -406,12 +352,8 @@ ax.set_xlim(-1, 50)
 plt.tight_layout()
 plt.show()
 
-display(HTML(f"""
-<div style="font-family:sans-serif; background:#f8f8f8; padding:12px; border-radius:8px; max-width:500px; margin-top:8px;">
-  <strong>📊 Embedding stats for "{term_0}":</strong><br>
-  <code>Shape: ({len(vec)},) · Norm: {np.linalg.norm(vec):.4f} · Min: {vec.min():.4f} · Max: {vec.max():.4f}</code>
-</div>
-"""))
+print(f'\n📊 Embedding stats for "{term_0}":')
+print(f"   Shape: ({len(vec)},) · Norm: {np.linalg.norm(vec):.4f} · Min: {vec.min():.4f} · Max: {vec.max():.4f}")
 
 # %% [markdown]
 # ### Why Dimensions Matter
@@ -427,24 +369,13 @@ bytes_per_float = 4
 total_384 = n_terms * n_dims * bytes_per_float
 total_3072 = n_terms * 3072 * bytes_per_float
 
-display(HTML(f"""
-<div style="font-family:sans-serif; max-width:500px;">
-<h4>💾 Storage Comparison</h4>
-<table style="border-collapse:collapse; width:100%;">
-<tr style="background:#f5f5f5;"><th style="padding:8px; text-align:left;">Model</th><th style="padding:8px;">Dims</th><th style="padding:8px;">Storage ({n_terms} terms)</th></tr>
-<tr><td style="padding:8px;"><strong>Our model</strong> (MiniLM)</td><td style="padding:8px; text-align:center;">{n_dims}</td><td style="padding:8px; text-align:center; color:#4CAF50;">{total_384/1024:.1f} KB</td></tr>
-<tr><td style="padding:8px;">OpenAI large</td><td style="padding:8px; text-align:center;">3072</td><td style="padding:8px; text-align:center; color:#E91E63;">{total_3072/1024:.1f} KB</td></tr>
-</table>
-<p style="color:#888; font-size:13px; margin-top:8px;">→ {3072//n_dims}x more storage for higher-dim models. Like 720p vs 4K — more detail, but more cost.</p>
-</div>
-"""))
-
-# %% [markdown]
-# ---
-# # ═══════════════════════════════════════════════
-# # 🔬 CODE DEMO 3: Embeddings, Similarity & Search
-# # Run after: Embeddings & Similarity slides
-# # ═══════════════════════════════════════════════
+df_storage = pd.DataFrame([
+    {"Model": "Our model (MiniLM)", "Dims": n_dims, f"Storage ({n_terms} terms)": f"{total_384/1024:.1f} KB"},
+    {"Model": "OpenAI large", "Dims": 3072, f"Storage ({n_terms} terms)": f"{total_3072/1024:.1f} KB"},
+])
+print(f"💾 Storage Comparison")
+print(f"   → {3072//n_dims}x more storage for higher-dim models. Like 720p vs 4K.\n")
+df_storage
 
 # %% [markdown]
 # ---
@@ -521,7 +452,7 @@ plt.show()
 
 # %% [markdown]
 # ---
-# ## Step 7: 2D Cluster Map — See the "Meaning Space" 🗺️
+# ## Step 6: 2D Cluster Map — See the "Meaning Space" 🗺️
 #
 # The heatmap shows numbers, but can we actually **see** the clusters?
 # We use **PCA** (Principal Component Analysis) to compress our 384-dimensional
@@ -563,19 +494,16 @@ ax.set_axisbelow(True)
 plt.tight_layout()
 plt.show()
 
-display(HTML("""
-<div style="font-family:sans-serif; background:#e3f2fd; padding:12px; border-radius:8px; max-width:700px; margin-top:8px;">
-  <strong>🔍 What to notice:</strong><br>
-  • Terms in the <strong>same category</strong> cluster together<br>
-  • Categories are <strong>separated</strong> in space<br>
-  • Some terms are closer across categories (e.g., "artificial intelligence" near "deep learning") — these share semantic overlap<br>
-  • PCA explains only ~{:.0%} of variance with 2 axes — the real space is 384D!
-</div>
-""".format(sum(pca.explained_variance_ratio_[:2]))))
+total_var = sum(pca.explained_variance_ratio_[:2])
+print(f"🔍 What to notice:")
+print(f"   • Terms in the same category cluster together")
+print(f"   • Categories are separated in space")
+print(f"   • Some terms are closer across categories — they share semantic overlap")
+print(f"   • PCA explains only {total_var:.0%} of variance with 2 axes — the real space is 384D!")
 
 # %% [markdown]
 # ---
-# ## Step 8: Find the Most Similar Pairs
+# ## Step 7: Find the Most Similar Pairs
 #
 # Now let's find which term pairs have the **highest cosine similarity**.
 # If embeddings truly capture meaning, the most similar pairs should
@@ -592,41 +520,24 @@ def find_top_similar_pairs(similarity_matrix, terms, top_k=10):
                           terms[i]["category"], terms[j]["category"]))
     pairs.sort(reverse=True)
 
-    # Build HTML table
-    rows = ""
+    rows = []
     for idx, (score, t1, t2, c1, c2) in enumerate(pairs[:top_k], 1):
-        same = c1 == c2
-        badge = '<span style="color:#4CAF50; font-weight:bold;">✓ Yes</span>' if same else '<span style="color:#E91E63;">✗ No</span>'
-        bar_color = "#4CAF50" if score > 0.6 else "#FF9800" if score > 0.4 else "#E91E63"
-        bar_width = int(score * 100)
-        bar = f'<div style="background:#eee; border-radius:4px; overflow:hidden; width:80px; display:inline-block; vertical-align:middle;"><div style="background:{bar_color}; height:14px; width:{bar_width}%;"></div></div> {score:.3f}'
-        rows += f"<tr><td style='padding:6px;'>{idx}</td><td style='padding:6px;'><strong>{t1}</strong></td><td style='padding:6px;'><strong>{t2}</strong></td><td style='padding:6px;'>{bar}</td><td style='padding:6px; text-align:center;'>{badge}</td></tr>"
+        same = "✓ Yes" if c1 == c2 else "✗ No"
+        rows.append({"#": idx, "Term 1": t1, "Term 2": t2,
+                      "Similarity": f"{score:.3f}", "Same Category?": same})
 
     same_cat = sum(1 for _, _, _, c1, c2 in pairs[:top_k] if c1 == c2)
 
-    display(HTML(f"""
-    <div style="font-family:sans-serif;">
-    <h3>🏆 Top {top_k} Most Similar Term Pairs</h3>
-    <table style="border-collapse:collapse; width:100%; max-width:750px;">
-    <tr style="background:#f5f5f5; border-bottom:2px solid #ddd;">
-      <th style="padding:8px;">#</th><th style="padding:8px; text-align:left;">Term 1</th>
-      <th style="padding:8px; text-align:left;">Term 2</th><th style="padding:8px;">Similarity</th>
-      <th style="padding:8px;">Same Category?</th>
-    </tr>
-    {rows}
-    </table>
-    <div style="margin-top:12px; padding:10px; background:#e8f5e9; border-radius:8px; max-width:750px;">
-      <strong>📊 Observation:</strong> {same_cat}/{top_k} of the most similar pairs are in the same category
-      — embeddings capture semantic structure!
-    </div>
-    </div>
-    """))
+    print(f"🏆 Top {top_k} Most Similar Term Pairs\n")
+    display(pd.DataFrame(rows).set_index("#"))
+    print(f"\n📊 Observation: {same_cat}/{top_k} of the most similar pairs are in the same category")
+    print(f"   → Embeddings capture semantic structure!")
 
 find_top_similar_pairs(sim_matrix, data["terms"], top_k=10)
 
 # %% [markdown]
 # ---
-# ## Step 9: Semantic Search — "Find Similar Meaning" 🔍
+# ## Step 8: Semantic Search — "Find Similar Meaning" 🔍
 #
 # This is **the core use case** that everything else in the course builds on.
 # In Lecture 3 (RAG), you'll use this exact technique to search documents by meaning.
@@ -649,32 +560,14 @@ def semantic_search(query: str, terms: list[dict], embeddings: np.ndarray, top_k
     # Sort by score
     ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)[:top_k]
 
-    # Build HTML result
-    rows = ""
+    rows = []
     for rank, (idx, score) in enumerate(ranked, 1):
         term = terms[idx]
-        cat = term['category']
-        cat_color = cat_cmap.get(cat, '#888')
-        bar_width = int(score * 100)
-        bar_color = "#4CAF50" if score > 0.5 else "#FF9800" if score > 0.3 else "#E91E63"
-        bar = f'<div style="background:#eee; border-radius:4px; overflow:hidden; width:120px; display:inline-block; vertical-align:middle;"><div style="background:{bar_color}; height:16px; width:{bar_width}%;"></div></div> <strong>{score:.3f}</strong>'
-        badge = f'<span style="background:{cat_color}; color:white; padding:2px 8px; border-radius:10px; font-size:11px;">{cat}</span>'
-        rows += f"<tr><td style='padding:8px;'>{rank}</td><td style='padding:8px;'><strong>{term['en']}</strong></td><td style='padding:8px;'>{badge}</td><td style='padding:8px;'>{bar}</td></tr>"
+        rows.append({"#": rank, "Match": term["en"], "Category": term["category"],
+                      "Similarity": f"{score:.3f}"})
 
-    display(HTML(f"""
-    <div style="font-family:sans-serif; max-width:650px;">
-    <div style="background:#f3e5f5; padding:12px; border-radius:8px; margin-bottom:12px;">
-      <strong>🔍 Query:</strong> "{query}"
-    </div>
-    <table style="border-collapse:collapse; width:100%;">
-    <tr style="background:#f5f5f5; border-bottom:2px solid #ddd;">
-      <th style="padding:8px;">#</th><th style="padding:8px; text-align:left;">Match</th>
-      <th style="padding:8px;">Category</th><th style="padding:8px;">Similarity</th>
-    </tr>
-    {rows}
-    </table>
-    </div>
-    """))
+    print(f'\n🔍 Query: "{query}"\n')
+    display(pd.DataFrame(rows).set_index("#"))
 
 # %%
 # Try different queries to see how semantic search works!
@@ -691,10 +584,17 @@ semantic_search("building a neural network with Python", data["terms"], embeddin
 # > **none of the exact words match**. "football" finds "soccer" and "basketball".
 # > "invest money" finds "stock market" and "investment portfolio".
 # > This is the power of **semantic search** — and the foundation of RAG.
+#
+# ### 🧪 Try it yourself!
+# Type any sentence below and see what the model finds:
+
+# %%
+# ✏️ Type your own query here!
+semantic_search("my grandmother makes the best pasta", data["terms"], embeddings)
 
 # %% [markdown]
 # ---
-# ## Step 10: Word2Vec Analogy — The Classic Demo 👑
+# ## Step 9: Word2Vec Analogy — The Classic Demo 👑
 #
 # > 📄 **From the slides — Word2Vec (Mikolov et al., Google 2013):**
 # > The paper that started the embedding revolution showed that vector
@@ -723,24 +623,28 @@ def word2vec_analogy(word_a, word_b, word_c, model, top_k=3):
     scores = cosine_similarity(result_vec, cand_vecs)[0]
     ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)[:top_k]
     
-    result_str = " | ".join(f"<strong>{w}</strong> ({s:.3f})" for w, s in ranked)
-    display(HTML(f"""
-    <div style="font-family:sans-serif; padding:12px; background:#f3e5f5; border-radius:8px; max-width:600px; margin:6px 0;">
-      <code style="font-size:1.1em;">{word_a} − {word_b} + {word_c} ≈ ?</code><br>
-      <div style="margin-top:8px;">→ {result_str}</div>
-    </div>
-    """))
+    results = " | ".join(f"{w} ({s:.3f})" for w, s in ranked)
+    print(f"   {word_a} − {word_b} + {word_c} ≈ {results}")
 
-print("👑 Word2Vec-style analogies:")
+print("👑 Word2Vec-style analogies:\n")
 word2vec_analogy("king", "man", "woman", _analogy_model)
 word2vec_analogy("Paris", "France", "Germany", _analogy_model)
 word2vec_analogy("husband", "man", "woman", _analogy_model)
 
+# %% [markdown]
+# ### 🧪 Try it yourself!
+# Create your own analogy: `A − B + C ≈ ?`
+
+# %%
+# ✏️ Change the words and re-run!
+word2vec_analogy("Rome", "Italy", "France", _analogy_model)
+
+# %%
 del _analogy_model
 
 # %% [markdown]
 # ---
-# ## Step 11: Model Comparison (Bonus) 🏆
+# ## Step 10: Model Comparison (Bonus) 🏆
 #
 # Compare how a **multilingual** model vs an **English-only** model handles
 # the same terms in **Italian**. From the slides:

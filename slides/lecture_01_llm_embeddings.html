@@ -47,7 +47,7 @@
         .reveal .big-number { font-size: 2.5em; font-weight: 700; color: var(--accent); }
         .reveal .formula { background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; padding: 0.5em 1.2em; font-size: 1em; text-align: center; margin: 0.5em auto; font-family: var(--r-code-font); color: var(--accent3); }
         .reveal .vs-table { width: 100%; border-collapse: collapse; font-size: 0.65em; table-layout: fixed; word-wrap: break-word; }
-        .reveal .vs-table th { background: rgba(108,99,255,0.2); padding: 0.45em; text-align: left; font-weight: 500; }
+        .reveal .vs-table th { background: rgba(108,99,255,0.35); padding: 0.45em; text-align: left; font-weight: 600; color: #e0e0ff; border-bottom: 2px solid rgba(108,99,255,0.5); }
         .reveal .vs-table td { padding: 0.4em 0.5em; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .reveal .vs-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
         .reveal .takeaway { background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,217,255,0.1)); border: 1px solid rgba(108,99,255,0.3); border-radius: 10px; padding: 0.6em 1em; margin-top: 0.5em; text-align: left; font-size: 0.82em; }
@@ -87,16 +87,14 @@
     <h2>Today's Agenda</h2>
     <div style="max-width:620px; margin:0 auto; text-align:left;">
         <div class="agenda-item"><span class="time">30 min</span> The Transformer Blueprint</div>
-        <div class="agenda-item" style="border-left-color: var(--accent2);"><span class="time">5 min</span> 🔬 Code Demo 1: Three Architectures in Action</div>
         <div class="agenda-item"><span class="time">15 min</span> Tokenization &amp; Its Consequences</div>
-        <div class="agenda-item" style="border-left-color: var(--accent2);"><span class="time">5 min</span> 🔬 Code Demo 2: How the Tokenizer Sees Text</div>
         <div class="agenda-item" style="border-left-color: #888; background:rgba(255,255,255,0.03);"><span class="time" style="background:#555;">10 min</span> ☕ Break</div>
         <div class="agenda-item"><span class="time">20 min</span> Embeddings &amp; Similarity</div>
-        <div class="agenda-item" style="border-left-color: var(--accent2);"><span class="time">10 min</span> 🔬 Code Demo 3: Embeddings, Similarity &amp; Search</div>
         <div class="agenda-item"><span class="time">10 min</span> Multilingual &amp; Practical Guidance</div>
-        <div class="agenda-item" style="border-left-color: #555;"><span class="time">15 min</span> Summary &amp; Q&amp;A</div>
+        <div class="agenda-item" style="border-left-color: var(--accent2);"><span class="time">25 min</span> 🔬 Hands-on Lab: Embeddings Exploration</div>
+        <div class="agenda-item" style="border-left-color: #555;"><span class="time">10 min</span> Summary &amp; Q&amp;A</div>
     </div>
-    <div style="margin-top:10px; font-size:0.55em; color:#888;">Total: 2 hours (120 min) &middot; Theory and code are <span class="highlight">interleaved</span> &mdash; no separate lab block</div>
+    <div style="margin-top:10px; font-size:0.55em; color:#888;">Total: 2 hours (120 min) &middot; All theory first, then <span class="highlight">hands-on lab</span> at the end</div>
 </section>
 
 <!-- ============================================ -->
@@ -195,113 +193,45 @@
 
     <section>
         <h2>The Transformer Architecture</h2>
-        <img src="img_transformer_arch.png" style="max-height: 520px; border-radius: 12px; border: 1px solid rgba(108,99,255,0.2);">
-        <p style="font-size:0.55em; color:#666; margin-top:0.5em;">The original encoder-decoder architecture from "Attention Is All You Need" (Vaswani et al., 2017)</p>
-    </section>
-
-    <!-- NEW: TRANSFORMER BLOCK -->
-    <section>
-        <h2>Inside One Transformer Block</h2>
-        <p style="font-size:0.7em; color:#aaa;">The model stacks <span class="highlight">N identical blocks</span>. Each block has the same structure:</p>
-        <div style="max-width:580px; margin:0 auto; font-size:0.65em;">
-            <div class="card" style="border-left:4px solid var(--accent3); margin:4px 0; padding:8px 14px;">
-                <strong style="color:var(--accent3);">Step 1: Multi-Head Self-Attention</strong>
-                <div class="formula" style="font-size:0.85em; margin:4px 0;">x₁ = x + MultiHeadAttention(LayerNorm(x))</div>
-                <p style="color:#888; font-size:0.85em;">Residual connection (+x) lets information flow directly through — solves vanishing gradient</p>
-            </div>
-            <div style="text-align:center; color:#555;">⬇️</div>
-            <div class="card" style="border-left:4px solid var(--accent); margin:4px 0; padding:8px 14px;">
-                <strong style="color:var(--accent);">Step 2: Feed-Forward Network (FFN)</strong>
-                <div class="formula" style="font-size:0.85em; margin:4px 0;">x₂ = x₁ + FFN(LayerNorm(x₁))</div>
-                <p style="color:#888; font-size:0.85em;">FFN is the "memory" — where the model stores learned facts and patterns</p>
-            </div>
-            <div style="text-align:center; color:#555;">⬇️</div>
-            <div class="card" style="border-left:4px solid var(--accent2); margin:4px 0; padding:8px 14px;">
-                <strong style="color:var(--accent2);">FFN internally:</strong>
-                <div class="formula" style="font-size:0.85em; margin:4px 0;">FFN(x) = max(0, xW₁ + b₁) · W₂ + b₂</div>
-                <p style="color:#888; font-size:0.85em;">ReLU activation — simple but effective. Two linear layers with a nonlinearity.</p>
-            </div>
-        </div>
-        <div class="two-col" style="font-size:0.55em; margin-top:6px;">
-            <div class="card"><strong>BERT:</strong> 12 blocks, 12 heads, 110M params</div>
-            <div class="card"><strong>GPT-3:</strong> 96 blocks, 96 heads, 175B params</div>
+        <img src="img_transformer_arch.png" style="max-height: 400px; border-radius: 12px; border: 1px solid rgba(108,99,255,0.2);">
+        <p style="font-size:0.55em; color:#666; margin-top:0.3em;">The original architecture from "Attention Is All You Need" (Vaswani et al., 2017)</p>
+        <div class="card" style="font-size:0.65em; margin-top:0.3em; padding:8px 14px; border-left:4px solid var(--accent3);">
+            <strong style="color:var(--accent3);">Running Example &mdash;</strong> We will trace this sentence through the next 3 slides:<br>
+            <span style="font-family:var(--r-code-font); font-size:1.1em; color:#fff;">&ldquo;The <span class="highlight">bank</span> approved the <span class="warn">loan</span> for the new <span style="color:var(--accent);">house</span>&rdquo;</span><br>
+            <span style="color:#888;">Input text &rarr; Encoder blocks &rarr; Self-Attention inside each block &rarr; rich understanding</span>
         </div>
     </section>
 
+    <!-- SLIDE 9a: Positional Encoding — WHY -->
     <section>
-        <h2>Self-Attention</h2>
-        <p style="font-size:0.75em; color:#aaa;">When you read "it" in a sentence, your brain looks back to find what "it" refers to. <span class="highlight">Self-attention does this for every word simultaneously.</span></p>
-        <div class="card" style="text-align:center;">
-            <p style="font-size:1.1em; font-family: var(--r-code-font);">
-                "The <span class="highlight">bank</span> approved the <span class="warn">loan</span> for the new <span class="highlight">house</span>"
+        <h2>Why Position Matters</h2>
+        <p style="font-size:0.65em; color:#aaa;">Transformers process all words at once &mdash; they have <span class="highlight">no idea about word order</span>.</p>
+        <div class="card" style="font-size:0.7em; text-align:center; padding:10px 16px;">
+            <p style="color:#aaa;">Without position info, these two sentences look <strong>identical</strong> to the model:</p>
+            <p style="font-family:var(--r-code-font); font-size:1.15em; margin:6px 0;">
+                &ldquo;The <span class="highlight">dog</span> bit the <span class="warn">man</span>&rdquo; &nbsp;&nbsp; vs &nbsp;&nbsp; &ldquo;The <span class="warn">man</span> bit the <span class="highlight">dog</span>&rdquo;
             </p>
-            <p style="font-size:0.7em; color:#888; margin-top:0.5em;">
-                ← bank attends to loan (financial context, not river bank)<br>
-                ← loan attends to bank AND house (loan purpose connects to house)
-            </p>
+            <p style="color:#666; font-size:0.85em;">Same words, same embeddings &mdash; but <strong>completely different meaning</strong>!</p>
         </div>
-        <div class="two-col" style="font-size:0.65em; margin-top:0.3em;">
-            <div class="card">
-                <h3>📚 Library Search Analogy</h3>
-                <ul>
-                    <li><strong style="color:var(--accent3);">Query (Q):</strong> "I need info about Italian cooking"</li>
-                    <li><strong style="color:var(--accent);">Key (K):</strong> Each book's label/title</li>
-                    <li><strong style="color:var(--accent2);">Value (V):</strong> The actual book content</li>
-                </ul>
-                <p style="color:#888; font-size:0.9em;">Match your query against all keys → read the best-matching values</p>
+        <div style="font-size:0.58em; max-width:700px; margin:8px auto 0;">
+            <p style="color:#aaa; text-align:center; margin-bottom:4px;"><strong>Solution:</strong> add a unique <span class="highlight">position vector</span> to each word&rsquo;s embedding:</p>
+            <div class="card" style="padding:8px 12px;">
+                <table style="width:100%; text-align:center;">
+                    <tr style="color:#666;"><td></td><td><strong>Word</strong></td><td><strong>Embedding</strong></td><td>+</td><td><strong>Position</strong></td><td>=</td><td><strong>Final input x</strong></td></tr>
+                    <tr style="color:#aaa;"><td style="color:#666;">pos 1</td><td>&ldquo;The&rdquo;</td><td><code>[0.10, 0.20]</code></td><td>+</td><td style="color:var(--accent3);"><code>[0.00, 1.00]</code></td><td>=</td><td><code>[0.10, 1.20]</code></td></tr>
+                    <tr style="color:#aaa;"><td style="color:#666;">pos 2</td><td>&ldquo;<span class="highlight">dog</span>&rdquo;</td><td><code>[0.80, 0.30]</code></td><td>+</td><td style="color:var(--accent3);"><code>[0.84, 0.54]</code></td><td>=</td><td><code>[1.64, 0.84]</code></td></tr>
+                    <tr style="color:#aaa;"><td style="color:#666;">pos 3</td><td>&ldquo;bit&rdquo;</td><td><code>[0.50, 0.60]</code></td><td>+</td><td style="color:var(--accent3);"><code>[0.91, &minus;0.42]</code></td><td>=</td><td><code>[1.41, 0.18]</code></td></tr>
+                </table>
             </div>
-            <div class="card" style="text-align:center;">
-                <div class="formula" style="font-size:0.9em;">Attention(Q, K, V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>) · V</div>
-                <p style="color:#888; font-size:0.85em; margin-top:0.3em;">In a transformer, every word simultaneously plays all 3 roles:<br>it asks questions (Q), advertises its content (K), and provides answers (V)</p>
-            </div>
+            <p style="color:#888; text-align:center; margin-top:4px;">Now &ldquo;dog&rdquo; at position 2 has a <strong>different vector</strong> than &ldquo;dog&rdquo; at position 5 &mdash; the model can tell them apart!</p>
         </div>
+        <div class="takeaway" style="font-size:0.6em;">Each position gets a <strong>unique fingerprint</strong>. The same word at different positions produces different vectors. Next slide: how these position vectors are computed.</div>
     </section>
 
-    <!-- NEW: MULTI-HEAD ATTENTION -->
+    <!-- SLIDE 9b: Positional Encoding — HOW -->
     <section>
-        <h2>Multi-Head Attention — The Full Picture</h2>
-        <p style="font-size:0.7em; color:#aaa;">One attention head learns one type of relationship. <span class="highlight">Multiple heads</span> learn different patterns simultaneously.</p>
-        <div class="formula" style="font-size:0.8em; padding:0.6em 1em;">MultiHead(Q, K, V) = Concat(head₁, ..., headₕ) · W<sup>O</sup></div>
-        <div class="formula" style="font-size:0.75em; padding:0.4em 1em; margin-top:4px;">where headᵢ = Attention(Q·Wᵢ<sup>Q</sup>, K·Wᵢ<sup>K</sup>, V·Wᵢ<sup>V</sup>)</div>
-        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px; font-size:0.6em;">
-            <div class="card" style="text-align:center; flex:1; min-width:120px; padding:8px;">
-                <p style="font-size:1.5em;">🔗</p>
-                <p><strong style="color:var(--accent3);">Head 1</strong></p>
-                <p style="color:#888;">Syntax</p>
-                <p style="font-size:0.85em;">subject↔verb agreement</p>
-            </div>
-            <div class="card" style="text-align:center; flex:1; min-width:120px; padding:8px;">
-                <p style="font-size:1.5em;">🧠</p>
-                <p><strong style="color:var(--accent);">Head 2</strong></p>
-                <p style="color:#888;">Semantics</p>
-                <p style="font-size:0.85em;">meaning relationships</p>
-            </div>
-            <div class="card" style="text-align:center; flex:1; min-width:120px; padding:8px;">
-                <p style="font-size:1.5em;">📍</p>
-                <p><strong style="color:var(--accent2);">Head 3</strong></p>
-                <p style="color:#888;">Position</p>
-                <p style="font-size:0.85em;">nearby word context</p>
-            </div>
-            <div class="card" style="text-align:center; flex:1; min-width:120px; padding:8px;">
-                <p style="font-size:1.5em;">🔙</p>
-                <p><strong style="color:#4CAF50;">Head 4</strong></p>
-                <p style="color:#888;">Reference</p>
-                <p style="font-size:0.85em;">pronoun↔noun links</p>
-            </div>
-        </div>
-        <div class="takeaway">Each head has its OWN W<sup>Q</sup>, W<sup>K</sup>, W<sup>V</sup> matrices — they learn independently. The concatenation combines all perspectives.</div>
-    </section>
-
-    <section>
-        <h2>Attention in Action</h2>
-        <img src="img_self_attention.svg" style="max-height: 500px; border-radius: 12px;">
-        <p style="font-size:0.6em; color:#888; margin-top:0.5em;">Each row = a word's attention distribution. Notice <span style="color:#00d9ff;">bank ↔ loan = 0.40</span> in both directions (symmetric). "The" attends mostly to itself (0.50).</p>
-    </section>
-
-    <!-- NEW: POSITIONAL ENCODING -->
-    <section>
-        <h2>Positional Encoding — How Models Know Word Order</h2>
-        <p style="font-size:0.7em; color:#aaa;">Transformers process all words at once — they need <span class="highlight">explicit position information</span>.</p>
+        <h2>Positional Encoding &mdash; The Math</h2>
+        <p style="font-size:0.65em; color:#aaa;">Each position gets a unique vector computed using <span class="highlight">sine and cosine</span> at different frequencies.</p>
         <div class="formula" style="font-size:0.8em; padding:0.5em 1em;">
             PE(pos, 2i) = sin(pos / 10000<sup>2i/d</sup>)
         </div>
@@ -312,22 +242,216 @@
             <div class="card">
                 <h3>Why sin/cos?</h3>
                 <ul>
-                    <li>Each dimension has a <span class="highlight">different frequency</span> — like Fourier transform</li>
-                    <li>Relative positions become linear functions: PE(pos+k) = f(PE(pos))</li>
-                    <li>Can generalize to longer sequences than training data</li>
+                    <li>Each dimension has a <span class="highlight">different frequency</span> &mdash; like a clock with hands ticking at different speeds</li>
+                    <li>The model can learn <strong>relative distances</strong>: &ldquo;3 words apart&rdquo; always looks the same</li>
+                    <li>Works for sequences <strong>longer than training data</strong> &mdash; no limit!</li>
                 </ul>
             </div>
             <div class="card">
                 <h3>Modern alternative: RoPE</h3>
                 <ul>
-                    <li><span class="highlight">Rotary Position Embedding</span> — used in LLaMA, Gemini</li>
-                    <li>Encodes position by rotating the Q and K vectors</li>
-                    <li>Better at handling very long contexts (100K+ tokens)</li>
+                    <li><span class="highlight">Rotary Position Embedding</span> &mdash; used in LLaMA, Gemini</li>
+                    <li>Instead of <strong>adding</strong> to embeddings, it <strong>rotates</strong> the Q and K vectors</li>
+                    <li>Better at handling very long contexts (<strong>100K+</strong> tokens)</li>
                 </ul>
             </div>
         </div>
-        <p class="paper-ref">📄 Vaswani et al., 2017 (original PE) &nbsp;|&nbsp; Su et al., "RoFormer: Enhanced Transformer with Rotary Position Embedding", 2021</p>
+        <div class="takeaway" style="font-size:0.6em;">The final input to the transformer is: <strong>x = token embedding + positional encoding</strong>. This combined vector is what enters Block 1.</div>
     </section>
+
+    <!-- SLIDE 10: Self-Attention — The Core Idea -->
+    <section>
+        <h2>Self-Attention: The Core Idea</h2>
+        <p style="font-size:0.65em; color:#aaa;">Every word asks: <span class="highlight">&ldquo;Which other words are relevant to me?&rdquo;</span></p>
+        <div class="card" style="text-align:center; font-size:0.85em;">
+            <p style="font-family: var(--r-code-font); font-size:1.1em;">
+                &ldquo;The <span class="highlight">bank</span> approved the <span class="warn">loan</span> for the new <span style="color:var(--accent);">house</span>&rdquo;
+            </p>
+            <p style="font-size:0.7em; color:#888; margin-top:0.3em;">
+                &larr; &ldquo;bank&rdquo; attends to &ldquo;loan&rdquo; (financial context, not river bank)<br>
+                &larr; &ldquo;loan&rdquo; attends to &ldquo;bank&rdquo; AND &ldquo;house&rdquo; (purpose of the loan)
+            </p>
+        </div>
+        <div class="two-col" style="font-size:0.62em; margin-top:0.3em;">
+            <div class="card">
+                <h3>&nbsp;📚 Library Analogy for Q, K, V</h3>
+                <ul>
+                    <li><strong style="color:var(--accent3);">Query (Q):</strong> &ldquo;I need info about Italian cooking&rdquo;</li>
+                    <li><strong style="color:var(--accent);">Key (K):</strong> Each book's label on the shelf</li>
+                    <li><strong style="color:var(--accent2);">Value (V):</strong> The actual book content inside</li>
+                </ul>
+                <p style="color:#888; font-size:0.9em;">Match query against all keys &rarr; read best-matching values</p>
+                <p style="color:#aaa; margin-top:4px;">In a transformer, every word plays <strong>all 3 roles</strong> at the same time.</p>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div class="formula" style="font-size:0.95em;">Attention(Q, K, V) = softmax(QK<sup>T</sup> / &radic;d<sub>k</sub>) &middot; V</div>
+                <p style="color:#888; font-size:0.85em; margin-top:0.4em;"><strong>softmax</strong> turns scores into percentages<br><strong>&radic;d</strong> keeps the numbers from exploding</p>
+                <p style="color:#aaa; font-size:0.85em; margin-top:0.4em;">Q, K, V all come from the <strong>same input</strong> &mdash; next slide: the math with real numbers</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 10: Self-Attention — Numeric Walkthrough -->
+    <section>
+        <h2>Self-Attention: Step-by-Step with Numbers</h2>
+        <p style="font-size:0.65em; color:#aaa;">Let&rsquo;s trace what happens when <span class="highlight">&ldquo;bank&rdquo;</span> computes its attention scores</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:720px; margin:0 auto; font-size:0.6em;">
+            <div class="card" style="background:rgba(0,217,255,0.05);">
+                <h3 style="color:var(--accent3);">The 6 Steps</h3>
+                <p style="color:#aaa; margin-bottom:6px;">&ldquo;The <span class="highlight">bank</span> approved the <span class="warn">loan</span> for the new house&rdquo;</p>
+                <table style="width:100%; font-size:0.95em;">
+                    <tr style="color:#888;"><td><strong>1.</strong></td><td>&ldquo;bank&rdquo; Q &times; &ldquo;loan&rdquo; K</td><td style="text-align:right;"><span class="highlight">4.2</span></td></tr>
+                    <tr style="color:#888;"><td><strong>2.</strong></td><td>&ldquo;bank&rdquo; Q &times; &ldquo;house&rdquo; K</td><td style="text-align:right;">2.1</td></tr>
+                    <tr style="color:#888;"><td><strong>3.</strong></td><td>&ldquo;bank&rdquo; Q &times; &ldquo;approved&rdquo; K</td><td style="text-align:right;">1.8</td></tr>
+                    <tr style="color:#888;"><td><strong>4.</strong></td><td>Divide by &radic;d = &radic;3 &asymp; 1.73</td><td style="text-align:right;"><span class="highlight">2.43</span>, 1.21, 1.04</td></tr>
+                    <tr style="color:#888;"><td><strong>5.</strong></td><td>Softmax &rarr; percentages</td><td style="text-align:right;"><span class="highlight">0.40</span>, 0.25, 0.22, ...</td></tr>
+                    <tr style="color:#888;"><td><strong>6.</strong></td><td colspan="2">Weighted sum of V &rarr; new vector</td></tr>
+                </table>
+            </div>
+            <div>
+                <div class="card">
+                    <h3 style="color:var(--accent);">What Just Happened?</h3>
+                    <p style="color:#aaa; font-size:0.95em;">The new &ldquo;bank&rdquo; vector is now:</p>
+                    <ul>
+                        <li><strong style="color:var(--accent3);">40%</strong> influenced by &ldquo;loan&rdquo;</li>
+                        <li><strong>25%</strong> influenced by &ldquo;house&rdquo;</li>
+                        <li><strong>22%</strong> influenced by &ldquo;approved&rdquo;</li>
+                        <li>rest: &ldquo;The&rdquo;, &ldquo;for&rdquo;, &ldquo;the&rdquo;, &ldquo;new&rdquo;</li>
+                    </ul>
+                    <p style="color:#aaa; font-size:0.95em; margin-top:6px;">The model now <strong>knows</strong> &ldquo;bank&rdquo; means a financial institution &mdash; because &ldquo;loan&rdquo; had the highest score.</p>
+                </div>
+                <div class="card" style="margin-top:6px; text-align:center; padding:6px;">
+                    <p style="color:#aaa; font-size:0.9em;">But this was just <strong>ONE head</strong>. It found the meaning. What about grammar, position, purpose?</p>
+                </div>
+            </div>
+        </div>
+        <div class="takeaway" style="font-size:0.65em;">The highest Q&times;K score wins the most influence. &ldquo;bank&rdquo; &times; &ldquo;loan&rdquo; = 4.2 (strong match!) &rarr; after softmax = 0.40 (40%). Next slide: multiple heads for multiple patterns.</div>
+    </section>
+
+    <!-- SLIDE 11: Multi-Head Attention -->
+    <section>
+        <h2>Multi-Head Attention &mdash; The Full Picture</h2>
+        <p style="font-size:0.65em; color:#aaa;">One head found &ldquo;bank&harr;loan&rdquo;. But language has many types of relationships. <span class="highlight">Multiple heads</span> learn different patterns simultaneously.</p>
+        <div class="formula" style="font-size:0.75em; padding:0.4em 1em;">MultiHead(Q, K, V) = Concat(head₁, ..., headₕ) &middot; W<sup>O</sup></div>
+        <div class="formula" style="font-size:0.65em; padding:0.3em 1em; margin-top:3px;">where head&#x1d62; = Attention(Q&middot;W&#x1d62;<sup>Q</sup>, K&middot;W&#x1d62;<sup>K</sup>, V&middot;W&#x1d62;<sup>V</sup>) &mdash; each head has its OWN weight matrices</div>
+        <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:8px; font-size:0.55em;">
+            <div class="card" style="text-align:center; flex:1; min-width:130px; padding:6px 8px;">
+                <p style="font-size:1.4em;">🔗</p>
+                <p><strong style="color:var(--accent3);">Head 1: Syntax</strong></p>
+                <p style="font-family:var(--r-code-font); font-size:0.95em; color:#aaa;"><span class="highlight">bank</span> &harr; <span style="color:#aaa;">approved</span></p>
+                <p style="color:#666; font-size:0.85em;">subject&ndash;verb agreement</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:130px; padding:6px 8px;">
+                <p style="font-size:1.4em;">🧠</p>
+                <p><strong style="color:var(--accent);">Head 2: Meaning</strong></p>
+                <p style="font-family:var(--r-code-font); font-size:0.95em; color:#aaa;"><span class="highlight">bank</span> &harr; <span class="warn">loan</span></p>
+                <p style="color:#666; font-size:0.85em;">financial context</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:130px; padding:6px 8px;">
+                <p style="font-size:1.4em;">📍</p>
+                <p><strong style="color:var(--accent2);">Head 3: Position</strong></p>
+                <p style="font-family:var(--r-code-font); font-size:0.95em; color:#aaa;"><span style="color:#888;">The</span> &harr; <span class="highlight">bank</span></p>
+                <p style="color:#666; font-size:0.85em;">nearby word context</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:130px; padding:6px 8px;">
+                <p style="font-size:1.4em;">🔙</p>
+                <p><strong style="color:#4CAF50;">Head 4: Purpose</strong></p>
+                <p style="font-family:var(--r-code-font); font-size:0.95em; color:#aaa;"><span class="warn">loan</span> &harr; <span style="color:var(--accent);">house</span></p>
+                <p style="color:#666; font-size:0.85em;">loan purpose &rarr; house</p>
+            </div>
+        </div>
+        <div class="takeaway" style="font-size:0.65em;">Concat all 4 views &rarr; the word &ldquo;bank&rdquo; now has a <strong>complete understanding</strong> of the sentence: it is a financial bank (Head 2), that approved something (Head 1), is the subject (Head 3), related to a house purchase (Head 4).</div>
+    </section>
+
+    <!-- SLIDE 12: Inside One Transformer Block (overview) -->
+    <section>
+        <h2>Inside One Transformer Block</h2>
+        <p style="font-size:0.65em; color:#aaa;">Now you know what attention is. Let&rsquo;s see <span class="highlight">where it fits</span> inside the architecture.</p>
+        <div class="card" style="font-size:0.55em; padding:5px 12px; margin-bottom:4px; border-left:3px solid #888; max-width:600px; margin:0 auto 4px;">
+            <strong>What is x?</strong> &nbsp;
+            Block 1: x = <strong style="color:var(--accent3);">token embedding + positional encoding</strong> &nbsp;|&nbsp;
+            Block 2+: x = <strong style="color:var(--accent);">output of previous block</strong> &mdash; each block refines the understanding further
+        </div>
+        <div style="max-width:600px; margin:0 auto; font-size:0.6em;">
+            <div class="card" style="border-left:4px solid var(--accent3); padding:8px 14px; margin:4px 0;">
+                <strong style="color:var(--accent3);">Step 1: Multi-Head Self-Attention</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0; padding:4px 8px;">x₁ = x + MultiHeadAttention(LayerNorm(x))</div>
+                <p style="color:#888; font-size:0.88em;">All words look at each other (what we just learned) &rarr; <strong>+&nbsp;x</strong> adds the original back (residual)</p>
+            </div>
+            <div style="text-align:center; color:#555;">⬇️</div>
+            <div class="card" style="border-left:4px solid var(--accent); padding:8px 14px; margin:4px 0;">
+                <strong style="color:var(--accent);">Step 2: Feed-Forward Network (FFN)</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0; padding:4px 8px;">x₂ = x₁ + FFN(LayerNorm(x₁))</div>
+                <p style="color:#888; font-size:0.88em;">Each word independently passes through a small neural network &mdash; the &ldquo;memory&rdquo; that stores learned facts</p>
+            </div>
+            <div style="text-align:center; color:#555;">⬇️</div>
+            <div class="card" style="border-left:4px solid var(--accent2); padding:8px 14px; margin:4px 0;">
+                <strong style="color:var(--accent2);">FFN internally:</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0; padding:4px 8px;">FFN(x) = max(0, xW₁+b₁) &middot; W₂+b₂</div>
+                <p style="color:#888; font-size:0.88em;">ReLU activation + two linear layers. <strong>LayerNorm</strong> stabilizes values. <strong>+ x</strong> is the residual connection.</p>
+            </div>
+        </div>
+        <div class="two-col" style="font-size:0.55em; margin-top:6px;">
+            <div class="card"><strong>BERT:</strong> 12 blocks, 12 heads, 110M params</div>
+            <div class="card"><strong>GPT-3:</strong> 96 blocks, 96 heads, 175B params</div>
+        </div>
+        <div class="takeaway" style="font-size:0.6em;">One block = attention + FFN. The model stacks N of these. BERT has 12, GPT-3 has 96. Next slide: how Q, K, V are actually created inside Step 1.</div>
+    </section>
+
+    <!-- SLIDE 13: How Q, K, V Are Created -->
+    <section>
+        <h2>How Q, K, V Are Created</h2>
+        <p style="font-size:0.65em; color:#aaa;">The <span class="highlight">same input</span> passes through <span class="highlight">3 different learned lenses</span></p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:720px; margin:0 auto; font-size:0.58em;">
+            <div>
+                <div class="card" style="border-left:4px solid var(--accent3); padding:8px 12px;">
+                    <strong style="color:var(--accent3);">The Expanded Chain</strong>
+                    <div style="display:grid; grid-template-columns:auto 1fr; gap:3px 8px; margin-top:6px; font-size:0.95em;">
+                        <span style="color:var(--accent3); font-weight:600;">A.</span>
+                        <span style="color:#ccc;">LayerNorm(x) &rarr; x<sub>norm</sub></span>
+                        <span style="color:var(--accent3); font-weight:600;">B.</span>
+                        <span style="color:#ccc;">x<sub>norm</sub> &times; <strong style="color:var(--accent);">W<sup>Q</sup></strong> &rarr; Q</span>
+                        <span></span>
+                        <span style="color:#ccc;">x<sub>norm</sub> &times; <strong style="color:var(--accent2);">W<sup>K</sup></strong> &rarr; K</span>
+                        <span></span>
+                        <span style="color:#ccc;">x<sub>norm</sub> &times; <strong style="color:#4CAF50;">W<sup>V</sup></strong> &rarr; V</span>
+                        <span style="color:var(--accent3); font-weight:600;">C.</span>
+                        <span style="color:#ccc;">softmax(QK<sup>T</sup>/&radic;d) &middot; V</span>
+                        <span style="color:var(--accent3); font-weight:600;">D.</span>
+                        <span style="color:#ccc;">x₁ = <strong>x + output</strong></span>
+                    </div>
+                </div>
+                <div class="card" style="border-left:4px solid var(--accent); padding:8px 12px; margin-top:4px;">
+                    <strong style="color:var(--accent);">W<sup>Q</sup>, W<sup>K</sup>, W<sup>V</sup> = 3 &ldquo;lenses&rdquo;</strong>
+                    <p style="color:#888; font-size:0.9em; margin:3px 0;"><span style="color:var(--accent);">W<sup>Q</sup></span> &rarr; &ldquo;What am I <strong>looking for</strong>?&rdquo;</p>
+                    <p style="color:#888; font-size:0.9em; margin:3px 0;"><span style="color:var(--accent2);">W<sup>K</sup></span> &rarr; &ldquo;What do I <strong>contain</strong>?&rdquo;</p>
+                    <p style="color:#888; font-size:0.9em; margin:3px 0;"><span style="color:#4CAF50;">W<sup>V</sup></span> &rarr; &ldquo;What <strong>info</strong> do I carry?&rdquo;</p>
+                    <p style="color:#aaa; font-size:0.85em; margin-top:6px;">These are <strong>learned during training</strong> &mdash; not hand-coded!</p>
+                </div>
+            </div>
+            <div>
+                <div class="card" style="background:rgba(0,217,255,0.05); padding:10px 12px;">
+                    <h3 style="color:var(--accent3); font-size:1em; margin:0 0 6px;">Concrete Trace: &ldquo;bank&rdquo;</h3>
+                    <p style="color:#aaa; font-size:0.9em;"><strong>Input:</strong> <code>[0.23, &minus;0.11, 0.55]</code></p>
+                    <p style="color:#aaa; font-size:0.9em; margin-top:4px;"><strong style="color:var(--accent3);">A. LayerNorm:</strong> <code>[0.21, &minus;0.10, 0.52]</code></p>
+                    <p style="color:#aaa; font-size:0.9em; margin-top:4px;"><strong style="color:var(--accent);">B. &times; W<sup>Q</sup>:</strong> Q = <code>[1.2, 0.8]</code><br><span style="color:#666; font-size:0.85em;">&ldquo;looking for financial context&rdquo;</span></p>
+                    <p style="color:#aaa; font-size:0.9em;"><strong style="color:var(--accent2);">&nbsp;&nbsp;&nbsp; &times; W<sup>K</sup>:</strong> K = <code>[0.9, 1.4]</code><br><span style="color:#666; font-size:0.85em;">&ldquo;I am an institution&rdquo;</span></p>
+                    <p style="color:#aaa; font-size:0.9em;"><strong style="color:#4CAF50;">&nbsp;&nbsp;&nbsp; &times; W<sup>V</sup>:</strong> V = <code>[0.5, 0.3]</code><br><span style="color:#666; font-size:0.85em;">&ldquo;banking services&rdquo;</span></p>
+                    <p style="color:#aaa; font-size:0.9em; margin-top:4px;"><strong>C. Attention:</strong> <code>[0.31, &minus;0.08, 0.60]</code></p>
+                    <p style="color:#aaa; font-size:0.9em; margin-top:4px;"><strong>D. + Residual:</strong> <code>[0.54, &minus;0.19, 1.15]</code></p>
+                    <p style="color:#aaa; font-size:0.9em; margin-top:4px;"><strong>After FFN:</strong> <code>[0.48, &minus;0.22, 0.95]</code> &check;</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 14: Attention in Action -->
+    <section>
+        <h2>Attention in Action</h2>
+        <img src="img_self_attention.svg" style="max-height: 500px; border-radius: 12px;">
+        <p style="font-size:0.6em; color:#888; margin-top:0.5em;">Each row = a word's attention distribution. Notice <span style="color:#00d9ff;">bank &harr; loan = 0.40</span> in both directions (symmetric). &ldquo;The&rdquo; attends mostly to itself (0.50).</p>
+    </section>
+
 
     <section>
         <h2>Encoder vs. Decoder — The Big Picture</h2>
@@ -494,36 +618,101 @@
     </section>
 
     <section>
-        <h2>Temperature: Controlling Creativity</h2>
-        <p style="font-size:0.75em; color:#aaa;">The model outputs probabilities. <span class="highlight">Temperature</span> controls how we pick from them.</p>
-        <div class="two-col" style="font-size:0.7em;">
-            <div>
-                <div class="card" style="border-color: rgba(0,217,255,0.3);">
-                    <h3>❄️ Temperature = 0</h3>
-                    <p>Always picks the highest probability token.</p>
-                    <p style="color:var(--accent3);">Deterministic, consistent, factual</p>
-                    <p style="color:#888; font-size:0.85em;">Best for: data extraction, classification</p>
+        <h2>Temperature: What It Really Does</h2>
+        <p style="font-size:0.65em; color:#aaa;">Temperature divides the logits <span class="highlight">before</span> softmax. It changes how &ldquo;sharp&rdquo; or &ldquo;flat&rdquo; the probability distribution is.</p>
+        <div class="formula" style="font-size:0.85em; padding:0.5em 1em;">P(token<sub>i</sub>) = softmax(logit<sub>i</sub> / T) = e<sup>logit<sub>i</sub>/T</sup> / &sum; e<sup>logit<sub>j</sub>/T</sup></div>
+        <div style="font-size:0.55em; max-width:720px; margin:8px auto 0;">
+            <p style="color:#aaa; text-align:center; margin-bottom:4px;">Prompt: &ldquo;The capital of France is&rdquo; &mdash; model outputs raw logits: <strong>Paris = 5.0</strong>, Lyon = 2.0, Berlin = 1.0</p>
+            <div class="card" style="padding:8px 12px;">
+                <table style="width:100%; text-align:center;">
+                    <tr style="color:#666;"><td></td><td><strong>Logit / T</strong></td><td><strong>&ldquo;Paris&rdquo;</strong></td><td><strong>&ldquo;Lyon&rdquo;</strong></td><td><strong>&ldquo;Berlin&rdquo;</strong></td><td><strong>Effect</strong></td></tr>
+                    <tr style="color:#aaa;"><td style="color:var(--accent3);">❄️ T = 0.2</td><td>logit / 0.2</td><td><span class="highlight"><strong>99.4%</strong></span></td><td>0.5%</td><td>0.1%</td><td style="color:var(--accent3);">Very sharp &mdash; always Paris</td></tr>
+                    <tr style="color:#aaa;"><td style="color:var(--accent);">🎯 T = 1.0</td><td>logit / 1.0</td><td><strong>84.4%</strong></td><td>10.6%</td><td>5.0%</td><td style="color:var(--accent);">Balanced</td></tr>
+                    <tr style="color:#aaa;"><td style="color:var(--accent2);">🌋 T = 2.0</td><td>logit / 2.0</td><td><strong>49.0%</strong></td><td>27.2%</td><td>23.8%</td><td style="color:var(--accent2);">Flat &mdash; anything could happen</td></tr>
+                </table>
+            </div>
+            <div class="two-col" style="margin-top:6px; gap:6px;">
+                <div class="card" style="padding:5px 10px;">
+                    <p style="color:var(--accent3);"><strong>Low T</strong>: divides by a small number &rarr; logits become <strong>larger</strong> &rarr; softmax becomes <strong>sharper</strong> &rarr; top token wins</p>
                 </div>
-                <div class="card">
-                    <h3>🎯 Temperature = 0.7</h3>
-                    <p>Balanced sampling from the distribution.</p>
-                    <p style="color:var(--accent);">Creative but still coherent</p>
-                    <p style="color:#888; font-size:0.85em;">Best for: writing, brainstorming, chat</p>
+                <div class="card" style="padding:5px 10px;">
+                    <p style="color:var(--accent2);"><strong>High T</strong>: divides by a big number &rarr; logits become <strong>smaller</strong> &rarr; softmax becomes <strong>flatter</strong> &rarr; any token can win</p>
+                </div>
+            </div>
+        </div>
+        <div class="takeaway" style="font-size:0.6em;">Temperature does NOT change the model's knowledge. It only changes <strong>how we sample</strong> from the same distribution. But how does sampling actually work?</div>
+    </section>
+
+    <section>
+        <h2>How Sampling Works &mdash; The Weighted Dice</h2>
+        <p style="font-size:0.65em; color:#aaa;">The model does NOT always pick the highest probability. It <span class="highlight">rolls a weighted dice</span>.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:720px; margin:0 auto; font-size:0.6em;">
+            <div>
+                <div class="card" style="text-align:center; padding:10px 14px;">
+                    <p style="color:#aaa;">Probabilities after softmax:</p>
+                    <p style="font-size:1.3em; margin:6px 0;">
+                        <span class="highlight"><strong>Paris 50%</strong></span> &nbsp;
+                        <span style="color:var(--accent);">Lyon 30%</span> &nbsp;
+                        <span style="color:var(--accent2);">Berlin 20%</span>
+                    </p>
+                    <div style="background:linear-gradient(90deg, var(--accent3) 50%, var(--accent) 50%, var(--accent) 80%, var(--accent2) 80%); height:24px; border-radius:12px; margin:8px 0;"></div>
+                    <p style="color:#888; font-size:0.85em;">&uarr; Spinning wheel &mdash; each word gets a slice proportional to its probability</p>
+                    <p style="color:#aaa; margin-top:6px;">The model <strong>spins the wheel</strong>. Most spins land on Paris (50%), but sometimes Lyon (30%) or Berlin (20%).</p>
+                </div>
+                <div class="card" style="padding:8px 12px; margin-top:6px;">
+                    <p style="color:var(--accent3);"><strong>T = 0 is special:</strong></p>
+                    <p style="color:#aaa;">No dice, no spinning. Just pick the <strong>highest logit</strong>, always. Same prompt = same answer, 100% reproducible.</p>
                 </div>
             </div>
             <div>
-                <div class="card" style="border-color: rgba(233,69,96,0.3);">
-                    <h3>🌋 Temperature = 1.5+</h3>
-                    <p>Flattens probabilities — rare tokens become likely.</p>
-                    <p style="color:var(--accent2);">Wild, surprising, often incoherent</p>
-                    <p style="color:#888; font-size:0.85em;">Rarely used in production</p>
+                <div class="card" style="background:rgba(0,217,255,0.05); padding:10px 14px;">
+                    <h3 style="color:var(--accent3);">Why Different Answers Each Time?</h3>
+                    <p style="color:#aaa;">You send &ldquo;The capital of France is&rdquo; <strong>3 times</strong> at T = 0.7:</p>
+                    <div style="margin:6px 0;">
+                        <p style="color:#aaa;">Run 1: dice lands on &rarr; <span class="highlight"><strong>&ldquo;Paris&rdquo;</strong></span></p>
+                        <p style="color:#aaa;">Run 2: dice lands on &rarr; <span style="color:var(--accent);"><strong>&ldquo;Lyon&rdquo;</strong></span></p>
+                        <p style="color:#aaa;">Run 3: dice lands on &rarr; <span class="highlight"><strong>&ldquo;Paris&rdquo;</strong></span></p>
+                    </div>
+                    <p style="color:#888; font-size:0.9em;">The probabilities <strong>never changed</strong>. The random spin gave different results.</p>
                 </div>
-                <div class="card" style="text-align:center;">
-                    <p style="font-size:0.85em;">Think of it as a <span class="highlight">creativity dial</span></p>
-                    <p style="font-family: var(--r-code-font); font-size:1em;">❄️ 0 ── 0.7 ── 1.0 ── 1.5+ 🌋</p>
-                    <p style="font-size:0.7em; color:#888;">precise ←→ creative</p>
+                <div class="card" style="padding:8px 12px; margin-top:6px;">
+                    <h3 style="color:var(--accent);">Equal Probability?</h3>
+                    <p style="color:#aaa;">3 tokens at <strong>33.3%</strong> each? &rarr; perfectly fair dice. Pure randomness.</p>
+                </div>
+                <div class="card" style="border-left:3px solid var(--accent2); padding:8px 12px; margin-top:6px;">
+                    <h3 style="color:var(--accent2);">Why Not Just Pick the Highest?</h3>
+                    <p style="color:#aaa; font-family:var(--r-code-font); font-size:0.88em;">&ldquo;Italy is known for its history. It is also known for its culture. It is also known for its food. It is also known for...&rdquo;</p>
+                    <p style="color:#888; font-size:0.9em;">&uarr; <strong>Greedy decoding</strong> &mdash; always top token &rarr; gets stuck in loops! Sampling adds variety = natural, human-like text.</p>
                 </div>
             </div>
+        </div>
+        <div class="takeaway" style="font-size:0.6em;">Every token generation is a dice roll. <strong>T = 0</strong> = no dice (deterministic, but can loop). <strong>T = 0.7</strong> = natural variety. <strong>T = 1.5+</strong> = wild surprises.</div>
+    </section>
+
+    <section>
+        <h2>Temperature in Practice</h2>
+        <p style="font-size:0.65em; color:#aaa;">Same model, same prompt &mdash; only <span class="highlight">temperature</span> changes the output.</p>
+        <p style="font-size:0.6em; color:#888; margin-bottom:4px;">Prompt: &ldquo;Write a one-sentence summary of machine learning.&rdquo;</p>
+        <div style="font-size:0.6em; max-width:700px; margin:0 auto;">
+            <div class="card" style="border-left:4px solid var(--accent3); padding:8px 14px; margin:4px 0;">
+                <strong style="color:var(--accent3);">❄️ T = 0 &mdash; Deterministic</strong>
+                <p style="color:#aaa; font-family:var(--r-code-font); font-size:0.9em; margin-top:4px;">&ldquo;Machine learning is a subset of artificial intelligence that enables computers to learn from data without being explicitly programmed.&rdquo;</p>
+                <p style="color:#666; font-size:0.85em;">Always the same output. <strong>Best for:</strong> data extraction, classification, factual Q&amp;A</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--accent); padding:8px 14px; margin:4px 0;">
+                <strong style="color:var(--accent);">🎯 T = 0.7 &mdash; Balanced</strong>
+                <p style="color:#aaa; font-family:var(--r-code-font); font-size:0.9em; margin-top:4px;">&ldquo;Machine learning allows computers to discover patterns in data and improve their performance over time, much like how humans learn from experience.&rdquo;</p>
+                <p style="color:#666; font-size:0.85em;">Creative but coherent. <strong>Best for:</strong> writing, brainstorming, chat. <span class="highlight">Most common setting.</span></p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--accent2); padding:8px 14px; margin:4px 0;">
+                <strong style="color:var(--accent2);">🌋 T = 1.5 &mdash; Wild</strong>
+                <p style="color:#aaa; font-family:var(--r-code-font); font-size:0.9em; margin-top:4px;">&ldquo;Machine learning unfolds as a computational symphony where algorithms dance through probabilistic landscapes to sculpt emergent understanding.&rdquo;</p>
+                <p style="color:#666; font-size:0.85em;">Surprising but can be incoherent. <strong>Rarely used</strong> in production.</p>
+            </div>
+        </div>
+        <div class="card" style="text-align:center; font-size:0.6em; padding:6px; margin-top:4px;">
+            <p style="font-size:1.1em;">❄️ 0 ──── 0.7 ──── 1.0 ──── 1.5+ 🌋</p>
+            <p style="color:#888;">precise, repeatable &nbsp;&nbsp;&nbsp;&nbsp;←→&nbsp;&nbsp;&nbsp;&nbsp; creative, surprising</p>
         </div>
     </section>
 
@@ -605,41 +794,34 @@
     </section>
 
     <section>
-        <h2>🔧 The Training Pipeline</h2>
-        <p style="font-size:0.75em; color:#aaa;">Three ways to get an LLM to do what you want — with very different costs:</p>
-        <br>
-        <div style="max-width:650px; margin:0 auto;">
-            <div class="card" style="border-left:4px solid var(--accent2); font-size:0.75em;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <h3>1. Pre-training</h3>
-                        <p>Train from scratch on massive internet data</p>
-                    </div>
-                    <div style="text-align:right; color:#888; font-size:0.85em;">Months<br><span class="warn">$2M–$100M+</span></div>
+        <h2>From Training to Using an LLM</h2>
+        <p style="font-size:0.7em; color:#aaa;">Three levels of effort &mdash; from building a model to just talking to it:</p>
+        <div style="max-width:600px; margin:0 auto; font-size:0.6em;">
+            <div class="card" style="border-left:4px solid var(--accent2); padding:10px 16px; margin:4px 0;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <strong style="color:var(--accent2); font-size:1.1em;">1. Pre-Training</strong>
+                    <div style="text-align:right; color:#888; font-size:0.9em; white-space:nowrap;">Months &nbsp; <span class="warn">$2M&ndash;$100M+</span></div>
                 </div>
+                <p style="color:#aaa; margin-top:4px;">Train from scratch on massive internet data. Only done by Google, Meta, OpenAI, etc.</p>
             </div>
-            <div style="text-align:center; font-size:0.8em; color:#666;">⬇️ adapt to your domain</div>
-            <div class="card" style="border-left:4px solid var(--accent); font-size:0.75em;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <h3>2. Fine-tuning</h3>
-                        <p>Adapt a pre-trained model with your data → <span class="highlight">Lectures 8–9</span></p>
-                    </div>
-                    <div style="text-align:right; color:#888; font-size:0.85em;">Hours–Days<br><span style="color:var(--accent);">$10–$1,000</span></div>
+            <div style="text-align:center; color:#555; font-size:0.95em; margin:2px 0;">⬇️ <span style="color:#666;">adapt to your domain</span></div>
+            <div class="card" style="border-left:4px solid var(--accent); padding:10px 16px; margin:4px 0;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <strong style="color:var(--accent); font-size:1.1em;">2. Fine-Tuning</strong>
+                    <div style="text-align:right; color:#888; font-size:0.9em; white-space:nowrap;">Hours&ndash;Days &nbsp; <span style="color:var(--accent);">$10&ndash;$1,000</span></div>
                 </div>
+                <p style="color:#aaa; margin-top:4px;">Adapt a pre-trained model with your data &rarr; <span class="highlight">Lectures 8&ndash;9</span></p>
             </div>
-            <div style="text-align:center; font-size:0.8em; color:#666;">⬇️ steer with instructions</div>
-            <div class="card" style="border-left:4px solid var(--accent3); font-size:0.75em;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <h3>3. Prompting</h3>
-                        <p>No training — just clever instructions → <span class="highlight">Lecture 2</span></p>
-                    </div>
-                    <div style="text-align:right; color:#888; font-size:0.85em;">Seconds<br><span style="color:var(--accent3);">$0.001</span></div>
+            <div style="text-align:center; color:#555; font-size:0.95em; margin:2px 0;">⬇️ <span style="color:#666;">or skip training entirely</span></div>
+            <div class="card" style="border-left:4px solid var(--accent3); padding:10px 16px; margin:4px 0;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <strong style="color:var(--accent3); font-size:1.1em;">3. Prompting</strong>
+                    <div style="text-align:right; color:#888; font-size:0.9em; white-space:nowrap;">Seconds &nbsp; <span style="color:var(--accent3);">$0.001</span></div>
                 </div>
+                <p style="color:#aaa; margin-top:4px;">Zero training &mdash; just write clever instructions &rarr; <span class="highlight">Lecture 2</span></p>
             </div>
         </div>
-        <div class="takeaway">Most enterprise use cases start with <span class="highlight">prompting</span>, add <span class="highlight">RAG</span> for accuracy, and only fine-tune when needed.</div>
+        <div class="takeaway" style="font-size:0.6em;">Most enterprise use cases start with <span class="highlight">prompting</span> (cheapest, fastest), add <span class="highlight">RAG</span> for accuracy, and only fine-tune when needed. You almost never pre-train from scratch.</div>
     </section>
 
     <!-- NEW: RLHF -->
@@ -669,20 +851,18 @@
 
 </section>
 
+</section>
+
 <!-- ============================================ -->
-<!-- CODE DEMO 1: Three Architectures -->
+<!-- BREAK BEFORE SECTION 2 -->
 <!-- ============================================ -->
 <section>
-    <h2 style="color:var(--accent2);">🔬 Code Demo 1</h2>
-    <h1 style="font-size:1.6em;">Three Architectures<br>in Action</h1>
-    <p class="subtitle">Let's see what we just learned &mdash; live in Colab</p>
-    <div style="max-width:500px; margin:1em auto; font-size:0.65em;">
-        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 1</span> Load 20 terms across 4 categories</div>
-        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 3</span> Run encoder-only, decoder-only, and encoder-decoder side by side</div>
-    </div>
-    <div class="card" style="text-align:center; font-size:0.75em; max-width:450px; margin:0.5em auto;">
-        <p>Open <span class="highlight">Google Colab</span> &rarr; run cells for <strong>Code Demo 1</strong></p>
-        <p style="font-family:var(--r-code-font); font-size:0.85em; color:var(--accent3);">lab_01_embeddings.ipynb</p>
+    <div style="text-align:center;">
+        <p style="font-size:4em; margin-bottom:0.2em;">☕</p>
+        <h1>5-Minute Break</h1>
+        <p class="subtitle" style="margin-top:0.5em;">Stretch your legs, grab a coffee</p>
+        <br>
+        <p style="font-size:0.7em; color:#666;">Next up: Tokenization &amp; Its Consequences</p>
     </div>
 </section>
 
@@ -808,19 +988,6 @@
     </section>
 </section>
 
-<!-- ============================================ -->
-<!-- CODE DEMO 2: Tokenization -->
-<!-- ============================================ -->
-<section>
-    <h2 style="color:var(--accent2);">🔬 Code Demo 2</h2>
-    <h1 style="font-size:1.6em;">How the Tokenizer<br>Sees Text</h1>
-    <p class="subtitle">EN vs IT &mdash; see the token cost difference live</p>
-    <div style="max-width:500px; margin:1em auto; font-size:0.65em;">
-        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 2</span> Colored token boxes: "machine learning" vs "apprendimento automatico"</div>
-    </div>
-    <div class="card" style="text-align:center; font-size:0.75em; max-width:450px; margin:0.5em auto;">
-        <p>Switch to <span class="highlight">Colab</span> &rarr; run cells for <strong>Code Demo 2</strong></p>
-    </div>
 </section>
 
 <!-- ============================================ -->
@@ -832,7 +999,7 @@
         <h1>10-Minute Break</h1>
         <p class="subtitle" style="margin-top:0.5em;">Stretch, grab a coffee, check your phone</p>
         <br>
-        <p style="font-size:0.7em; color:#666;">Next up: Embeddings &amp; Similarity + Code Demo 3</p>
+        <p style="font-size:0.7em; color:#666;">Next up: Embeddings &amp; Similarity</p>
     </div>
 </section>
 
@@ -911,57 +1078,58 @@
         <p style="font-size:0.6em; color:#888; margin-top:0.5em;">High-dimensional vectors projected to 2D. Related terms naturally cluster together.</p>
     </section>
 
+    <!-- DISTANCE METRICS — MOVED FIRST: introduce all 3 options -->
     <section>
-        <h2>Cosine Similarity</h2>
-        <p style="font-size:0.75em; color:#aaa;">Measures the <span class="highlight">angle between two vectors</span>. Same direction = similar meaning.</p>
-        <div class="formula">cos(θ) = (A · B) / (||A|| × ||B||)</div>
-        <div style="display:flex; gap:10px; justify-content:center; margin-top:0.5em; flex-wrap:wrap;">
-            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
-                <p style="font-size:1.8em; color:var(--accent3);">0.90+</p>
-                <p style="font-size:0.7em; color:var(--accent3);">Near-duplicate</p>
-                <p style="font-size:0.6em; color:#888;">"car" ↔ "automobile"</p>
-            </div>
-            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
-                <p style="font-size:1.8em; color:#4CAF50;">0.70–0.90</p>
-                <p style="font-size:0.7em; color:#4CAF50;">Same topic</p>
-                <p style="font-size:0.6em; color:#888;">"machine learning" ↔ "deep learning"</p>
-            </div>
-            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
-                <p style="font-size:1.8em; color:#FF9800;">0.40–0.70</p>
-                <p style="font-size:0.7em; color:#FF9800;">Loosely related</p>
-                <p style="font-size:0.6em; color:#888;">"machine learning" ↔ "stock market"</p>
-            </div>
-            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
-                <p style="font-size:1.8em; color:var(--accent2);">< 0.40</p>
-                <p style="font-size:0.7em; color:var(--accent2);">Unrelated</p>
-                <p style="font-size:0.6em; color:#888;">"car" ↔ "pizza"</p>
-            </div>
-        </div>
-        <div class="takeaway">In RAG systems, you'll typically set a <span class="highlight">threshold of ~0.70</span> to filter relevant results. You'll practice this in Lecture 3.</div>
-    </section>
-
-    <!-- NEW: DISTANCE METRICS -->
-    <section>
-        <h2>Distance Metrics — Cosine vs Dot Product vs Euclidean</h2>
-        <p style="font-size:0.7em; color:#aaa;">Three ways to measure similarity. <span class="highlight">Choosing the right one</span> matters for your search system.</p>
+        <h2>Distance Metrics &mdash; How to Measure Similarity</h2>
+        <p style="font-size:0.7em; color:#aaa;">We have vectors. Now <span class="highlight">how do we compare them?</span> There are 3 main options:</p>
         <div style="font-size:0.6em;">
             <div class="card" style="border-left:4px solid var(--accent3); margin:4px 0; padding:8px 14px;">
-                <strong style="color:var(--accent3);">Cosine Similarity</strong>
-                <div class="formula" style="font-size:0.85em; margin:4px 0;">sim(A,B) = (A·B) / (||A|| × ||B||)</div>
-                <p style="color:#888;">Measures the <strong>angle</strong> between vectors. Ignores vector length. <span class="highlight">Default for most embedding models.</span></p>
+                <strong style="color:var(--accent3);">Cosine Similarity ⭐</strong>
+                <div class="formula" style="font-size:0.85em; margin:4px 0;">sim(A,B) = (A&middot;B) / (||A|| &times; ||B||)</div>
+                <p style="color:#888;">Measures the <strong>angle</strong> between vectors. Ignores vector length &mdash; only cares about <strong>direction</strong>. <span class="highlight">Default for most embedding models.</span></p>
             </div>
             <div class="card" style="border-left:4px solid var(--accent); margin:4px 0; padding:8px 14px;">
                 <strong style="color:var(--accent);">Dot Product</strong>
-                <div class="formula" style="font-size:0.85em; margin:4px 0;">sim(A,B) = A·B = <span style="font-size:1.1em;">Σ</span><sub>i</sub> a<sub>i</sub> · b<sub>i</sub></div>
+                <div class="formula" style="font-size:0.85em; margin:4px 0;">sim(A,B) = A&middot;B = <span style="font-size:1.1em;">&Sigma;</span><sub>i</sub> a<sub>i</sub> &middot; b<sub>i</sub></div>
                 <p style="color:#888;">Sensitive to vector <strong>magnitude</strong>. Longer vectors score higher. Use when length = importance.</p>
             </div>
             <div class="card" style="border-left:4px solid var(--accent2); margin:4px 0; padding:8px 14px;">
                 <strong style="color:var(--accent2);">Euclidean Distance</strong>
-                <div class="formula" style="font-size:0.85em; margin:4px 0;">dist(A,B) = ||A − B||₂ = √(<span style="font-size:1.1em;">Σ</span><sub>i</sub> (a<sub>i</sub> − b<sub>i</sub>)²)</div>
+                <div class="formula" style="font-size:0.85em; margin:4px 0;">dist(A,B) = ||A &minus; B||&sub2; = &radic;(<span style="font-size:1.1em;">&Sigma;</span><sub>i</sub> (a<sub>i</sub> &minus; b<sub>i</sub>)&sup2;)</div>
                 <p style="color:#888;">L2 distance in vector space. <strong>Smaller = more similar</strong> (opposite direction from cosine).</p>
             </div>
         </div>
-        <div class="takeaway">Most embedding models (including ours) <span class="highlight">normalize vectors to unit length</span>. When normalized: cosine similarity = dot product. Use cosine as your default.</div>
+        <div class="takeaway">Most embedding models <span class="highlight">normalize vectors to unit length</span>. When normalized: cosine = dot product. We use <strong>cosine similarity</strong> as our default &mdash; next slide: how to interpret the scores.</div>
+    </section>
+
+    <!-- COSINE SIMILARITY — DEEP DIVE: now we zoom in on the winner -->
+    <section>
+        <h2>Cosine Similarity &mdash; What the Scores Mean</h2>
+        <p style="font-size:0.7em; color:#aaa;">We chose cosine. But what does a score of <span class="highlight">0.85</span> actually mean?</p>
+        <div class="formula">cos(&theta;) = (A &middot; B) / (||A|| &times; ||B||)</div>
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:0.5em; flex-wrap:wrap;">
+            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
+                <p style="font-size:1.8em; color:var(--accent3);">0.90+</p>
+                <p style="font-size:0.7em; color:var(--accent3);">Near-duplicate</p>
+                <p style="font-size:0.6em; color:#888;">"car" &harr; "automobile"</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
+                <p style="font-size:1.8em; color:#4CAF50;">0.70&ndash;0.90</p>
+                <p style="font-size:0.7em; color:#4CAF50;">Same topic</p>
+                <p style="font-size:0.6em; color:#888;">"machine learning" &harr; "deep learning"</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
+                <p style="font-size:1.8em; color:#FF9800;">0.40&ndash;0.70</p>
+                <p style="font-size:0.7em; color:#FF9800;">Loosely related</p>
+                <p style="font-size:0.6em; color:#888;">"machine learning" &harr; "stock market"</p>
+            </div>
+            <div class="card" style="text-align:center; flex:1; min-width:130px; max-width:170px;">
+                <p style="font-size:1.8em; color:var(--accent2);">&lt; 0.40</p>
+                <p style="font-size:0.7em; color:var(--accent2);">Unrelated</p>
+                <p style="font-size:0.6em; color:#888;">"car" &harr; "pizza"</p>
+            </div>
+        </div>
+        <div class="takeaway">In RAG systems, you'll typically set a <span class="highlight">threshold of ~0.70</span> to filter relevant results. You'll practice this in Lecture 3.</div>
     </section>
 
     <section>
@@ -1027,23 +1195,7 @@
     </section>
 </section>
 
-<!-- ============================================ -->
-<!-- CODE DEMO 3: Embeddings & Search -->
-<!-- ============================================ -->
-<section>
-    <h2 style="color:var(--accent2);">🔬 Code Demo 3</h2>
-    <h1 style="font-size:1.6em;">Embeddings, Similarity<br>&amp; Search</h1>
-    <p class="subtitle">The core skills that power RAG, search, and recommendations</p>
-    <div style="max-width:520px; margin:1em auto; font-size:0.65em;">
-        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Steps 4-5</span> Generate embeddings + cosine similarity heatmap</div>
-        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 7</span> 2D cluster map &mdash; see the "meaning space"</div>
-        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 10</span> Word2Vec analogy: king &minus; man + woman &asymp; queen</div>
-        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 9</span> Semantic search &mdash; find by meaning, not keywords</div>
-    </div>
-    <div class="card" style="text-align:center; font-size:0.75em; max-width:450px; margin:0.5em auto;">
-        <p>Switch to <span class="highlight">Colab</span> &rarr; run cells for <strong>Code Demo 3</strong></p>
-    </div>
-</section>
+
 
 <!-- ============================================ -->
 <!-- SECTION 4: MULTILINGUAL -->
@@ -1162,6 +1314,29 @@
 </section>
 
 
+
+<!-- ============================================ -->
+<!-- HANDS-ON LAB -->
+<!-- ============================================ -->
+<section>
+    <h2 style="color:var(--accent2);">🔬 Hands-on Lab</h2>
+    <h1 style="font-size:1.5em;">Embeddings Exploration</h1>
+    <p class="subtitle">Let&rsquo;s see everything we learned &mdash; step by step in Colab</p>
+    <div style="max-width:560px; margin:0.8em auto; font-size:0.6em;">
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 1</span> Load 20 terms across 4 categories</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 2</span> Tokenization: EN vs IT token cost</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 3</span> 3 architectures in action: encoder, decoder, encoder-decoder</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Steps 4&ndash;5</span> Generate embeddings + cosine similarity heatmap</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 6</span> 2D cluster map &mdash; see the &ldquo;meaning space&rdquo;</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Steps 7&ndash;8</span> Most similar pairs + semantic search</div>
+        <div class="agenda-item" style="border-left-color:var(--accent2);"><span class="time">Step 9</span> Word2Vec analogy: king &minus; man + woman &asymp; queen</div>
+    </div>
+    <div class="card" style="text-align:center; font-size:0.75em; max-width:450px; margin:0.5em auto;">
+        <p>Open <span class="highlight">Google Colab</span> &rarr; run all cells step by step</p>
+        <p style="font-family:var(--r-code-font); font-size:0.85em; color:var(--accent3);">lab_01_embeddings.ipynb</p>
+    </div>
+    <div class="takeaway" style="font-size:0.55em;">Step 10 (Model Comparison) is a <strong>bonus</strong> &mdash; try it if time permits!</div>
+</section>
 
 <!-- ============================================ -->
 <!-- SUMMARY -->
