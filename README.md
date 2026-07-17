@@ -9,18 +9,17 @@
 
 ## 📚 Course Overview
 
-A comprehensive, theory-heavy course designed for software engineers who want to understand **how** and **why** LLMs work — not just how to use them. Each lecture includes academic paper references, mathematical foundations, and a 20-minute hands-on lab.
+A comprehensive, theory-heavy course designed for software engineers who want to understand **how** and **why** LLMs work — not just how to use them. Each lecture includes academic paper references, mathematical foundations, and a hands-on lab.
 
 ```
-📘 FOUNDATIONS (Lectures 1–3)                📙 ADVANCED (Lectures 4–10)
+📘 FOUNDATIONS (Lectures 1–4)                📙 ADVANCED (Lectures 5–10)
 ┌──────────────────────────────┐      ┌──────────────────────────────────────┐
-│ ✅ L1  LLM & Embeddings      │      │ 🔒 L4  Advanced RAG & Routing        │
-│ 🔒 L2  Prompt Engineering     │      │ 🔒 L5  Graph RAG & Knowledge Graphs  │
-│ 🔒 L3  RAG Foundations        │      │ 🔒 L6  Agentic RAG & Autonomous      │
-└──────────────────────────────┘      │ 🔒 L7  RAG Evaluation & Observability│
-                                       │ 🔒 L8  LoRA / QLoRA Fine-Tuning      │
-                                       │ 🔒 L9  Multimodal VLM Fine-Tuning    │
-                                       │ 🔒 L10 Production Deployment         │
+│ ✅ L1  LLM & Embeddings      │      │ 🔒 L5  Advanced RAG & Routing        │
+│ 🔒 L2  Prompt Engineering     │      │ 🔒 L6  Graph RAG & Knowledge Graphs  │
+│ 🔒 L3  RAG Foundations        │      │ 🔒 L7  Agentic RAG & Autonomous      │
+│ 🔒 L4  Models & Inference     │      │ 🔒 L8  RAG Evaluation & Observability│
+└──────────────────────────────┘      │ 🔒 L9  Fine-Tuning (LoRA / QLoRA)   │
+                                       │ 🔒 L10 Multimodal & Production      │
                                        └──────────────────────────────────────┘
 
 ✅ = Available now    🔒 = Coming soon
@@ -30,15 +29,15 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 
 ## 📖 Lecture 1: LLM & Embeddings Fundamentals
 
-**Duration:** 2 hours — theory and code demos are **interleaved** (no separate lab block)
+**Duration:** 2 hours — theory first, hands-on lab at the end
 
 ### 🎯 What You'll Learn
 
 - **Transformer architecture** — the math behind self-attention, multi-head attention, positional encoding
 - **Tokenization** — BPE algorithm step-by-step, why Italian costs more tokens than English
 - **Embeddings** — Word2Vec origins, cosine similarity, distance metrics
-- **Training pipeline** — cross-entropy loss, RLHF, perplexity
-- **Practical implications** — hallucination, temperature, context windows, model scale
+- **LLM internals** — cross-entropy loss, RLHF, perplexity, temperature & sampling
+- **Practical implications** — hallucination, context windows, model scale
 
 ### 📄 Key Papers Covered
 
@@ -110,13 +109,13 @@ Open `slides/lecture_01_llm_embeddings.html` in your browser.
 | Lecture 1 | LLM & Embeddings Fundamentals | ✅ **Available** |
 | Lecture 2 | Prompt Engineering | 🔒 Coming soon |
 | Lecture 3 | RAG Foundations & Vector Databases | 🔒 Coming soon |
-| Lecture 4 | Advanced RAG & Query Routing | 🔒 Coming soon |
-| Lecture 5 | Graph RAG & Knowledge Graphs | 🔒 Coming soon |
-| Lecture 6 | Agentic RAG & Autonomous Systems | 🔒 Coming soon |
-| Lecture 7 | RAG Evaluation & Observability | 🔒 Coming soon |
-| Lecture 8 | LoRA / QLoRA Fine-Tuning | 🔒 Coming soon |
-| Lecture 9 | Multimodal VLM Fine-Tuning | 🔒 Coming soon |
-| Lecture 10 | Production Deployment & Capstone | 🔒 Coming soon |
+| Lecture 4 | Models, Inference & Choosing the Right Approach | 🔒 Coming soon |
+| Lecture 5 | Advanced RAG & Intelligent Routing | 🔒 Coming soon |
+| Lecture 6 | Graph RAG & Knowledge Graphs | 🔒 Coming soon |
+| Lecture 7 | Agentic RAG & Autonomous Systems | 🔒 Coming soon |
+| Lecture 8 | RAG Evaluation & Observability | 🔒 Coming soon |
+| Lecture 9 | Efficient Fine-Tuning (LoRA / QLoRA) | 🔒 Coming soon |
+| Lecture 10 | Multimodal AI & Production Engineering | 🔒 Coming soon |
 
 Materials for each lecture will be released before the corresponding class session.
 
