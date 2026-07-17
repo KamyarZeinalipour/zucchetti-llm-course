@@ -180,10 +180,10 @@
         <p style="font-size:0.7em; color:#aaa;">Each paper built on the previous one. Understanding this <span class="highlight">lineage</span> helps you understand why current models work.</p>
         <table class="vs-table" style="font-size:0.6em;">
             <tr><th>Year</th><th>Paper</th><th>Key Innovation</th><th>Citations</th></tr>
-            <tr><td>2013</td><td><span class="highlight">Word2Vec</span> (Mikolov et al.)</td><td>Words as vectors — similar meaning = similar direction</td><td>45,000+</td></tr>
-            <tr><td>2017</td><td><span class="highlight">Attention Is All You Need</span> (Vaswani et al.)</td><td>Transformer architecture — parallel attention replaces RNNs</td><td>130,000+</td></tr>
-            <tr><td>2018</td><td><span class="highlight">BERT</span> (Devlin et al., Google)</td><td>Pre-train once → fine-tune for any task</td><td>95,000+</td></tr>
-            <tr><td>2020</td><td><span class="highlight">GPT-3</span> (Brown et al., OpenAI)</td><td>In-context learning — no fine-tuning needed, just examples</td><td>30,000+</td></tr>
+            <tr><td>2013</td><td><span class="highlight">Word2Vec</span> (Mikolov et al.)</td><td>Words as vectors — similar meaning = similar direction</td><td>35,000+</td></tr>
+            <tr><td>2017</td><td><span class="highlight">Attention Is All You Need</span> (Vaswani et al.)</td><td>Transformer architecture — parallel attention replaces RNNs</td><td>250,000+</td></tr>
+            <tr><td>2018</td><td><span class="highlight">BERT</span> (Devlin et al., Google)</td><td>Pre-train once → fine-tune for any task</td><td>115,000+</td></tr>
+            <tr><td>2020</td><td><span class="highlight">GPT-3</span> (Brown et al., OpenAI)</td><td>In-context learning — no fine-tuning needed, just examples</td><td>60,000+</td></tr>
             <tr><td>2022</td><td><span class="highlight">InstructGPT</span> (Ouyang et al.)</td><td>RLHF — train models to follow human instructions</td><td>8,000+</td></tr>
             <tr><td>2023</td><td><span class="highlight">LLaMA</span> (Touvron et al., Meta)</td><td>Open-source foundation models — democratized LLMs</td><td>12,000+</td></tr>
         </table>
@@ -749,12 +749,13 @@
         <div class="two-col" style="font-size:0.6em; margin-top:8px;">
             <div>
                 <table class="vs-table">
-                    <tr><th>Model</th><th>PPL (WikiText-103)</th></tr>
-                    <tr><td>GPT-2 (2019)</td><td>29.41</td></tr>
-                    <tr><td>GPT-3 175B (2020)</td><td>20.50</td></tr>
-                    <tr><td style="color:var(--accent3);">LLaMA 7B (2023)</td><td style="color:var(--accent3);">7.20</td></tr>
-                    <tr><td style="color:var(--accent3);">LLaMA 65B (2023)</td><td style="color:var(--accent3); font-weight:600;">3.53</td></tr>
+                    <tr><th>Model</th><th>Perplexity ↓</th></tr>
+                    <tr><td>GPT-2 1.5B (2019)</td><td>~35</td></tr>
+                    <tr><td>GPT-3 175B (2020)</td><td>~20</td></tr>
+                    <tr><td style="color:var(--accent3);">LLaMA 7B (2023)</td><td style="color:var(--accent3);">~7</td></tr>
+                    <tr><td style="color:var(--accent3);">LLaMA 65B (2023)</td><td style="color:var(--accent3); font-weight:600;">~4</td></tr>
                 </table>
+                <p style="font-size:0.8em; color:#555; margin-top:4px;">Approximate, varies by benchmark dataset</p>
             </div>
             <div class="card">
                 <h3>Intuition</h3>
