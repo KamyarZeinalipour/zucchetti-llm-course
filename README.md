@@ -14,10 +14,10 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 ```
 📘 FOUNDATIONS (Lectures 1–4)                📙 ADVANCED (Lectures 5–10)
 ┌──────────────────────────────┐      ┌──────────────────────────────────────┐
-│ ✅ L1  LLM & Embeddings      │      │ 🔒 L5  Advanced RAG & Routing        │
-│ 🔒 L2  Prompt Engineering     │      │ 🔒 L6  Graph RAG & Knowledge Graphs  │
-│ 🔒 L3  RAG Foundations        │      │ 🔒 L7  Agentic RAG & Autonomous      │
-│ 🔒 L4  Models & Inference     │      │ 🔒 L8  RAG Evaluation & Observability│
+│ ✅ L1  Transformer Blueprint  │      │ 🔒 L5  Advanced RAG & Routing        │
+│ 🔒 L2  Tokenization & Embed.  │      │ 🔒 L6  Graph RAG & Knowledge Graphs  │
+│ 🔒 L3  Prompt Engineering     │      │ 🔒 L7  Agentic RAG & Autonomous      │
+│ 🔒 L4  RAG & Decision Matrix  │      │ 🔒 L8  RAG Evaluation & Observability│
 └──────────────────────────────┘      │ 🔒 L9  Fine-Tuning (LoRA / QLoRA)   │
                                        │ 🔒 L10 Multimodal & Production      │
                                        └──────────────────────────────────────┘
@@ -27,17 +27,17 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 
 ---
 
-## 📖 Lecture 1: LLM & Embeddings Fundamentals
+## 📖 Lecture 1: The Transformer Blueprint
 
-**Duration:** 2 hours — theory first, hands-on lab at the end
+**Duration:** 2 hours
 
 ### 🎯 What You'll Learn
 
 - **Transformer architecture** — the math behind self-attention, multi-head attention, positional encoding
-- **Tokenization** — BPE algorithm step-by-step, why Italian costs more tokens than English
-- **Embeddings** — Word2Vec origins, cosine similarity, distance metrics
-- **LLM internals** — cross-entropy loss, RLHF, perplexity, temperature & sampling
-- **Practical implications** — hallucination, context windows, model scale
+- **How LLMs work** — next-token prediction, cross-entropy loss, temperature & sampling
+- **Key concepts** — hallucination, perplexity, context windows, RLHF
+- **Encoder vs Decoder** — the 3 architecture families and when to use each
+- **Scale & emergent abilities** — why bigger models develop unexpected capabilities
 
 ### 📄 Key Papers Covered
 
@@ -106,10 +106,10 @@ Open `slides/lecture_01_llm_embeddings.html` in your browser.
 
 | Lecture | Topic | Status |
 |---------|-------|--------|
-| Lecture 1 | LLM & Embeddings Fundamentals | ✅ **Available** |
-| Lecture 2 | Prompt Engineering | 🔒 Coming soon |
-| Lecture 3 | RAG Foundations & Vector Databases | 🔒 Coming soon |
-| Lecture 4 | Models, Inference & Choosing the Right Approach | 🔒 Coming soon |
+| Lecture 1 | The Transformer Blueprint | ✅ **Available** |
+| Lecture 2 | Tokenization, Embeddings & Similarity | 🔒 Coming soon |
+| Lecture 3 | Prompt Engineering | 🔒 Coming soon |
+| Lecture 4 | RAG Foundations & Decision Matrix | 🔒 Coming soon |
 | Lecture 5 | Advanced RAG & Intelligent Routing | 🔒 Coming soon |
 | Lecture 6 | Graph RAG & Knowledge Graphs | 🔒 Coming soon |
 | Lecture 7 | Agentic RAG & Autonomous Systems | 🔒 Coming soon |
