@@ -86,13 +86,14 @@
 <section>
     <h2>Today&rsquo;s Agenda</h2>
     <div style="max-width:700px; margin:0 auto;">
-        <div class="agenda-item"><span class="time">0:00</span> <span>Section 1: Tokenization &amp; BPE</span></div>
-        <div class="agenda-item"><span class="time">0:20</span> <span>Section 2: Embeddings &amp; Similarity</span></div>
-        <div class="agenda-item"><span class="time">0:40</span> <span>Section 3: Multilingual &amp; Domain Alignment</span></div>
-        <div class="agenda-item"><span class="time">0:55</span> <span>🔬 Hands-on Lab: Embeddings Exploration</span></div>
-        <div class="agenda-item"><span class="time">1:20</span> <span>Key Takeaways &amp; Q&amp;A</span></div>
+        <div class="agenda-item"><span class="time">0:00</span> <span>Section 1: Tokenization &amp; BPE, WordPiece, SentencePiece</span></div>
+        <div class="agenda-item"><span class="time">0:25</span> <span>Section 2: Embeddings &amp; Similarity</span></div>
+        <div class="agenda-item"><span class="time">0:50</span> <span>Section 3: Multilingual &amp; Domain Alignment</span></div>
+        <div class="agenda-item" style="border-left-color: #888; background:rgba(255,255,255,0.03);"><span class="time" style="color:#888;">1:05</span> ☕ Break (10 min)</div>
+        <div class="agenda-item"><span class="time">1:15</span> <span>🔬 Hands-on Lab: Embeddings Exploration</span></div>
+        <div class="agenda-item"><span class="time">1:50</span> <span>Key Takeaways &amp; Q&amp;A</span></div>
     </div>
-    <div class="takeaway" style="margin-top:1em; font-size:0.7em;">Today we complete the foundations: from raw text to searchable meaning vectors.</div>
+    <div style="margin-top:10px; font-size:0.55em; color:#888;">Total: 2 hours &middot; Theory first, then <span class="highlight">hands-on lab</span></div>
 </section>
 
 <!-- ============================================ -->
@@ -161,6 +162,46 @@
             </div>
         </div>
         <p class="paper-ref">📄 Sennrich et al., "Neural Machine Translation of Rare Words with Subword Units", ACL 2016</p>
+    </section>
+
+    <!-- NEW: WORDPIECE & SENTENCEPIECE -->
+    <section>
+        <h2>WordPiece &amp; SentencePiece</h2>
+        <p style="font-size:0.7em; color:#aaa;">BPE is not the only tokenizer. Two other algorithms dominate the landscape.</p>
+        <div class="two-col" style="font-size:0.7em;">
+            <div class="card" style="border-color: var(--accent);">
+                <h3>WordPiece (Google, 2016)</h3>
+                <p>Used by <strong>BERT</strong>, DistilBERT, Electra</p>
+                <ul>
+                    <li>Like BPE, but merges based on <span class="highlight">likelihood</span>, not frequency</li>
+                    <li>Picks the pair that <strong>maximizes</strong> the language model probability</li>
+                    <li>Uses <code>##</code> prefix for subword continuations</li>
+                </ul>
+                <div class="card" style="font-family:var(--r-code-font); font-size:0.8em; margin-top:4px; padding:6px 10px;">
+                    "playing" &rarr; ["play", "<span class="highlight">##ing</span>"]
+                </div>
+            </div>
+            <div class="card" style="border-color: var(--accent3);">
+                <h3>SentencePiece (Google, 2018)</h3>
+                <p>Used by <strong>T5</strong>, LLaMA, Gemma, Mistral</p>
+                <ul>
+                    <li>Treats input as <span class="highlight">raw bytes</span> &mdash; no pre-tokenization needed</li>
+                    <li>Language-agnostic: works on any script (Chinese, Arabic, Italian&hellip;)</li>
+                    <li>Uses <code>&block;</code> for spaces: <code>&block;Hello</code></li>
+                </ul>
+                <div class="card" style="font-family:var(--r-code-font); font-size:0.8em; margin-top:4px; padding:6px 10px;">
+                    "New York" &rarr; ["<span class="highlight">▁New</span>", "<span class="highlight">▁York</span>"]
+                </div>
+            </div>
+        </div>
+        <table class="vs-table" style="font-size:0.55em; margin-top:6px;">
+            <tr><th></th><th>BPE</th><th>WordPiece</th><th>SentencePiece</th></tr>
+            <tr><td>Merge criterion</td><td>Most <strong>frequent</strong> pair</td><td>Max <strong>likelihood</strong></td><td>BPE or Unigram (configurable)</td></tr>
+            <tr><td>Pre-tokenization</td><td>Required (whitespace)</td><td>Required (whitespace)</td><td><span class="highlight">Not required</span> (raw bytes)</td></tr>
+            <tr><td>Used by</td><td>GPT, LLaMA 2</td><td>BERT, Electra</td><td>T5, LLaMA 3, Gemma, Mistral</td></tr>
+        </table>
+        <div class="takeaway">All three produce <strong>subword tokens</strong>. The key difference: SentencePiece is <span class="highlight">language-agnostic</span> &mdash; it handles Italian, Chinese, and Arabic without special rules.</div>
+        <p class="paper-ref">📄 Schuster &amp; Nakajima, "Japanese and Korean Voice Search", ICASSP 2012 &nbsp;|&nbsp; Kudo &amp; Richardson, "SentencePiece", EMNLP 2018</p>
     </section>
 
     <section>
