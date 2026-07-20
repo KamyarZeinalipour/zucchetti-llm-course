@@ -15,7 +15,7 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 📘 FOUNDATIONS (Lectures 1–4)                📙 ADVANCED (Lectures 5–10)
 ┌──────────────────────────────┐      ┌──────────────────────────────────────┐
 │ ✅ L1  Transformer Blueprint  │      │ 🔒 L5  Advanced RAG & Routing        │
-│ 🔒 L2  Tokenization & Embed.  │      │ 🔒 L6  Graph RAG & Knowledge Graphs  │
+│ ✅ L2  Tokenization & Embed.  │      │ 🔒 L6  Graph RAG & Knowledge Graphs  │
 │ 🔒 L3  Prompt Engineering     │      │ 🔒 L7  Agentic RAG & Autonomous      │
 │ 🔒 L4  RAG & Decision Matrix  │      │ 🔒 L8  RAG Evaluation & Observability│
 └──────────────────────────────┘      │ 🔒 L9  Fine-Tuning (LoRA / QLoRA)   │
@@ -57,6 +57,36 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 |----------|------|-------------|
 | 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_01_llm_embeddings.html) | Click to view slides in your browser |
 | 🔬 **Lab notebook** | [`lab_01_embeddings/lab_01_embeddings.py`](lab_01_embeddings/lab_01_embeddings.py) | Python script — run locally |
+
+---
+
+## 📖 Lecture 2: Tokenization, Embeddings & Similarity
+
+**Duration:** ~1.5 hours
+
+### 🎯 What You'll Learn
+
+- **Tokenization** — BPE algorithm step-by-step, vocabulary sizes, why non-English text costs more tokens
+- **Why numbers break** — how tokenization fragments numbers and why LLMs can't do arithmetic
+- **Embeddings** — from Word2Vec to modern sentence transformers, GPS analogy for meaning
+- **Similarity metrics** — cosine similarity, dot product, Euclidean distance, and how to interpret scores
+- **Multilingual alignment** — cross-lingual search, domain-specific challenges
+- **Model selection** — MiniLM vs BGE-M3 vs OpenAI, when to use each
+
+### 📄 Key Papers Covered
+
+| Year | Paper | Venue |
+|------|-------|-------|
+| 2013 | Word2Vec — *Efficient Estimation of Word Representations* (Mikolov et al.) | Google |
+| 2014 | GloVe — *Global Vectors for Word Representation* (Pennington et al.) | EMNLP |
+| 2016 | BPE — *Neural Machine Translation of Rare Words* (Sennrich et al.) | ACL |
+
+### 📂 Materials
+
+| Resource | Path | Description |
+|----------|------|-------------|
+| 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_02_tokenization_embeddings.html) | Click to view slides in your browser |
+| 🔬 **Lab notebook** | [`lab_01_embeddings/lab_01_embeddings.py`](lab_01_embeddings/lab_01_embeddings.py) | Shared lab — embeddings exploration |
 
 ---
 
@@ -107,7 +137,7 @@ Open `slides/lecture_01_llm_embeddings.html` in your browser.
 | Lecture | Topic | Status |
 |---------|-------|--------|
 | Lecture 1 | The Transformer Blueprint | ✅ **Available** |
-| Lecture 2 | Tokenization, Embeddings & Similarity | 🔒 Coming soon |
+| Lecture 2 | Tokenization, Embeddings & Similarity | ✅ **Available** |
 | Lecture 3 | Prompt Engineering | 🔒 Coming soon |
 | Lecture 4 | RAG Foundations & Decision Matrix | 🔒 Coming soon |
 | Lecture 5 | Advanced RAG & Intelligent Routing | 🔒 Coming soon |
@@ -130,10 +160,11 @@ zucchetti-llm-course/
 ├── .env.example                     ← API key template
 │
 ├── slides/                          ← Lecture presentations
-│   ├── lecture_01_llm_embeddings.html   ← Open in browser
-│   └── img_*.png / img_*.svg           ← Slide images
+│   ├── lecture_01_llm_embeddings.html        ← L1 slides
+│   ├── lecture_02_tokenization_embeddings.html ← L2 slides
+│   └── img_*.png / img_*.svg                ← Slide images
 │
-└── lab_01_embeddings/               ← Hands-on lab
+└── lab_01_embeddings/               ← Hands-on lab (L1 & L2)
     ├── lab_01_embeddings.py             ← Main script
     ├── lab_01_embeddings.ipynb          ← Jupyter notebook
     ├── solutions.py                     ← Complete solutions
