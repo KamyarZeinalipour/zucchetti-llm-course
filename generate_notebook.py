@@ -22,7 +22,7 @@ except Exception:
 
 # Cell 1: Intro Markdown
 cells.append(nbf.v4.new_markdown_cell("""# 🎯 Lab 02: Prompt Engineering Workshop
-## LLM Course — Lecture 2: Prompt Engineering
+## LLM Course — Lecture 3: Prompt Engineering
 
 **Objective:** Master prompt engineering by learning how to communicate effectively with LLMs. You will iterate through 5 prompt strategies — from naive to advanced — and see how the SAME question produces dramatically different answers.
 
