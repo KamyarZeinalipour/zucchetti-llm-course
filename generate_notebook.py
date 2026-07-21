@@ -190,44 +190,6 @@ cells.append(nbf.v4.new_code_cell("""def call_llm(user_msg: str, system_msg: str
 # Quick test
 print(call_llm("Say 'hello' and nothing else."))
 """))
-
-# ============================================================
-# SECTION: Anatomy of a Prompt
-# ============================================================
-cells.append(nbf.v4.new_markdown_cell("""---
-## 📐 Anatomy of a Prompt — The 5 Components
-
-Every well-structured prompt contains up to 5 building blocks:
-
-| # | Component | Where | Example |
-|---|-----------|-------|---------|
-| ① | **Role** | System msg | "You are a senior IT consultant" |
-| ② | **Context** | User msg | "The client is a 500-person manufacturing company" |
-| ③ | **Task** | User msg | "Compare SAP vs Oracle and recommend one" |
-| ④ | **Output Format** | System msg | "Respond in JSON: {recommendation, reasons[]}" |
-| ⑤ | **Constraints** | System msg | "Maximum 200 words. Do not mention competitors." |
-
-Not every prompt needs all 5. But knowing them helps you **diagnose** why a prompt isn't working — which component is missing?
-
-Let's build one using all 5 components:
-"""))
-
-cells.append(nbf.v4.new_code_cell("""# ① Role + ④ Format + ⑤ Constraints → System Message
-system_msg = dedent(\"\"\"\\
-    You are a senior IT consultant specializing in ERP systems.
-    Always respond in JSON with keys: recommendation (string), reasons (list of strings).
-    Maximum 100 words. Do not mention competitors outside SAP and Oracle.\"\"\")
-
-# ② Context + ③ Task → User Message
-user_msg = dedent(\"\"\"\\
-    Context: The client is a 500-person manufacturing company in Milan, Italy.
-    Task: Compare SAP vs Oracle ERP and recommend one.\"\"\")
-
-result = call_llm(user_msg, system_msg=system_msg)
-print("--- 5-Component Prompt Output ---")
-print(result)
-"""))
-
 # ============================================================
 # SECTION: 5 Strategies
 # ============================================================
@@ -317,10 +279,75 @@ print(json_out)
 
 # Bonus: actually parse it!
 try:
-    parsed = json.loads(json_out.strip("`").replace("json\\n", "").replace("json", ""))
-    print(f"\\n✅ Parsed successfully! Sentiment = {parsed.get('sentiment')}, Confidence = {parsed.get('confidence')}")
+    parsed = json.loads(json_out.strip("`").replace("json\n", "").replace("json", ""))
+    print(f"\n✅ Parsed successfully! Sentiment = {parsed.get('sentiment')}, Confidence = {parsed.get('confidence')}")
 except:
-    print("\\n⚠️ Could not auto-parse (the model may have included markdown fences)")
+    print("\n⚠️ Could not auto-parse (the model may have included markdown fences)")
+"""))
+
+# ============================================================
+# SECTION: Grand Comparison
+# ============================================================
+cells.append(nbf.v4.new_markdown_cell("""---
+## 📊 Grand Comparison — Same Review, 5 Different Strategies
+
+Let's see all 5 outputs side by side. Same model, same review — the **only** difference is the prompt!
+"""))
+
+cells.append(nbf.v4.new_code_cell("""print("=" * 65)
+print("  GRAND COMPARISON — Same review, 5 strategies")
+print("=" * 65)
+print(f"\nReview: \"{REVIEW}\"")
+print("-" * 65)
+print(f"\n1️⃣  Zero-Shot:      {zero_shot[:100]}")
+print(f"\n2️⃣  System Message:  {system_out[:100]}")
+print(f"\n3️⃣  Few-Shot:        {few_shot[:100]}")
+print(f"\n4️⃣  CoT:             {cot_out[:80]}...")
+print(f"\n5️⃣  JSON:            {json_out[:80]}...")
+print()
+print("=" * 65)
+print("👆 Same model, same review — the ONLY difference is the prompt!")
+print("   Notice how each strategy adds more structure and control.")
+print("=" * 65)
+"""))
+
+# ============================================================
+# SECTION: Anatomy of a Prompt (moved here — AFTER strategies)
+# ============================================================
+cells.append(nbf.v4.new_markdown_cell("""---
+## 📐 Anatomy of a Prompt — The 5 Components
+
+Now that you've SEEN how different prompts change the output, let's understand **why**.
+
+Every well-structured prompt contains up to 5 building blocks:
+
+| # | Component | Where | Example |
+|---|-----------|-------|---------|
+| ① | **Role** | System msg | "You are a senior IT consultant" |
+| ② | **Context** | User msg | "The client is a 500-person manufacturing company" |
+| ③ | **Task** | User msg | "Compare SAP vs Oracle and recommend one" |
+| ④ | **Output Format** | System msg | "Respond in JSON: {recommendation, reasons[]}" |
+| ⑤ | **Constraints** | System msg | "Maximum 200 words. Do not mention competitors." |
+
+Not every prompt needs all 5. But knowing them helps you **diagnose** why a prompt isn't working — which component is missing?
+
+Let's build one using all 5 components explicitly:
+"""))
+
+cells.append(nbf.v4.new_code_cell("""# ① Role + ④ Format + ⑤ Constraints → System Message
+system_msg = dedent(\"\"\"\\
+    You are a senior IT consultant specializing in ERP systems.
+    Always respond in JSON with keys: recommendation (string), reasons (list of strings).
+    Maximum 100 words. Do not mention competitors outside SAP and Oracle.\"\"\")
+
+# ② Context + ③ Task → User Message
+user_msg = dedent(\"\"\"\\
+    Context: The client is a 500-person manufacturing company in Milan, Italy.
+    Task: Compare SAP vs Oracle ERP and recommend one.\"\"\")
+
+result = call_llm(user_msg, system_msg=system_msg)
+print("--- 5-Component Prompt Output ---")
+print(result)
 """))
 
 # ============================================================
