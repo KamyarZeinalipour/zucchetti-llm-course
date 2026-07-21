@@ -16,7 +16,7 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 ┌──────────────────────────────┐      ┌──────────────────────────────────────┐
 │ ✅ L1  Transformer Blueprint  │      │ 🔒 L5  Advanced RAG & Routing        │
 │ ✅ L2  Tokenization & Embed.  │      │ 🔒 L6  Graph RAG & Knowledge Graphs  │
-│ 🔒 L3  Prompt Engineering     │      │ 🔒 L7  Agentic RAG & Autonomous      │
+│ ✅ L3  Prompt Engineering     │      │ 🔒 L7  Agentic RAG & Autonomous      │
 │ 🔒 L4  RAG & Decision Matrix  │      │ 🔒 L8  RAG Evaluation & Observability│
 └──────────────────────────────┘      │ 🔒 L9  Fine-Tuning (LoRA / QLoRA)   │
                                        │ 🔒 L10 Multimodal & Production      │
@@ -90,6 +90,36 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 
 ---
 
+## 📖 Lecture 3: Prompt Engineering
+
+**Duration:** 2 hours
+
+### 🎯 What You'll Learn
+
+- **Zero-shot, few-shot, chain-of-thought** — five prompting strategies from basic to advanced
+- **Structured output (JSON)** — how to make LLMs production-ready
+- **Temperature, top-p, top-k** — the math behind generation control
+- **Prompt injection** — security attacks and defenses
+- **The language effect** — why English prompts work better even for Italian tasks
+
+### 📄 Key Papers Covered
+
+| Year | Paper | Venue |
+|------|-------|-------|
+| 2020 | GPT-3 — *Language Models are Few-Shot Learners* (Brown et al.) | NeurIPS |
+| 2022 | *Chain-of-Thought Prompting Elicits Reasoning* (Wei et al.) | NeurIPS |
+| 2022 | *Rethinking the Role of Demonstrations* (Min et al.) | EMNLP |
+| 2023 | *Self-Consistency Improves CoT Reasoning* (Wang et al.) | ICLR |
+
+### 📂 Materials
+
+| Resource | Path | Description |
+|----------|------|-------------|
+| 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_03_prompt_engineering.html) | Click to view slides in your browser |
+| 🔬 **Lab notebook** | [`lab_03_prompting/lab_03_prompting.py`](lab_03_prompting/lab_03_prompting.py) | Prompt engineering workshop |
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
@@ -138,7 +168,7 @@ Open `slides/lecture_01_llm_embeddings.html` in your browser.
 |---------|-------|--------|
 | Lecture 1 | The Transformer Blueprint | ✅ **Available** |
 | Lecture 2 | Tokenization, Embeddings & Similarity | ✅ **Available** |
-| Lecture 3 | Prompt Engineering | 🔒 Coming soon |
+| Lecture 3 | Prompt Engineering | ✅ **Available** |
 | Lecture 4 | RAG Foundations & Decision Matrix | 🔒 Coming soon |
 | Lecture 5 | Advanced RAG & Intelligent Routing | 🔒 Coming soon |
 | Lecture 6 | Graph RAG & Knowledge Graphs | 🔒 Coming soon |
