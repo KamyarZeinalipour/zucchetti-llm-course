@@ -208,6 +208,46 @@
     </div>
 </section>
 
+<!-- SLIDE 6b: PROMPT TEMPLATE IN ACTION -->
+<section>
+    <h2>Prompt Template in Action</h2>
+    <p style="font-size:0.65em; color:#aaa;">How the 5 components become an <span class="highlight">actual API call</span>.</p>
+    <div class="two-col" style="font-size:0.55em; gap:12px;">
+        <div>
+            <div class="card" style="border-color:rgba(108,99,255,0.3); font-family:var(--r-code-font); line-height:1.7; padding:12px;">
+                <p style="color:var(--accent2); margin:0; font-weight:600;">📨 system message</p>
+                <p style="margin:2px 0;"><span style="color:var(--accent);">①</span> You are a <strong>senior IT consultant</strong> specializing in ERP systems.</p>
+                <p style="margin:2px 0;"><span style="color:var(--accent2);">⑤</span> Rules: Maximum 200 words. Do not mention competitors.</p>
+                <p style="margin:2px 0;"><span style="color:#FF9800;">④</span> Always respond in JSON: {"recommendation": "...", "reasons": [...]}</p>
+            </div>
+            <div style="text-align:center; font-size:1.2em; margin:4px 0;">↓</div>
+            <div class="card" style="border-color:rgba(0,217,255,0.3); font-family:var(--r-code-font); line-height:1.7; padding:12px;">
+                <p style="color:var(--accent3); margin:0; font-weight:600;">💬 user message</p>
+                <p style="margin:2px 0;"><span style="color:var(--accent3);">②</span> Context: The client is a 500-person manufacturing company in Milan.</p>
+                <p style="margin:2px 0;"><span style="color:#4CAF50;">③</span> Task: Compare SAP vs Oracle ERP and recommend one.</p>
+            </div>
+        </div>
+        <div>
+            <div class="card" style="border-color:rgba(76,175,80,0.3); font-family:var(--r-code-font); line-height:1.6; padding:12px;">
+                <p style="color:#4CAF50; margin:0; font-weight:600;">✅ model output</p>
+                <p style="color:var(--accent3); margin:4px 0;">{</p>
+                <p style="color:var(--accent3); margin:2px 0;">&nbsp;&nbsp;"recommendation": "SAP S/4HANA",</p>
+                <p style="color:var(--accent3); margin:2px 0;">&nbsp;&nbsp;"reasons": [</p>
+                <p style="color:var(--accent3); margin:2px 0;">&nbsp;&nbsp;&nbsp;&nbsp;"Better Italian localization",</p>
+                <p style="color:var(--accent3); margin:2px 0;">&nbsp;&nbsp;&nbsp;&nbsp;"Stronger manufacturing module",</p>
+                <p style="color:var(--accent3); margin:2px 0;">&nbsp;&nbsp;&nbsp;&nbsp;"500 users fits mid-market tier"</p>
+                <p style="color:var(--accent3); margin:2px 0;">&nbsp;&nbsp;]</p>
+                <p style="color:var(--accent3); margin:2px 0;">}</p>
+            </div>
+            <div style="margin-top:6px; font-size:0.9em;">
+                <p><span style="color:var(--accent);">①</span> Role &nbsp; <span style="color:var(--accent3);">②</span> Context &nbsp; <span style="color:#4CAF50;">③</span> Task</p>
+                <p><span style="color:#FF9800;">④</span> Format &nbsp; <span style="color:var(--accent2);">⑤</span> Constraints</p>
+            </div>
+        </div>
+    </div>
+    <div class="takeaway">The <span class="highlight">system message</span> holds role + rules + format. The <span class="highlight">user message</span> holds context + task. This split is how all APIs work.</div>
+</section>
+
 <!-- SLIDE 7: SECTION 2 TITLE -->
 <section>
     <div class="progress-bar"><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
