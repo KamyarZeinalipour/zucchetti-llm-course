@@ -462,9 +462,9 @@
         <tr><td>System Message</td><td>⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td></tr>
         <tr><td>Few-Shot</td><td>⭐</td><td>⭐⭐</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td></tr>
         <tr><td style="color:var(--accent2);">Chain-of-Thought</td><td style="color:var(--accent2);">✗ hurts</td><td>⭐</td><td>⭐⭐⭐</td><td style="color:var(--accent3);">⭐⭐⭐⭐⭐</td></tr>
-        <tr><td style="color:var(--accent2);">Self-Consistency</td><td style="color:var(--accent2);">✗</td><td>⭐</td><td>⭐⭐⭐⭐</td><td style="color:var(--accent3);">⭐⭐⭐⭐⭐</td></tr>
+        <tr><td>JSON Output</td><td>⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td></tr>
     </table>
-    <div class="takeaway">CoT and Self-Consistency are <span class="warn">emergent abilities</span> — they appear suddenly at ~100B parameters. Don't use CoT on small models.</div>
+    <div class="takeaway">CoT is an <span class="warn">emergent ability</span> — it appears suddenly at ~100B parameters. On small models it can <strong>hurt</strong> performance. JSON output works at all sizes but improves with scale.</div>
     <p class="paper-ref">📄 Wei et al., "Emergent Abilities of Large Language Models", TMLR 2022</p>
 </section>
 
