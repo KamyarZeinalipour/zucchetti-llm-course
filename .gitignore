@@ -35,9 +35,8 @@ qdrant_storage/
 # FUTURE LECTURES — remove as each is released
 # =============================================
 
-# Lecture 2+ labs (not yet released)
+# Lecture 3+ labs (not yet released)
 lab_02_prompt_engineering/
-lab_03_*/
 lab_04_*/
 lab_05_*/
 lab_06_*/
