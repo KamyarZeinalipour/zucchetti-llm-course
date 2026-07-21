@@ -585,6 +585,41 @@
     <p class="paper-ref">📄 Holtzman et al., "The Curious Case of Neural Text Degeneration", ICLR 2020</p>
 </section>
 
+<!-- SLIDE: SAMPLING IN PRACTICE -->
+<section>
+    <h2>Sampling in Practice — Real Examples</h2>
+    <p style="font-size:0.65em; color:#aaa;">Same prompt, different <span class="highlight">Temperature + Top-p</span> = completely different behavior.</p>
+    <div style="font-size:0.55em;">
+        <div class="card" style="margin:5px 0; padding:10px 14px; border-left:4px solid var(--accent3);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><strong style="color:var(--accent3);">🔒 Data Extraction</strong> &nbsp; T=0 &nbsp; top_p=1.0</div>
+                <div style="color:#888; font-size:0.85em;">Deterministic — same output every time</div>
+            </div>
+            <p style="margin:4px 0;">Prompt: "Extract the invoice total from: 'Total due: €1,250.00'"</p>
+            <p style="margin:2px 0; font-family:var(--r-code-font); color:var(--accent3);">Run 1: <strong>€1,250.00</strong> &nbsp;|&nbsp; Run 2: <strong>€1,250.00</strong> &nbsp;|&nbsp; Run 3: <strong>€1,250.00</strong> ← identical</p>
+        </div>
+        <div class="card" style="margin:5px 0; padding:10px 14px; border-left:4px solid var(--accent);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><strong style="color:var(--accent);">✉️ Email Drafting</strong> &nbsp; T=0.7 &nbsp; top_p=0.9</div>
+                <div style="color:#888; font-size:0.85em;">Balanced — natural but controlled</div>
+            </div>
+            <p style="margin:4px 0;">Prompt: "Write a polite follow-up email about a late delivery"</p>
+            <p style="margin:2px 0; color:var(--accent);">Run 1: "I wanted to <strong>check in</strong> on the status..." &nbsp;|&nbsp; Run 2: "I'm <strong>reaching out</strong> regarding..."</p>
+            <p style="margin:2px 0; color:#888;">← different wording, same professional tone</p>
+        </div>
+        <div class="card" style="margin:5px 0; padding:10px 14px; border-left:4px solid var(--accent2);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><strong style="color:var(--accent2);">💡 Brainstorming</strong> &nbsp; T=1.2 &nbsp; top_p=0.95</div>
+                <div style="color:#888; font-size:0.85em;">Creative — surprise is the goal</div>
+            </div>
+            <p style="margin:4px 0;">Prompt: "Suggest an innovative product name for an AI assistant"</p>
+            <p style="margin:2px 0; color:var(--accent2);">Run 1: "<strong>MindForge</strong>" &nbsp;|&nbsp; Run 2: "<strong>NeuralPilot</strong>" &nbsp;|&nbsp; Run 3: "<strong>CogniSpark</strong>"</p>
+            <p style="margin:2px 0; color:#888;">← completely different each time — that's the point</p>
+        </div>
+    </div>
+    <div class="takeaway"><span class="highlight">T=0</span> for facts. <span class="highlight">T=0.7 + top_p=0.9</span> for natural text. <span class="highlight">T≥1.0 + top_p=0.95</span> for creativity. Match settings to your use case.</div>
+</section>
+
 <!-- SLIDE 17: SELF-CONSISTENCY -->
 <section>
     <h2>Self-Consistency</h2>
