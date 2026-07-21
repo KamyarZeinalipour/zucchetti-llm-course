@@ -77,7 +77,7 @@ client = OpenAI(
     api_key=api_key,
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
-model = "gemini-2.0-flash"
+model = "gemini-3.5-flash"
 print(f"✅ Connected to Gemini ({model})")
 """))
 
