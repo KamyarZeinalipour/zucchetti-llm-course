@@ -88,7 +88,7 @@ def get_llm_client():
     return client, model
 
 
-def call_llm(client, model, user_msg, system_msg=None, temperature=None, max_tokens=600):
+def call_llm(client, model, user_msg, system_msg=None, temperature=None, top_p=None, max_tokens=None):
     """
     Send a prompt to the LLM and return (response_text, token_count).
 
@@ -118,6 +118,10 @@ def call_llm(client, model, user_msg, system_msg=None, temperature=None, max_tok
     kwargs = {"model": model, "messages": msgs}
     if temperature is not None:
         kwargs["temperature"] = temperature
+    if top_p is not None:
+        kwargs["top_p"] = top_p
+    if max_tokens is not None:
+        kwargs["max_tokens"] = max_tokens
 
     # Retry with backoff for rate limit errors (free tier has strict limits)
     max_retries = 5
@@ -350,6 +354,42 @@ def step_8_temperature(client, model):
     console.print(table)
     console.print()
 
+# ============================================================
+# STEP 8B: ADVANCED GENERATION PARAMETERS
+# ============================================================
+
+def step_8b_advanced_parameters(client, model):
+    console.print(Panel(
+        "[bold]Step 8b: Advanced Generation Parameters[/]\n"
+        "In addition to Temperature, you can control the model using `top_p` (Nucleus Sampling) and `max_tokens`.\n"
+        "- [cyan]top_p[/]: Controls vocabulary pool (0.1 = top 10% most likely words).\n"
+        "- [cyan]max_tokens[/]: Hard cutoff for output length.",
+        title="🎛️ Parameters", border_style="yellow"
+    ))
+
+    prompt = "Write a highly creative, bizarre sentence about a flying toaster."
+    
+    console.print("[bold cyan]Top-P Experiment[/]")
+    try:
+        t_low, _ = call_llm(client, model, prompt, temperature=1.0, top_p=0.1)
+        console.print(f"[dim]Top-P = 0.1 (Focused):[/] {t_low}")
+        
+        t_high, _ = call_llm(client, model, prompt, temperature=1.0, top_p=1.0)
+        console.print(f"[dim]Top-P = 1.0 (Diverse):[/] {t_high}")
+    except Exception as e:
+        console.print(f"[red]Error in top_p: {e}[/]")
+
+    console.print("\n[bold cyan]Max Tokens Experiment[/]")
+    prompt_long = "Write a 5 paragraph essay about the history of Rome."
+    try:
+        max_t, _ = call_llm(client, model, prompt_long, max_tokens=20)
+        console.print("[dim]Max Tokens = 20:[/]")
+        console.print(max_t)
+        console.print("[yellow](Notice how it is abruptly cut off mid-sentence!)[/]")
+    except Exception as e:
+        console.print(f"[red]Error in max_tokens: {e}[/]")
+    console.print()
+
 
 # ============================================================
 # STEP 9: PROMPT INJECTION DEMO
@@ -520,10 +560,11 @@ def main():
     # Step 7: Grand comparison
     step_7_comparison(results)
 
-    # Step 8: Temperature
+    # 8. Generation Parameters
     step_8_temperature(client, model)
+    step_8b_advanced_parameters(client, model)
 
-    # Step 9: Injection
+    # 9. Prompt Injection & Defense
     step_9_injection(client, model)
     time.sleep(1)
 
@@ -573,12 +614,26 @@ def show_chat_templates():
     try:
         from transformers import AutoTokenizer
         tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct")
-        messages = [
+        
+        # Scenario A: Training
+        messages_train = [
+            {"role": "system", "content": "You are a bot."},
+            {"role": "user", "content": "Hi!"},
+            {"role": "assistant", "content": "Hello! How can I help?"}
+        ]
+        
+        # Scenario B: Inference
+        messages_infer = [
             {"role": "system", "content": "You are a bot."},
             {"role": "user", "content": "Hi!"}
         ]
-        text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        console.print(Panel(text, title="Raw ChatML Output", border_style="magenta"))
+        
+        text_train = tokenizer.apply_chat_template(messages_train, tokenize=False, add_generation_prompt=False)
+        console.print(Panel(text_train, title="Scenario A: Training (add_generation_prompt=False)", border_style="magenta"))
+        
+        text_infer = tokenizer.apply_chat_template(messages_infer, tokenize=False, add_generation_prompt=True)
+        console.print(Panel(text_infer, title="Scenario B: Inference (add_generation_prompt=True)", border_style="green"))
+
     except ImportError:
         console.print("[yellow]pip install transformers[/] to see the live template generator!")
 
