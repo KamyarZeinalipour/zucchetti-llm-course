@@ -187,8 +187,7 @@ cells.append(nbf.v4.new_code_cell("""def call_llm(user_msg: str, system_msg: str
                 raise
     return "(rate limited — no response)"
 
-# Quick test
-print(call_llm("Say 'hello' and nothing else."))
+print("✅ call_llm helper is ready! (No API call made yet — run the next cells to test it.)")
 """))
 # ============================================================
 # SECTION: 5 Strategies
@@ -266,10 +265,10 @@ cells.append(nbf.v4.new_code_cell("""system_msg = dedent(\"\"\"\\
     You are an API endpoint. Analyze the review and return ONLY valid JSON.
     Schema:
     {
-      "sentiment": "POSITIVE|NEGATIVE|NEUTRAL",
-      "confidence": float (0.0 to 1.0),
-      "positive_aspects": [list of strings],
-      "negative_aspects": [list of strings]
+      \"sentiment\": \"POSITIVE|NEGATIVE|NEUTRAL\",
+      \"confidence\": 0.0 to 1.0,
+      \"positive_aspects\": [list of strings],
+      \"negative_aspects\": [list of strings]
     }\"\"\")
 prompt = f'Review: "{REVIEW}"'
 
@@ -279,10 +278,15 @@ print(json_out)
 
 # Bonus: actually parse it!
 try:
-    parsed = json.loads(json_out.strip("`").replace("json\n", "").replace("json", ""))
-    print(f"\n✅ Parsed successfully! Sentiment = {parsed.get('sentiment')}, Confidence = {parsed.get('confidence')}")
-except:
-    print("\n⚠️ Could not auto-parse (the model may have included markdown fences)")
+    import re
+    # Strip markdown code fences if present
+    clean = re.sub(r'^```[a-z]*\\n', '', json_out.strip())
+    clean = re.sub(r'\\n```$', '', clean).strip()
+    parsed = json.loads(clean)
+    print(chr(10) + "✅ Parsed successfully! Sentiment =" , parsed.get('sentiment'), ", Confidence =", parsed.get('confidence'))
+except Exception as parse_err:
+    print(chr(10) + "⚠️ Could not auto-parse:", parse_err)
+    print("   Raw output:", json_out[:200])
 """))
 
 # ============================================================
@@ -297,13 +301,13 @@ Let's see all 5 outputs side by side. Same model, same review — the **only** d
 cells.append(nbf.v4.new_code_cell("""print("=" * 65)
 print("  GRAND COMPARISON — Same review, 5 strategies")
 print("=" * 65)
-print(f"\nReview: \"{REVIEW}\"")
+print("Review:", REVIEW)
 print("-" * 65)
-print(f"\n1️⃣  Zero-Shot:      {zero_shot[:100]}")
-print(f"\n2️⃣  System Message:  {system_out[:100]}")
-print(f"\n3️⃣  Few-Shot:        {few_shot[:100]}")
-print(f"\n4️⃣  CoT:             {cot_out[:80]}...")
-print(f"\n5️⃣  JSON:            {json_out[:80]}...")
+print("1\ufe0f\u20e3  Zero-Shot:     ", zero_shot[:100])
+print("2\ufe0f\u20e3  System Message:", system_out[:100])
+print("3\ufe0f\u20e3  Few-Shot:      ", few_shot[:100])
+print("4\ufe0f\u20e3  CoT:           ", cot_out[:80], "...")
+print("5\ufe0f\u20e3  JSON:          ", json_out[:80], "...")
 print()
 print("=" * 65)
 print("👆 Same model, same review — the ONLY difference is the prompt!")
@@ -364,11 +368,11 @@ system_msg = "You are a technical support analyst. Classify tickets by urgency. 
 
 # User Message (Few-Shot examples + new query + CoT + JSON)
 user_msg = dedent(\"\"\"\\
-    Example 1: "Can't login to the system" → {"urgency": "HIGH", "category": "auth"}
-    Example 2: "Change the button color on dashboard" → {"urgency": "LOW", "category": "ui"}
+    Example 1: Can't login to the system -> urgency HIGH, category auth
+    Example 2: Change the button color on dashboard -> urgency LOW, category ui
 
     Now classify this ticket. Think step by step, then output JSON:
-    "Production server is down, all clients affected"\"\"\")
+    Production server is down, all clients affected\"\"\")
 
 combined_out = call_llm(user_msg, system_msg=system_msg)
 print("--- Combined Strategy Output ---")
@@ -407,17 +411,15 @@ def softmax_with_temp(logits, T):
     exp_scaled = np.exp(scaled - np.max(scaled))  # subtract max for numerical stability
     return exp_scaled / exp_scaled.sum()
 
+# Pre-compute all temperatures FIRST, then print — avoid initializing dict inside the loop
+temps_to_show = [0.1, 1.0, 2.0]
+all_probs = {T: softmax_with_temp(logits, T) for T in temps_to_show}
+
 print(f"{'Token':<10} {'Logit':<8} {'T=0.1':<10} {'T=1.0':<10} {'T=2.0':<10}")
 print("-" * 48)
-for temps in [0.1, 1.0, 2.0]:
-    probs = softmax_with_temp(logits, temps)
-    if temps == 0.1:
-        all_probs = {t: [] for t in [0.1, 1.0, 2.0]}
-    all_probs[temps] = probs
-
 for i, token in enumerate(tokens):
     row = f"{token:<10} {logits[i]:<8.1f}"
-    for T in [0.1, 1.0, 2.0]:
+    for T in temps_to_show:
         row += f" {all_probs[T][i]:<10.4f}"
     print(row)
 
