@@ -552,3 +552,37 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# ============================================================
+# STEP X: Chat Templates & Training Mechanics
+# ============================================================
+def show_chat_templates():
+    """
+    In modern NLP, we don't send raw strings, we send a messages list.
+    Under the hood, APIs use a 'Chat Template' to stringify this list.
+    
+    During Instruction Tuning, the model calculates loss ONLY on the 
+    tokens belonging to the 'assistant'. The system and user tokens are
+    treated as context.
+    """
+    console.print("\n[bold cyan]╭───────────────────── 🧠 Under the Hood ──────────────────────╮[/]")
+    console.print("[cyan]│ Chat Templates & Training Mechanics                        │[/]")
+    console.print("[cyan]│ Models are trained to predict only the 'assistant' tokens. │[/]")
+    console.print("[cyan]╰────────────────────────────────────────────────────────────╯[/]")
+    
+    try:
+        from transformers import AutoTokenizer
+        tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct")
+        messages = [
+            {"role": "system", "content": "You are a bot."},
+            {"role": "user", "content": "Hi!"}
+        ]
+        text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        console.print(Panel(text, title="Raw ChatML Output", border_style="magenta"))
+    except ImportError:
+        console.print("[yellow]pip install transformers[/] to see the live template generator!")
+
+# Add to the execution flow at the end
+if __name__ == "__main__":
+    # The existing main block will run normally, we just append this for the terminal script.
+    pass
