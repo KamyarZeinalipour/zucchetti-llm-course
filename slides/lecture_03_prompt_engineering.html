@@ -248,6 +248,46 @@
     <div class="takeaway">The <span class="highlight">system message</span> holds role + rules + format. The <span class="highlight">user message</span> holds context + task. This split is how all APIs work.</div>
 </section>
 
+<!-- SLIDE 6c: UNDER THE HOOD — CHATML -->
+<section>
+    <h2>Under the Hood: Chat Template</h2>
+    <p style="font-size:0.65em; color:#aaa;">What the model <span class="highlight">actually sees</span> — special tokens wrap each message.</p>
+    <div class="two-col" style="font-size:0.52em; gap:14px;">
+        <div>
+            <div class="card" style="font-family:var(--r-code-font); line-height:1.8; padding:14px; border-color:rgba(108,99,255,0.4);">
+                <p style="margin:0; color:#555;"><!-- ChatML format (GPT / Gemini / Mistral) --></p>
+                <p style="margin:2px 0;"><span style="color:var(--accent2); font-weight:700;">&lt;|im_start|&gt;system</span></p>
+                <p style="margin:2px 0;">You are a senior IT consultant.</p>
+                <p style="margin:2px 0;">Rules: Max 200 words. Respond in JSON.</p>
+                <p style="margin:2px 0;"><span style="color:var(--accent2); font-weight:700;">&lt;|im_end|&gt;</span></p>
+                <p style="margin:6px 0 2px;"><span style="color:var(--accent3); font-weight:700;">&lt;|im_start|&gt;user</span></p>
+                <p style="margin:2px 0;">Context: 500-person company in Milan.</p>
+                <p style="margin:2px 0;">Task: Compare SAP vs Oracle ERP.</p>
+                <p style="margin:2px 0;"><span style="color:var(--accent3); font-weight:700;">&lt;|im_end|&gt;</span></p>
+                <p style="margin:6px 0 2px;"><span style="color:#4CAF50; font-weight:700;">&lt;|im_start|&gt;assistant</span></p>
+                <p style="margin:2px 0; color:#888;">← model generates from here</p>
+            </div>
+        </div>
+        <div>
+            <div class="card" style="padding:12px; border-color:rgba(0,217,255,0.3);">
+                <h3>Why this matters</h3>
+                <ul style="margin:4px 0; line-height:1.7;">
+                    <li><span class="highlight">Special tokens</span> like <code>&lt;|im_start|&gt;</code> tell the model where each role begins and ends</li>
+                    <li>The model was <strong>trained</strong> on this format — it learned to follow system rules</li>
+                    <li>The API does this wrapping <strong>for you</strong> — you just pass the messages</li>
+                    <li>Different models use different templates (ChatML, Llama, Gemma)</li>
+                </ul>
+            </div>
+            <div class="card" style="padding:12px; margin-top:6px; border-color:rgba(255,152,0,0.3);">
+                <h3 style="color:#FF9800;">⚡ Key insight</h3>
+                <p style="margin:4px 0;">The model generates <strong>one token at a time</strong> starting after <code>&lt;|im_start|&gt;assistant</code>.</p>
+                <p style="margin:4px 0;">Everything before it — system + user — is the <span class="highlight">conditioning context</span> from Slide 5.</p>
+            </div>
+        </div>
+    </div>
+    <div class="takeaway">You write <span class="highlight">messages</span>. The API wraps them in <span class="highlight">special tokens</span>. The model generates conditioned on the full template.</div>
+</section>
+
 <!-- SLIDE 7: SECTION 2 TITLE -->
 <section>
     <div class="progress-bar"><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
