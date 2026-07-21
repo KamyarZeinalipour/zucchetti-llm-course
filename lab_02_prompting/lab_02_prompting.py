@@ -1,6 +1,6 @@
 """
 ============================================================
-  Lab 03: Prompt Engineering Workshop
+  Lab 02: Prompt Engineering Workshop
   LLM Course — Lecture 3: Prompt Engineering
 ============================================================
 
@@ -83,7 +83,7 @@ def get_llm_client():
         api_key=api_key,
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
     )
-    model = "gemini-2.0-flash"
+    model = "gemini-3.5-flash"
     console.print(f"[bold green]✓[/] Connected to Gemini ({model})")
     return client, model
 
@@ -115,15 +115,28 @@ def call_llm(client, model, user_msg, system_msg=None, temperature=None, max_tok
     # User message: the actual question/task (comes from the end user)
     msgs.append({"role": "user", "content": user_msg})
 
-    kwargs = {"model": model, "messages": msgs, "max_tokens": max_tokens}
+    kwargs = {"model": model, "messages": msgs}
     if temperature is not None:
         kwargs["temperature"] = temperature
 
-    response = client.chat.completions.create(**kwargs)
-    text = response.choices[0].message.content.strip()
-    # Estimate tokens (rough: 1 token ≈ 4 chars for English)
-    est_tokens = len(text) // 4
-    return text, est_tokens
+    # Retry with backoff for rate limit errors (free tier has strict limits)
+    max_retries = 5
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(**kwargs)
+            text = response.choices[0].message.content.strip()
+            # Estimate tokens (rough: 1 token ≈ 4 chars for English)
+            est_tokens = len(text) // 4
+            return text, est_tokens
+        except Exception as e:
+            if "429" in str(e) or "rate" in str(e).lower() or "quota" in str(e).lower():
+                wait = min(15 * (attempt + 1), 60)  # 15s, 30s, 45s, 60s, 60s
+                console.print(f"[yellow]⏳ Rate limit hit — waiting {wait}s (attempt {attempt+1}/{max_retries})...[/]")
+                time.sleep(wait)
+            else:
+                raise
+    console.print("[red]✗ Max retries exceeded. API quota may be fully exhausted for today.[/]")
+    return "(rate limited — no response)", 0
 
 
 def show_comparison(label_a, text_a, label_b, text_b):
@@ -206,11 +219,17 @@ def step_4_few_shot(client, model):
     prompt = dedent(f"""\
         Classify these reviews:
 
-        "Amazing product, works perfectly!" → POSITIVE
-        "Terrible quality, broke after one day" → NEGATIVE
-        "It's okay, nothing special" → NEUTRAL
+        Review: "Amazing product, works perfectly!"
+        Sentiment: POSITIVE
 
-        "{REVIEW}" →""")
+        Review: "Terrible quality, broke after one day"
+        Sentiment: NEGATIVE
+
+        Review: "It's okay, nothing special"
+        Sentiment: NEUTRAL
+
+        Review: "{REVIEW}"
+        Sentiment:""")
 
     text, tokens = call_llm(client, model, prompt, temperature=0.0)
     console.print(Panel(text, title="Few-Shot Output", border_style="cyan"))
@@ -457,7 +476,7 @@ def step_10_production(client, model):
 
 def main():
     console.print(Panel(
-        "[bold white]Lab 03: Prompt Engineering Workshop[/]\n"
+        "[bold white]Lab 02: Prompt Engineering Workshop[/]\n"
         "[dim]Lecture 3 — Prompt Engineering[/]\n\n"
         "Same model, same question, 5 different strategies.\n"
         "Watch the output transform from [red]verbose garbage[/]\n"
@@ -517,7 +536,7 @@ def main():
 
     # Summary
     console.print(Panel(
-        "[bold green]Lab 03 Complete![/]\n\n"
+        "[bold green]Lab 02 Complete![/]\n\n"
         "Key takeaways:\n"
         "  1. [bold]System message[/] = most impactful single improvement\n"
         "  2. [bold]Few-shot[/] = showing > telling\n"
