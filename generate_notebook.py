@@ -16,7 +16,7 @@ cells.append(nbf.v4.new_code_cell("""# Run this cell first to install required p
 import os
 from google.colab import userdata
 try:
-    os.environ["GOOGLE_API_KEY"] = userdata.get('GOOGLE_API_KEY')
+    os.environ["GOOGLE_API_KEY"] = userdata.get('GOOGLE_API_KEY').strip()
 except Exception:
     print("Not running in Colab or Secrets not configured.")
 """))
@@ -65,11 +65,11 @@ cells.append(nbf.v4.new_markdown_cell("""## Step 1: Connecting to the API
 We use the `openai` Python package, but point it to Google's Gemini endpoint. This is a common pattern: the OpenAI API format has become an industry standard, so many providers (Google, DeepSeek, Together, Groq) accept the exact same code!
 """))
 
-cells.append(nbf.v4.new_code_cell("""api_key = os.environ.get("GOOGLE_API_KEY")
+cells.append(nbf.v4.new_code_cell("""api_key = (os.environ.get("GOOGLE_API_KEY") or "").strip()
 if not api_key:
     from dotenv import load_dotenv
     load_dotenv()
-    api_key = os.environ.get("GOOGLE_API_KEY")
+    api_key = (os.environ.get("GOOGLE_API_KEY") or "").strip()
     if not api_key:
         raise ValueError("Missing GOOGLE_API_KEY environment variable!")
 
