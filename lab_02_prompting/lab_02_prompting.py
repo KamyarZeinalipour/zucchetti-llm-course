@@ -83,7 +83,7 @@ def get_llm_client():
         api_key=api_key,
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
     )
-    model = "gemini-3.5-flash"
+    model = "gemini-3.1-flash-lite"
     console.print(f"[bold green]✓[/] Connected to Gemini ({model})")
     return client, model
 
