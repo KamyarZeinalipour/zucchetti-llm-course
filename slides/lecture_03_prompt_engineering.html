@@ -524,6 +524,51 @@
     <div class="takeaway">Chaining makes complex tasks <span class="highlight">reliable</span>. Each step is simple enough that the model rarely fails.</div>
 </section>
 
+<!-- SLIDE 15b: PROMPT CHAINING — WORKED EXAMPLE -->
+<section>
+    <h2>Chaining — Worked Example</h2>
+    <p style="font-size:0.6em; color:#aaa;">Processing a customer email in 3 chained calls. Each step's <span class="highlight">output feeds the next step's input</span>.</p>
+    <div style="font-size:0.5em;">
+        <div class="card" style="margin:4px 0; padding:8px 12px; border-left:4px solid var(--accent);">
+            <p style="margin:0;"><strong style="color:var(--accent);">📄 Input Email:</strong> <em>"Hi, my order #4521 arrived damaged yesterday. The screen is cracked. I need a replacement ASAP or a refund. — Marco Rossi"</em></p>
+        </div>
+        <div style="text-align:center; margin:2px 0; color:#555;">▼ Step 1</div>
+        <div class="card" style="margin:4px 0; padding:8px 12px; border-left:4px solid var(--accent2);">
+            <div style="display:flex; gap:12px;">
+                <div style="flex:1;">
+                    <p style="margin:0; color:var(--accent2);"><strong>Prompt 1:</strong> "Extract entities from this email as JSON"</p>
+                </div>
+                <div style="flex:1; font-family:var(--r-code-font); color:var(--accent3);">
+                    <p style="margin:0;">→ {"customer": "Marco Rossi", "order": "#4521", "issue": "damaged screen", "request": "replacement or refund"}</p>
+                </div>
+            </div>
+        </div>
+        <div style="text-align:center; margin:2px 0; color:#555;">▼ Step 2 (receives Step 1 output)</div>
+        <div class="card" style="margin:4px 0; padding:8px 12px; border-left:4px solid var(--accent3);">
+            <div style="display:flex; gap:12px;">
+                <div style="flex:1;">
+                    <p style="margin:0; color:var(--accent3);"><strong>Prompt 2:</strong> "Given these entities, classify urgency and route to department"</p>
+                </div>
+                <div style="flex:1; font-family:var(--r-code-font); color:var(--accent3);">
+                    <p style="margin:0;">→ {"urgency": "HIGH", "department": "returns", "sla_hours": 24, "requires_manager": false}</p>
+                </div>
+            </div>
+        </div>
+        <div style="text-align:center; margin:2px 0; color:#555;">▼ Step 3 (receives Step 1 + Step 2 outputs)</div>
+        <div class="card" style="margin:4px 0; padding:8px 12px; border-left:4px solid #4CAF50;">
+            <div style="display:flex; gap:12px;">
+                <div style="flex:1;">
+                    <p style="margin:0; color:#4CAF50;"><strong>Prompt 3:</strong> "Draft a reply using the customer name, acknowledging the issue, and offering the resolution"</p>
+                </div>
+                <div style="flex:1; color:#4CAF50;">
+                    <p style="margin:0;">→ "Dear Marco, we're sorry about the damaged screen on order #4521. We've initiated a replacement that will ship within 24 hours..."</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="takeaway">Each step is <span class="highlight">simple and verifiable</span>. If Step 2 misclassifies urgency, you fix only that prompt — not the whole pipeline.</div>
+</section>
+
 <!-- SLIDE 16: TEMPERATURE -->
 <section>
     <h2>Temperature + Prompt Interaction</h2>
