@@ -527,46 +527,31 @@
 <!-- SLIDE 15b: PROMPT CHAINING — WORKED EXAMPLE -->
 <section>
     <h2>Chaining — Worked Example</h2>
-    <p style="font-size:0.6em; color:#aaa;">Processing a customer email in 3 chained calls. Each step's <span class="highlight">output feeds the next step's input</span>.</p>
-    <div style="font-size:0.5em;">
+    <p style="font-size:0.6em; color:#aaa;">Each step has its own <span class="highlight">system prompt, schema, and output format</span>. It is NOT simple — each step is a full prompt engineering task.</p>
+    <div style="font-size:0.48em;">
         <div class="card" style="margin:4px 0; padding:8px 12px; border-left:4px solid var(--accent);">
-            <p style="margin:0;"><strong style="color:var(--accent);">📄 Input Email:</strong> <em>"Hi, my order #4521 arrived damaged yesterday. The screen is cracked. I need a replacement ASAP or a refund. — Marco Rossi"</em></p>
+            <p style="margin:0;"><strong style="color:var(--accent);">📄 Input:</strong> <em>"Hi, my order #4521 arrived damaged yesterday. The screen is cracked. I need a replacement ASAP or a refund. — Marco Rossi"</em></p>
         </div>
-        <div style="text-align:center; margin:2px 0; color:#555;">▼ Step 1</div>
+        <div style="text-align:center; margin:2px 0; color:#555;">▼ Step 1 — Entity Extraction (its own system prompt + schema)</div>
         <div class="card" style="margin:4px 0; padding:8px 12px; border-left:4px solid var(--accent2);">
-            <div style="display:flex; gap:12px;">
-                <div style="flex:1;">
-                    <p style="margin:0; color:var(--accent2);"><strong>Prompt 1:</strong> "Extract entities from this email as JSON"</p>
-                </div>
-                <div style="flex:1; font-family:var(--r-code-font); color:var(--accent3);">
-                    <p style="margin:0;">→ {"customer": "Marco Rossi", "order": "#4521", "issue": "damaged screen", "request": "replacement or refund"}</p>
-                </div>
-            </div>
+            <p style="margin:0 0 2px; color:var(--accent2);"><strong>System:</strong> "You are an NER engine. Extract entities from customer emails."</p>
+            <p style="margin:0 0 2px; color:#888;"><strong>User:</strong> "Extract as JSON with schema: {customer_name: str, order_id: str, product_type: str | null, issue_type: enum[damaged, missing, wrong_item, defective, other], desired_resolution: enum[refund, replacement, repair, credit]}"</p>
+            <p style="margin:0; font-family:var(--r-code-font); color:var(--accent3);">→ {"customer_name": "Marco Rossi", "order_id": "#4521", "product_type": null, "issue_type": "damaged", "desired_resolution": "replacement"}</p>
         </div>
-        <div style="text-align:center; margin:2px 0; color:#555;">▼ Step 2 (receives Step 1 output)</div>
+        <div style="text-align:center; margin:2px 0; color:#555;">▼ Step 2 — Classification & Routing (different system prompt + categories)</div>
         <div class="card" style="margin:4px 0; padding:8px 12px; border-left:4px solid var(--accent3);">
-            <div style="display:flex; gap:12px;">
-                <div style="flex:1;">
-                    <p style="margin:0; color:var(--accent3);"><strong>Prompt 2:</strong> "Given these entities, classify urgency and route to department"</p>
-                </div>
-                <div style="flex:1; font-family:var(--r-code-font); color:var(--accent3);">
-                    <p style="margin:0;">→ {"urgency": "HIGH", "department": "returns", "sla_hours": 24, "requires_manager": false}</p>
-                </div>
-            </div>
+            <p style="margin:0 0 2px; color:var(--accent3);"><strong>System:</strong> "You are a ticket router. Classify by urgency [CRITICAL, HIGH, MEDIUM, LOW] and department [returns, billing, technical, shipping, general]."</p>
+            <p style="margin:0 0 2px; color:#888;"><strong>User:</strong> "Classify this ticket. Entities from Step 1: {…}. Consider: physical damage = HIGH, financial request = requires_approval, SLA = 24h for HIGH."</p>
+            <p style="margin:0; font-family:var(--r-code-font); color:var(--accent3);">→ {"urgency": "HIGH", "department": "returns", "sla_hours": 24, "requires_approval": true, "escalate_to": "returns_manager"}</p>
         </div>
-        <div style="text-align:center; margin:2px 0; color:#555;">▼ Step 3 (receives Step 1 + Step 2 outputs)</div>
+        <div style="text-align:center; margin:2px 0; color:#555;">▼ Step 3 — Response Generation (yet another system prompt + tone + template)</div>
         <div class="card" style="margin:4px 0; padding:8px 12px; border-left:4px solid #4CAF50;">
-            <div style="display:flex; gap:12px;">
-                <div style="flex:1;">
-                    <p style="margin:0; color:#4CAF50;"><strong>Prompt 3:</strong> "Draft a reply using the customer name, acknowledging the issue, and offering the resolution"</p>
-                </div>
-                <div style="flex:1; color:#4CAF50;">
-                    <p style="margin:0;">→ "Dear Marco, we're sorry about the damaged screen on order #4521. We've initiated a replacement that will ship within 24 hours..."</p>
-                </div>
-            </div>
+            <p style="margin:0 0 2px; color:#4CAF50;"><strong>System:</strong> "You are a CS agent. Tone: empathetic, professional. Use the customer's name. Never blame the customer. Include order ID and next steps."</p>
+            <p style="margin:0 0 2px; color:#888;"><strong>User:</strong> "Draft a reply. Entities: {Step 1}. Routing: {Step 2}. Template: greeting → acknowledge → action → timeline → sign-off."</p>
+            <p style="margin:0; color:#4CAF50;">→ "Dear Marco, we sincerely apologize for the condition of order #4521. We've flagged this as high priority and initiated a replacement. It will ship within 24 hours. You'll receive tracking via email..."</p>
         </div>
     </div>
-    <div class="takeaway">Each step is <span class="highlight">simple and verifiable</span>. If Step 2 misclassifies urgency, you fix only that prompt — not the whole pipeline.</div>
+    <div class="takeaway">3 calls, 3 <span class="highlight">different system prompts</span>, 3 different output schemas. Each step is a <span class="warn">full prompt engineering problem</span> on its own.</div>
 </section>
 
 <!-- SLIDE 16: TEMPERATURE -->
