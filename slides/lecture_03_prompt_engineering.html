@@ -206,6 +206,7 @@
             <p style="color:#888; font-size:0.85em; margin:2px 0 0;">"Maximum 200 words. Do not mention other competitors."</p>
         </div>
     </div>
+    <div class="takeaway">Not every prompt needs all 5 components — but knowing them helps you <span class="highlight">diagnose</span> why a prompt isn't working.</div>
 </section>
 
 <!-- SLIDE 6b: PROMPT TEMPLATE IN ACTION -->
@@ -255,7 +256,7 @@
     <div class="two-col" style="font-size:0.52em; gap:14px;">
         <div>
             <div class="card" style="font-family:var(--r-code-font); line-height:1.8; padding:14px; border-color:rgba(108,99,255,0.4);">
-                <p style="margin:0; color:#555;"><!-- ChatML format (GPT / Gemini / Mistral) --></p>
+                <p style="margin:0; color:#555;">ChatML format (used by GPT, Gemini, Mistral)</p>
                 <p style="margin:2px 0;"><span style="color:var(--accent2); font-weight:700;">&lt;|im_start|&gt;system</span></p>
                 <p style="margin:2px 0;">You are a senior IT consultant.</p>
                 <p style="margin:2px 0;">Rules: Max 200 words. Respond in JSON.</p>
@@ -281,7 +282,7 @@
             <div class="card" style="padding:12px; margin-top:6px; border-color:rgba(255,152,0,0.3);">
                 <h3 style="color:#FF9800;">⚡ Key insight</h3>
                 <p style="margin:4px 0;">The model generates <strong>one token at a time</strong> starting after <code>&lt;|im_start|&gt;assistant</code>.</p>
-                <p style="margin:4px 0;">Everything before it — system + user — is the <span class="highlight">conditioning context</span> from Slide 5.</p>
+                <p style="margin:4px 0;">Everything before it — system + user — is the <span class="highlight">conditioning context</span> from the math slide earlier.</p>
             </div>
         </div>
     </div>
@@ -400,7 +401,7 @@
         <h3>⚠️ Important caveat</h3>
         <p>CoT is an <span class="warn">emergent ability</span> — it only works on large models (>100B parameters). On small models, CoT can <strong>hurt</strong> performance by adding noise.</p>
     </div>
-    <p class="paper-ref">📄 Wei et al., "Chain-of-Thought Prompting Elicits Reasoning in LLMs", NeurIPS 2022 &nbsp;|&nbsp; Wang et al., "Self-Consistency Improves CoT Reasoning", ICLR 2023</p>
+    <p class="paper-ref">📄 Wei et al., "Chain-of-Thought Prompting Elicits Reasoning in LLMs", NeurIPS 2022</p>
 </section>
 
 <!-- SLIDE 12: JSON OUTPUT -->
@@ -434,7 +435,7 @@
         <p>&nbsp;&nbsp;❌ <span style="color:var(--accent2); text-decoration:line-through;">{</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ P = 0 <span style="color:#555;">(masked — breaks JSON)</span></p>
     </div>
     <div class="formula" style="font-size:0.8em;">P(tokenᵢ) = P<sub>model</sub>(tokenᵢ) × <span style="color:var(--accent2);">mask</span>(tokenᵢ)</div>
-    <p style="font-size:0.55em; color:#888;">The mask sets invalid token probabilities to 0, then renormalize. Also called <span class="highlight">grammar-guided generation</span>.</p>
+    <p style="font-size:0.55em; color:#888;">The <strong>mask</strong> is a filter: it sets the probability of invalid tokens to 0 (blocking them), then renormalizes. Also called <span class="highlight">grammar-guided generation</span>.</p>
     <p class="paper-ref">📄 Willard & Louf, "Efficient Guided Generation for LLMs", 2023 (Outlines library)</p>
 </section>
 
@@ -582,8 +583,8 @@
         </table>
     </div>
     <div class="two-col" style="font-size:0.55em; margin-top:6px;">
-        <div class="card"><strong style="color:var(--accent3);">T → 0:</strong> highest logit dominates → nearly deterministic (greedy decoding)</div>
-        <div class="card"><strong style="color:var(--accent2);">T → ∞:</strong> all logits equal → uniform random → incoherent</div>
+        <div class="card"><strong style="color:var(--accent3);">T = 0 (in APIs):</strong> greedy decoding — always pick the most likely token. No randomness. Same input = same output every time.</div>
+        <div class="card"><strong style="color:var(--accent2);">T → ∞:</strong> all logits become equal → uniform random → the model picks tokens randomly → incoherent gibberish.</div>
     </div>
 </section>
 
@@ -611,7 +612,7 @@
             <p style="color:var(--accent3); margin-top:4px;">Adapts: sharp distribution → fewer tokens. Flat → more tokens.</p>
         </div>
     </div>
-    <div class="takeaway">Pure sampling produces degenerate text. Top-p was the fix — now the industry default (p=0.95).</div>
+    <div class="takeaway">Without filtering, the model can produce <span class="warn">repetitive or incoherent text</span>. Top-p was the fix — now the industry default (p=0.95).</div>
     <p class="paper-ref">📄 Holtzman et al., "The Curious Case of Neural Text Degeneration", ICLR 2020</p>
 </section>
 
@@ -654,6 +655,7 @@
 <section>
     <h2>Self-Consistency</h2>
     <p style="font-size:0.7em; color:#aaa;">Run the same prompt <span class="highlight">3-5 times</span>, pick the most common answer.</p>
+    <p style="font-size:0.55em; color:#888; margin-top:0;">Why do you get different answers each time? Because with <strong>temperature &gt; 0</strong>, the model samples randomly — each run picks different tokens. That's by design.</p>
     <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:10px 0;">
         <div class="card" style="text-align:center; flex:1; min-width:80px; padding:10px;"><p style="font-size:0.75em;">Run 1</p><p>NEGATIVE</p></div>
         <div class="card" style="text-align:center; flex:1; min-width:80px; padding:10px;"><p style="font-size:0.75em;">Run 2</p><p>NEGATIVE</p></div>
@@ -772,8 +774,8 @@
         </div>
         <div class="card" style="margin:5px 0; padding:10px 14px;">
             <h3>❌ Ignoring context window</h3>
-            <p><span class="warn">100 pages + "summarize this"</span> → truncated input</p>
-            <p><span class="highlight">Chunk → summarize each → merge</span> → complete coverage</p>
+            <p><span class="warn">100 pages + "summarize this"</span> → the model <strong>silently drops</strong> text that doesn't fit in its context window</p>
+            <p><span class="highlight">Chunk → summarize each → merge</span> → complete coverage (use prompt chaining!)</p>
         </div>
     </div>
 </section>
@@ -849,7 +851,7 @@
             <p style="color:#888;">Connect to Gemini, send "Hello!"</p>
         </div>
         <div class="card" style="padding:10px;">
-            <h3>📝 Steps 3-7</h3>
+            <h3>📝 Steps 2-6</h3>
             <p>5 prompting strategies</p>
             <p style="color:#888;">Zero-shot → System → Few-shot → CoT → JSON</p>
         </div>
