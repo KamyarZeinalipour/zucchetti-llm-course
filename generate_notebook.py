@@ -152,43 +152,6 @@ print("👆 Notice how Scenario B ends with '<|im_start|>assistant' — this dan
 """))
 
 # ============================================================
-# SECTION: Anatomy of a Prompt
-# ============================================================
-cells.append(nbf.v4.new_markdown_cell("""---
-## 📐 Anatomy of a Prompt — The 5 Components
-
-Every well-structured prompt contains up to 5 building blocks:
-
-| # | Component | Where | Example |
-|---|-----------|-------|---------|
-| ① | **Role** | System msg | "You are a senior IT consultant" |
-| ② | **Context** | User msg | "The client is a 500-person manufacturing company" |
-| ③ | **Task** | User msg | "Compare SAP vs Oracle and recommend one" |
-| ④ | **Output Format** | System msg | "Respond in JSON: {recommendation, reasons[]}" |
-| ⑤ | **Constraints** | System msg | "Maximum 200 words. Do not mention competitors." |
-
-Not every prompt needs all 5. But knowing them helps you **diagnose** why a prompt isn't working — which component is missing?
-
-Let's build one using all 5 components:
-"""))
-
-cells.append(nbf.v4.new_code_cell("""# ① Role + ④ Format + ⑤ Constraints → System Message
-system_msg = dedent(\"\"\"\\
-    You are a senior IT consultant specializing in ERP systems.
-    Always respond in JSON with keys: recommendation (string), reasons (list of strings).
-    Maximum 100 words. Do not mention competitors outside SAP and Oracle.\"\"\")
-
-# ② Context + ③ Task → User Message
-user_msg = dedent(\"\"\"\\
-    Context: The client is a 500-person manufacturing company in Milan, Italy.
-    Task: Compare SAP vs Oracle ERP and recommend one.\"\"\")
-
-result = call_llm(user_msg, system_msg=system_msg)
-print("--- 5-Component Prompt Output ---")
-print(result)
-"""))
-
-# ============================================================
 # SECTION: Helper Function
 # ============================================================
 cells.append(nbf.v4.new_markdown_cell("""---
@@ -229,6 +192,43 @@ print(call_llm("Say 'hello' and nothing else."))
 """))
 
 # ============================================================
+# SECTION: Anatomy of a Prompt
+# ============================================================
+cells.append(nbf.v4.new_markdown_cell("""---
+## 📐 Anatomy of a Prompt — The 5 Components
+
+Every well-structured prompt contains up to 5 building blocks:
+
+| # | Component | Where | Example |
+|---|-----------|-------|---------|
+| ① | **Role** | System msg | "You are a senior IT consultant" |
+| ② | **Context** | User msg | "The client is a 500-person manufacturing company" |
+| ③ | **Task** | User msg | "Compare SAP vs Oracle and recommend one" |
+| ④ | **Output Format** | System msg | "Respond in JSON: {recommendation, reasons[]}" |
+| ⑤ | **Constraints** | System msg | "Maximum 200 words. Do not mention competitors." |
+
+Not every prompt needs all 5. But knowing them helps you **diagnose** why a prompt isn't working — which component is missing?
+
+Let's build one using all 5 components:
+"""))
+
+cells.append(nbf.v4.new_code_cell("""# ① Role + ④ Format + ⑤ Constraints → System Message
+system_msg = dedent(\"\"\"\\
+    You are a senior IT consultant specializing in ERP systems.
+    Always respond in JSON with keys: recommendation (string), reasons (list of strings).
+    Maximum 100 words. Do not mention competitors outside SAP and Oracle.\"\"\")
+
+# ② Context + ③ Task → User Message
+user_msg = dedent(\"\"\"\\
+    Context: The client is a 500-person manufacturing company in Milan, Italy.
+    Task: Compare SAP vs Oracle ERP and recommend one.\"\"\")
+
+result = call_llm(user_msg, system_msg=system_msg)
+print("--- 5-Component Prompt Output ---")
+print(result)
+"""))
+
+# ============================================================
 # SECTION: 5 Strategies
 # ============================================================
 cells.append(nbf.v4.new_markdown_cell("""---
@@ -236,6 +236,7 @@ cells.append(nbf.v4.new_markdown_cell("""---
 Just ask the question directly. No role, no instructions.  
 This is the **"before"** — watch for verbosity and unpredictability.
 """))
+
 
 cells.append(nbf.v4.new_code_cell("""prompt = f'Classify the sentiment of this review: "{REVIEW}"'
 zero_shot = call_llm(prompt)
