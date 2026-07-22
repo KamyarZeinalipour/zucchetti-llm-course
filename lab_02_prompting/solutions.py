@@ -1,38 +1,59 @@
-"""Lab 03: Solutions — Chain-of-Thought prompt implementation."""
+"""Lab 02: Solutions — Chain-of-Thought prompt implementation.
+
+This is the reference implementation for the CoT step (Step 5).
+Compare it to your own attempt in step_5_cot() inside lab_02_prompting.py.
+"""
+
+from textwrap import dedent
 
 
-def prompt_cot_solution(client, model, query, context):
-    """Chain-of-Thought: force step-by-step reasoning."""
-    from textwrap import dedent
+def prompt_cot_solution(client, model, review):
+    """
+    Chain-of-Thought sentiment classification.
 
-    system = dedent("""\
-        You are an HR policy assistant. You must answer questions based ONLY on the provided context.
-        
-        IMPORTANT: Think step by step before answering.
-        
-        Follow this process:
-        1. IDENTIFY: Which sections of the context are relevant to the question?
-        2. ANALYZE: What do those sections say? Are there any conditions or exceptions?
-        3. REASON: How do the relevant sections combine to answer the question?
-        4. ANSWER: Provide a clear, concise final answer.
-        5. SOURCES: List the source documents you used.
-        
-        If the context does not contain enough information, say so clearly.""")
+    Instead of asking the model to jump straight to the answer,
+    we explicitly ask it to reason step by step.
+    Each intermediate step narrows the probability distribution
+    for the next one — leading to a more accurate final answer.
 
-    user = f"""Context:
-{context}
+    Compare with step_3_system_message: that gives you a fast one-word
+    answer. CoT gives you an auditable reasoning trail.
+    """
+    prompt = dedent(f"""\
+        Classify this software review as POSITIVE, NEGATIVE, or NEUTRAL.
+        Think step by step, analyzing each aspect before your final classification.
 
-Question: {query}
+        Review: "{review}"
 
-Let's think step by step:"""
+        Step 1 - Identify positive aspects:
+        Step 2 - Identify negative aspects:
+        Step 3 - Weigh which matters more for a software product:
+        Step 4 - Final classification (one word: POSITIVE / NEGATIVE / NEUTRAL):""")
 
     response = client.chat.completions.create(
         model=model,
         messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
+            {"role": "user", "content": prompt},
         ],
-        temperature=0.2,
-        max_tokens=600,
+        temperature=0.0,
     )
     return response.choices[0].message.content
+
+
+# ─── Example usage ───────────────────────────────────────────
+if __name__ == "__main__":
+    import os
+    from pathlib import Path
+    from dotenv import load_dotenv
+    from openai import OpenAI
+
+    load_dotenv(Path(__file__).parent.parent / ".env")
+    client = OpenAI(
+        api_key=os.getenv("GOOGLE_API_KEY"),
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+    )
+    model = "gemini-3.1-flash-lite"
+
+    review = "Easy to use but crashes frequently."
+    result = prompt_cot_solution(client, model, review)
+    print(result)

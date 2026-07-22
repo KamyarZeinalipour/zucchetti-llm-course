@@ -90,10 +90,10 @@
     <h2>Today&rsquo;s Agenda</h2>
     <div style="max-width:650px; margin:0 auto; text-align:left;">
         <div class="agenda-item"><span class="time">20 min</span> The Retrieval Problem &amp; The RAG Architecture</div>
+        <div class="agenda-item" style="border-left-color: #888; background:rgba(255,255,255,0.03);"><span class="time" style="color:#888;">5 min</span> &#9749; Short Break &mdash; <em style="color:#666; font-size:0.9em;">transition from the lab session</em></div>
         <div class="agenda-item"><span class="time">20 min</span> From Keywords to Vectors &mdash; How Retrieval Evolved</div>
         <div class="agenda-item"><span class="time">15 min</span> Document Processing &amp; Chunking Theory</div>
         <div class="agenda-item"><span class="time">10 min</span> Vector Databases &mdash; Similarity Search at Scale</div>
-        <div class="agenda-item" style="border-left-color: #888; background:rgba(255,255,255,0.03);"><span class="time" style="color:#888;">5 min</span> &#9749; Short Break</div>
         <div class="agenda-item"><span class="time">15 min</span> Decision Matrix: Prompt vs. RAG vs. Fine-Tune</div>
         <div class="agenda-item"><span class="time">5 min</span> Key Takeaways &amp; Q&amp;A</div>
     </div>
@@ -112,7 +112,7 @@
     </section>
 </section>
 
-<!-- Slide 3: The Fundamental Problem -->
+<!-- Slide 4: The Fundamental Problem -->
 <section>
     <h2>The Fundamental Problem</h2>
     <p style="font-size:0.75em; color:#aaa;">LLMs have two critical limitations:</p>
@@ -135,7 +135,7 @@
     <div class="takeaway">We need a way to <strong>inject real, verifiable knowledge</strong> into the model at query time.</div>
 </section>
 
-<!-- Slide 4: Two Ways to Add Knowledge -->
+<!-- Slide 5: Two Ways to Add Knowledge -->
 <section>
     <h2>Two Ways to Add Knowledge</h2>
     <div class="two-col">
@@ -156,7 +156,7 @@
             <ul>
                 <li>Retrieve relevant documents</li>
                 <li>Inject into the prompt as context</li>
-                <li>Cheap, instantly updatable</li>
+                <li>Fast to update (re-index documents)</li>
                 <li>Answers are <span class="highlight">grounded in sources</span></li>
             </ul>
             <p style="font-size:0.65em; color:#aaa; margin-top:0.5em;">Like an open-book exam &mdash; you can check your answers.</p>
@@ -165,7 +165,7 @@
     <div class="takeaway">Fine-tuning changes <strong>behavior</strong>. RAG provides <strong>knowledge</strong>. They solve different problems.</div>
 </section>
 
-<!-- Slide 5: What is RAG? -->
+<!-- Slide 6: What is RAG? -->
 <section>
     <h2>Retrieval-Augmented Generation</h2>
     <p style="font-size:0.7em; color:#aaa;">The idea: instead of asking the model to <em>remember</em>, let it <em>look things up</em>.</p>
@@ -196,7 +196,7 @@
     <p class="paper-ref">Lewis et al., &ldquo;Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks&rdquo;, NeurIPS 2020</p>
 </section>
 
-<!-- Slide 6: RAG in Action — A Concrete Example -->
+<!-- Slide 7: RAG in Action — A Concrete Example -->
 <section>
     <h2>RAG in Action &mdash; Step by Step</h2>
     <p style="font-size:0.7em; color:#aaa;">A concrete example of the full pipeline.</p>
@@ -217,7 +217,7 @@
     <p class="paper-ref">Lewis et al., &ldquo;Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks&rdquo;, NeurIPS 2020</p>
 </section>
 
-<!-- Slide 7: Why RAG Works — Grounding -->
+<!-- Slide 8: Why RAG Works — Grounding -->
 <section>
     <h2>Why RAG Works &mdash; The Grounding Principle</h2>
     <p style="font-size:0.75em; color:#aaa;">RAG transforms the generation task from <em>recall</em> to <em>reading comprehension</em>.</p>
@@ -238,20 +238,34 @@
     <p style="font-size:0.62em; text-align:center; color:#aaa; margin-top:0.4em;">LLMs excel at <strong>reading comprehension</strong> &mdash; RAG converts recall into comprehension.</p>
 </section>
 
-<!-- Slide 8: RAG vs Fine-Tuning — Deep Comparison -->
+<!-- Slide 9: RAG vs Fine-Tuning — Deep Comparison -->
 <section>
     <h2>RAG vs. Fine-Tuning &mdash; When to Use Each</h2>
     <table class="vs-table">
         <tr><th></th><th>📚 RAG</th><th>🔧 Fine-Tuning</th></tr>
         <tr><td>What it changes</td><td><span class="highlight">Knowledge available</span></td><td>Model behavior / weights</td></tr>
         <tr><td>Knowledge source</td><td>External documents</td><td>Baked into parameters</td></tr>
-        <tr><td>Update frequency</td><td><span class="highlight">Instant</span> (swap documents)</td><td>Retrain required (hours&ndash;days)</td></tr>
+        <tr><td>Update frequency</td><td><span class="highlight">Fast</span> (swap or re-index documents — minutes for typical corpora)</td><td>Retrain required (hours&ndash;days)</td></tr>
         <tr><td>Cost</td><td><span class="highlight">Low</span> (embeddings + DB)</td><td>High (GPU compute)</td></tr>
-        <tr><td>Hallucination</td><td><span class="highlight">Low</span> (grounded in text)</td><td>Medium (may still confabulate)</td></tr>
+        <tr><td>Hallucination</td><td><span class="highlight">Significantly reduced</span> (answers grounded in text — but not eliminated: model can still ignore context)</td><td>Medium (may still confabulate)</td></tr>
         <tr><td>Interpretability</td><td><span class="highlight">High</span> (can show sources)</td><td>Low (black box)</td></tr>
         <tr><td>Best for</td><td>Facts, policies, Q&amp;A</td><td>Style, format, behavior</td></tr>
     </table>
     <div class="takeaway">RAG and fine-tuning are <strong>complementary</strong>, not competing. Many production systems use both.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- BREAK -->
+<!-- ============================================ -->
+<section>
+    <div style="text-align:center;">
+        <p class="section-title" style="margin-bottom:0.5em;">After the Lab &mdash; Time to Recharge</p>
+        <p style="font-size:4em; margin-bottom:0.2em;">&#9749;</p>
+        <h1>5-Minute Break</h1>
+        <p class="subtitle" style="margin-top:0.5em;">Stretch your legs &mdash; we are going deep next</p>
+        <br>
+        <p style="font-size:0.7em; color:#666;">Next up: How Search Evolved &mdash; from keywords to meaning &mdash; the math behind retrieval</p>
+    </div>
 </section>
 
 <!-- ============================================ -->
@@ -266,20 +280,46 @@
     </section>
 </section>
 
-<!-- Slide 10: The Evolution of Search -->
+<!-- Slide 11: The Evolution of Search -->
 <section>
     <h2>The Evolution of Search</h2>
     <table class="vs-table">
         <tr><th>Era</th><th>Method</th><th>How It Works</th><th>Limitation</th></tr>
         <tr><td>1970s</td><td><span class="highlight">Boolean</span></td><td>Exact keyword match (AND, OR, NOT)</td><td>No ranking, no synonyms</td></tr>
         <tr><td>1990s</td><td><span class="highlight">TF-IDF</span></td><td>Rank by term frequency &times; rarity</td><td>No semantic understanding</td></tr>
-        <tr><td>2000s</td><td><span class="highlight">BM25</span></td><td>Improved TF-IDF with saturation</td><td>Still keyword-based</td></tr>
+        <tr><td>1994+</td><td><span class="highlight">BM25</span></td><td>Improved TF-IDF with saturation &amp; length norm</td><td>Still keyword-based</td></tr>
         <tr><td>2019+</td><td><span class="highlight">Dense Retrieval</span></td><td>Embed query &amp; docs as vectors, compare similarity</td><td>Needs good embeddings</td></tr>
     </table>
-    <div class="takeaway">RAG uses <strong>dense retrieval</strong> &mdash; searching by <strong>meaning</strong>, not keywords. This connects directly to the embeddings and cosine similarity you learned in <strong>Lectures 1 &amp; 2</strong>.</div>
+    <div class="takeaway">RAG is <strong>retrieval-method-agnostic</strong> — it works with sparse (BM25), dense (embeddings), or <strong>hybrid</strong> search. Simple RAG systems still use BM25. Production systems typically use <strong>hybrid retrieval</strong>. Dense retrieval (embeddings &amp; cosine similarity, from <strong>Lectures 1 &amp; 2</strong>) is the modern standard &mdash; but not the only option.</div>
 </section>
 
-<!-- Slide 11: TF-IDF — The Math -->
+<!-- Slide 12: Boolean Search — The First Era -->
+<section>
+    <h2>Boolean Search &mdash; The First Era</h2>
+    <p style="font-size:0.7em; color:#aaa;">Information retrieval before statistics. Simple logic, no ranking.</p>
+    <div class="two-col" style="margin-top:0.5em;">
+        <div class="card">
+            <h3>How It Works</h3>
+            <p style="font-size:0.75em;">Documents must contain <strong>exact keywords</strong> combined with logical operators.</p>
+            <div class="formula" style="font-size:0.75em; text-align:left; margin-top:0.4em;">
+                AND &nbsp;&rarr;&nbsp; both terms must appear<br>
+                OR &nbsp;&nbsp;&rarr;&nbsp; either term matches<br>
+                NOT &rarr;&nbsp; exclude this term
+            </div>
+            <p style="font-size:0.65em; color:#aaa; margin-top:0.5em;"><em>Query:</em> <code>maternity AND leave AND policy NOT termination</code></p>
+        </div>
+        <div class="card" style="border-color: var(--accent2);">
+            <h3>Why It Failed</h3>
+            <p style="font-size:0.7em; color:#aaa;"><span class="warn">No ranking</span> &mdash; every matching document is equal. 10,000 results, no idea which is best.</p>
+            <p style="font-size:0.7em; color:#aaa;"><span class="warn">No synonyms</span> &mdash; query <em>&ldquo;car&rdquo;</em> misses documents saying <em>&ldquo;automobile&rdquo;</em>.</p>
+            <p style="font-size:0.7em; color:#aaa;"><span class="warn">Brittle</span> &mdash; one typo, zero results. Expert users only.</p>
+            <p style="font-size:0.7em; color:#aaa;"><span class="warn">No context</span> &mdash; <em>&ldquo;python AND programming&rdquo;</em> matches a document about programming AND snakes separately.</p>
+        </div>
+    </div>
+    <div class="takeaway">Boolean search was <strong>revolutionary in the 1970s</strong> &mdash; MEDLINE (1971) and DIALOG (1972) made entire scientific databases searchable for the first time. But it requires users to think like a computer, not a human. TF-IDF replaced it by adding <strong>statistical ranking</strong>.</div>
+</section>
+
+<!-- Slide 13: TF-IDF — The Math -->
 <section>
     <h2>TF-IDF &mdash; The Classic Approach</h2>
     <p style="font-size:0.7em; color:#aaa;">The foundation of keyword search. Still used today in hybrid systems.</p>
@@ -303,7 +343,7 @@
     <p class="paper-ref">Sp&auml;rck Jones, &ldquo;A Statistical Interpretation of Term Specificity and Its Application in Retrieval&rdquo;, <em>Journal of Documentation</em>, 1972</p>
 </section>
 
-<!-- Slide 12: BM25 -->
+<!-- Slide 14: BM25 -->
 <section>
     <h2>BM25 &mdash; The Industry Standard</h2>
     <p style="font-size:0.7em; color:#aaa;">The default ranking in Elasticsearch, Solr, OpenSearch. Still the strongest sparse retriever.</p>
@@ -320,27 +360,76 @@
             <p style="font-size:0.65em; color:#aaa;">b &isin; [0, 1] controls length penalty. b=0.75 is default. <span class="highlight">The memo wins.</span></p>
         </div>
     </div>
-    <div class="card" style="border-color: var(--accent2); text-align:center; margin-top:0.3em; font-size:0.8em;">
-        <p><strong>Still keyword-based:</strong> <em>&ldquo;vacation days&rdquo;</em> &ne; <em>&ldquo;time off&rdquo;</em> &mdash; this is why we need <span class="highlight">dense retrieval</span></p>
+    <div class="card" style="margin-top:0.3em; font-size:0.78em;">
+        <h3>⚙️ BM25 Scoring in Action — Query: &ldquo;sick leave policy&rdquo;</h3>
+        <p style="font-size:0.75em; color:#aaa; margin-bottom:0.3em;">Inverted index finds 6 candidate chunks. BM25 scores each one:</p>
+        <table class="vs-table" style="font-size:0.72em;">
+            <tr><th>Chunk</th><th>Has &ldquo;sick&rdquo;?</th><th>Has &ldquo;leave&rdquo;?</th><th>Has &ldquo;policy&rdquo;?</th><th>BM25 Score</th></tr>
+            <tr><td>chunk3</td><td style="color:#4caf50;">✅</td><td style="color:#4caf50;">✅</td><td style="color:#4caf50;">✅</td><td><strong style="color:#4caf50;">6.48 🏆</strong></td></tr>
+            <tr><td>chunk7</td><td style="color:#4caf50;">✅</td><td style="color:#4caf50;">✅</td><td style="color:#4caf50;">✅</td><td><strong style="color:#4caf50;">5.90</strong></td></tr>
+            <tr><td>chunk41</td><td style="color:#4caf50;">✅</td><td style="color:#aaa;">❌</td><td style="color:#aaa;">❌</td><td>3.36</td></tr>
+            <tr><td>chunk12</td><td style="color:#aaa;">❌</td><td style="color:#4caf50;">✅</td><td style="color:#aaa;">❌</td><td>1.68</td></tr>
+            <tr><td>chunk88</td><td style="color:#aaa;">❌</td><td style="color:#4caf50;">✅</td><td style="color:#aaa;">❌</td><td>1.68</td></tr>
+            <tr><td>chunk1</td><td style="color:#aaa;">❌</td><td style="color:#aaa;">❌</td><td style="color:#4caf50;">✅</td><td>1.44</td></tr>
+        </table>
+        <p style="font-size:0.68em; color:#aaa; margin-top:0.3em;">Score = IDF(&ldquo;sick&rdquo;)&times;TF_norm + IDF(&ldquo;leave&rdquo;)&times;TF_norm + IDF(&ldquo;policy&rdquo;)&times;TF_norm &nbsp;&mdash;&nbsp; summed across query terms. &ldquo;sick&rdquo; is rare (IDF=4.2) so contributes more than &ldquo;policy&rdquo; (IDF=1.8).</p>
     </div>
+    <div class="takeaway">BM25 rewards: <strong>(1) more query terms matched</strong> &bull; <strong>(2) rarer words = bigger bonus</strong> &bull; <strong>(3) more occurrences in a short chunk</strong>. chunk3 wins because it contains all 3 terms and &ldquo;sick&rdquo; is rare.</div>
     <p class="paper-ref">Robertson &amp; Zaragoza, &ldquo;The Probabilistic Relevance Framework: BM25 and Beyond&rdquo;, <em>Foundations and Trends in IR</em>, 2009</p>
 </section>
 
-<!-- Slide 13: Dense Retrieval — The Semantic Leap -->
+<!-- Slide 15: From Formula to Results — How Retrieval Actually Works -->
+<section>
+    <h2>From Formula to Results &mdash; How Retrieval Works</h2>
+    <p style="font-size:0.7em; color:#aaa;">In RAG, the unit being indexed and retrieved is always a <strong>chunk</strong> &mdash; not the original full document. Each method works on chunks.</p>
+    <div class="two-col" style="margin-top:0.4em;">
+        <div class="card">
+            <h3>📋 Sparse Retrieval (BM25)</h3>
+            <p style="font-size:0.7em; color:#aaa; margin-bottom:0.3em;">Uses an <strong>inverted index</strong> &mdash; a lookup table: <em>term &rarr; [chunk_ids that contain it]</em></p>
+            <div style="font-size:0.65em; color:#aaa; font-family: var(--r-code-font); line-height:1.7em;">
+                1. Query: <em>&ldquo;sick leave policy&rdquo;</em><br>
+                2. Look up each term in index:<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&ldquo;sick&rdquo; &rarr; [chunk3, chunk7, chunk41]<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&ldquo;leave&rdquo; &rarr; [chunk3, chunk7, chunk12, chunk88]<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&ldquo;policy&rdquo; &rarr; [chunk1, chunk3, chunk7]<br>
+                3. Candidate set: union = [chunk1, chunk3, chunk7, chunk12, chunk41, chunk88]<br>
+                4. Compute BM25 score for each candidate chunk<br>
+                5. Sort by score &rarr; return top-k chunks
+            </div>
+            <p style="font-size:0.6em; color:var(--accent3); margin-top:0.3em;">⚡ Fast: only scores chunks that share at least one query term</p>
+        </div>
+        <div class="card" style="border-color:#4caf50;">
+            <h3>🔢 Dense Retrieval (Embeddings)</h3>
+            <p style="font-size:0.7em; color:#aaa; margin-bottom:0.3em;">Uses a <strong>vector index</strong> (HNSW) &mdash; stores <strong>chunk embeddings</strong> in a navigable graph</p>
+            <div style="font-size:0.65em; color:#aaa; font-family: var(--r-code-font); line-height:1.7em;">
+                1. Query: <em>&ldquo;sick leave policy&rdquo;</em><br>
+                2. Embed query &rarr; [0.21, &minus;0.45, 0.78, ...]<br>
+                3. Search HNSW graph for nearest chunk vectors<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;(no word lookup &mdash; geometric search)<br>
+                4. Candidate set: top-k chunks by cosine similarity<br>
+                5. Return those chunks to the LLM
+            </div>
+            <p style="font-size:0.6em; color:#4caf50; margin-top:0.3em;">⚡ Fast: HNSW navigates from coarse to fine &mdash; O(log n)</p>
+        </div>
+    </div>
+    <div class="takeaway">In RAG: <strong>chunk = the unit of retrieval</strong>. Both BM25 and dense retrieval index <em>chunks</em>, score <em>chunks</em>, and return <em>chunks</em> &mdash; never the full source document. This is why chunking quality directly determines retrieval quality.</div>
+</section>
+
+<!-- Slide 16: Dense Retrieval — The Semantic Leap -->
 <section>
     <h2>Dense Retrieval &mdash; The Semantic Leap</h2>
     <p style="font-size:0.7em; color:#aaa;">Instead of matching keywords, we match <strong>meaning</strong>. The key intuition: similar meanings point in the same <strong>direction</strong> in vector space.</p>
     <div class="two-col">
         <div class="card" style="border-color: var(--accent2);">
             <h3>Sparse (BM25)</h3>
-            <p style="font-size:0.75em;">Each document is a <strong>bag of words</strong>.</p>
-            <p style="font-size:0.7em; color:#aaa;">Vector has 50,000+ dimensions (one per word).</p>
+            <p style="font-size:0.75em;">Each <strong>chunk</strong> is a <strong>bag of words</strong>.</p>
+            <p style="font-size:0.7em; color:#aaa;">Vector has 50,000+ dimensions (one per word in vocabulary).</p>
             <p style="font-size:0.7em; color:#aaa;">Most values are <strong>zero</strong> (sparse).</p>
             <p style="font-size:0.7em; color:#aaa;">Match = shared words exist. No synonyms.</p>
         </div>
         <div class="card" style="border-color: #4caf50;">
             <h3>Dense (Embeddings)</h3>
-            <p style="font-size:0.75em;">Each document is a <strong>meaning direction</strong> in space.</p>
+            <p style="font-size:0.75em;">Each <strong>chunk</strong> is a <strong>meaning direction</strong> in space.</p>
             <p style="font-size:0.7em; color:#aaa;">Vector has 384&ndash;3072 dims. All non-zero.</p>
             <p style="font-size:0.7em; color:#aaa;">Cosine measures <strong>angle</strong> between two directions.</p>
             <div class="formula" style="font-size:0.58em; margin:0.3em 0;">cos(A,B) = <sup>A&sdot;B</sup>&frasl;<sub>||A|| &middot; ||B||</sub> &isin; [&minus;1, 1]</div>
@@ -356,52 +445,118 @@
     <div class="takeaway">Dense retrieval finds <strong>meaning</strong>, not keywords. Two texts are similar if they <strong>point in the same direction</strong> — even when they share zero words.</div>
 </section>
 
-<!-- Slide 14: Bi-Encoder vs Cross-Encoder — How Dense Retrieval Actually Works -->
+<!-- Slide 17: Why ANN? — The Scale Problem (brief intro, details in Section 4) -->
 <section>
-    <h2>The Encoder Connection &mdash; From L1&ndash;2 to RAG</h2>
-    <p style="font-size:0.7em; color:#aaa;">Remember <strong>encoders</strong> from Lectures 1&ndash;2? This is exactly where they plug into RAG.</p>
+    <h2>The Scale Problem &mdash; Why We Need ANN</h2>
+    <p style="font-size:0.7em; color:#aaa;">Cosine similarity gives the score. But how do you search <strong>1 million vectors</strong> fast enough?</p>
+    <div class="two-col" style="margin-top:0.5em;">
+        <div class="card" style="border-color:var(--accent2);">
+            <h3>❌ Brute Force (KNN)</h3>
+            <p style="font-size:0.7em; color:#aaa;">Compare query against <strong>every</strong> vector.</p>
+            <p style="font-size:0.65em; color:#aaa;">1M &times; 384 dims = 384M operations &rarr; <strong>~300ms</strong></p>
+            <p style="font-size:0.65em; color:var(--accent2);">Too slow for real-time use.</p>
+        </div>
+        <div class="card" style="border-color:#4caf50;">
+            <h3>✅ Approximate Nearest Neighbor (ANN)</h3>
+            <p style="font-size:0.7em; color:#aaa;">Build a smart <strong>index</strong> that enables shortcuts.</p>
+            <p style="font-size:0.65em; color:#aaa;">~20 comparisons instead of 1M &rarr; <strong>~1ms</strong></p>
+            <p style="font-size:0.65em; color:#4caf50;">300&times; faster. Trades ~2&ndash;5% accuracy for speed.</p>
+        </div>
+    </div>
+    <div class="takeaway">All modern vector databases use ANN algorithms &mdash; most commonly <strong>HNSW</strong> (Hierarchical Navigable Small World). We&rsquo;ll cover exactly how HNSW works in <strong>Section 4</strong>.</div>
+</section>
+
+<!-- Slide 18: Bi-Encoder vs Cross-Encoder -->
+<section>
+    <h2>Two Retrieval Approaches &mdash; Which to Use?</h2>
+    <p style="font-size:0.7em; color:#aaa;">Two fundamentally different ways to measure relevance. Different trade-offs.</p>
     <div class="two-col">
         <div class="card" style="border-color: var(--accent3);">
-            <h3>Bi-Encoder (for retrieval) &star;</h3>
-            <p style="font-size:0.7em;">Encode query and document <strong>separately</strong>.</p>
-            <div class="formula" style="font-size:0.6em;">sim(q, d) = cos(BERT(q), BERT(d))</div>
-            <p style="font-size:0.6em; color:#4caf50;">WHY it is fast: all <strong>1M document vectors</strong> are computed <strong>offline</strong> at index time and stored. At query time you only run the encoder <strong>once</strong> (for the query), then do ANN search.</p>
+            <h3>⚡ Bi-Encoder <span style="font-size:0.7em; color:#4caf50;">(start here)</span></h3>
+            <p style="font-size:0.7em;">Query and chunk are embedded <strong>separately</strong>. Relevance = cosine similarity between their vectors.</p>
+            <div class="formula" style="font-size:0.6em;">sim(q, d) = cos( embed(q), embed(d) )</div>
+            <p style="font-size:0.6em; color:#4caf50; margin-top:0.4em;">✅ <strong>All chunk embeddings precomputed offline</strong> — at query time: one embedding call + ANN search = milliseconds</p>
+            <p style="font-size:0.6em; color:#4caf50;">✅ Works with <strong>any embedding model</strong> (MiniLM, BGE-M3, OpenAI, etc.)</p>
+            <p style="font-size:0.6em; color:var(--accent2);">⚠️ Query and chunk never "interact" — relevance is geometric distance only</p>
         </div>
         <div class="card">
-            <h3>Cross-Encoder (for re-ranking)</h3>
-            <p style="font-size:0.7em;">Encode query + document <strong>together</strong>.</p>
-            <div class="formula" style="font-size:0.6em;">score = BERT([q; d])</div>
-            <p style="font-size:0.6em; color:var(--accent2);">WHY it is slow: both texts enter the model <strong>together</strong> &rarr; you cannot precompute anything offline &rarr; must run the full model for every single query-document pair.</p>
+            <h3>🎯 Cross-Encoder <span style="font-size:0.7em; color:var(--accent2);">(costly)</span></h3>
+            <p style="font-size:0.7em;">Query and chunk are processed <strong>together</strong> by the model. Output: one relevance score.</p>
+            <div class="formula" style="font-size:0.6em;">score = model( query + chunk ) &rarr; 0.94</div>
+            <p style="font-size:0.6em; color:#4caf50; margin-top:0.4em;">✅ Model <strong>reads</strong> query against chunk — full interaction = higher accuracy</p>
+            <p style="font-size:0.6em; color:var(--accent2);">❌ <strong>Cannot precompute anything</strong> — must run the model once per candidate at query time</p>
+            <p style="font-size:0.6em; color:var(--accent2);">❌ Too slow to run on 100,000 chunks — only practical on a small candidate set</p>
         </div>
     </div>
-    <div class="takeaway"><strong>Bi-encoders</strong> power the initial retrieval (fast, scalable). <strong>Cross-encoders</strong> re-rank the top results (accurate, slow). This two-stage re-ranking pattern is explored in depth in <strong>Lecture 5</strong>.</div>
-    <div class="formula" style="font-size:0.72em; margin-top:0.4em;">D* = top-k<sub>d &isin; D</sub> cos(E<sub>q</sub>(q),&thinsp; E<sub>d</sub>(d))</div>
-    <p style="font-size:0.55em; color:#888; text-align:center;">At query time: embed query, find the k documents with highest cosine similarity in the vector index.</p>
-    <p class="paper-ref">Reimers &amp; Gurevych, &ldquo;Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks&rdquo;, EMNLP 2019</p>
+    <div class="card" style="margin-top:0.4em; font-size:0.78em; border-color: var(--accent3);">
+        <h3>🔁 Combine Both — The Production Pattern</h3>
+        <div style="display:flex; align-items:center; gap:0.5em; font-size:0.8em; color:#aaa; margin-top:0.3em; flex-wrap:wrap;">
+            <div style="padding:0.3em 0.6em; border:1px solid #555; border-radius:6px; text-align:center;">📦 All 100,000 chunks</div>
+            <div style="color:var(--accent3);">→<br><small>Stage 1: Bi-encoder<br>ms — fast filter</small></div>
+            <div style="padding:0.3em 0.6em; border:1px solid var(--accent3); border-radius:6px; text-align:center; color:var(--accent3);"><strong>Top 100</strong></div>
+            <div style="color:#4caf50;">→<br><small>Stage 2: Cross-encoder<br>re-rank 100 only</small></div>
+            <div style="padding:0.3em 0.6em; border:1px solid #4caf50; border-radius:6px; text-align:center; color:#4caf50;"><strong>Top 3–5</strong></div>
+            <div style="color:#aaa;">→</div>
+            <div style="padding:0.3em 0.6em; border:1px solid #888; border-radius:6px; text-align:center;">🤖 LLM</div>
+        </div>
+        <p style="font-size:0.68em; color:#888; margin-top:0.3em;">Cross-encoder runs <strong>100 times</strong> — not 100,000. Bi-encoder eliminates 99,900 chunks first.</p>
+    </div>
+    <div class="takeaway"><strong>Start with bi-encoder only</strong> — it's fast, simple, and works well. Add a cross-encoder re-ranker only when you need higher precision. Deep dive in <strong>Lecture 5</strong>.</div>
 </section>
 
-<!-- Slide 15: Sentence Transformers — The Models We Use -->
+
+<!-- Slide 19: Embedding Models We Use -->
 <section>
-    <h2>Sentence Transformers &mdash; The Models Behind RAG</h2>
-    <p style="font-size:0.7em; color:#aaa;">BERT was not designed for similarity. <strong>Sentence-BERT</strong> (2019) fixed this.</p>
-    <div class="card" style="font-size:0.8em;">
-        <h3>The problem with raw BERT</h3>
-        <p style="font-size:0.75em;">BERT produces <strong>token-level</strong> embeddings (one per word). To get a sentence embedding you need to pool all tokens — but this was never what BERT was trained to do. Comparing two sentences = cross-encoder = <span class="warn">O(n&sup2;)</span> pairs for n sentences = 65 hours for 10,000 sentences.</p>
-    </div>
-    <div class="card" style="font-size:0.8em; border-color:#4caf50;">
-        <h3>The Sentence-BERT solution &mdash; HOW it works</h3>
-        <p style="font-size:0.75em;">Train <strong>two identical BERT encoders</strong> in parallel on labeled sentence pairs. For similar pairs, push their vectors <strong>closer</strong>. For dissimilar pairs, push them <strong>apart</strong>. This is called <strong>contrastive learning</strong>. Result: one vector per sentence, directly comparable with cosine similarity. Same computation reduced from 65 hours to <span class="highlight">5 seconds</span>.</p>
-    </div>
-    <table class="vs-table" style="margin-top:0.3em;">
-        <tr><th>Model</th><th>Architecture</th><th>Dims</th><th>Use in Our Course</th></tr>
-        <tr><td>MiniLM-L6-v2</td><td>MiniLM (distilled)</td><td>384</td><td>Lab (fast, lightweight)</td></tr>
-        <tr><td>BGE-M3</td><td>XLM-RoBERTa</td><td>1024</td><td>Multilingual production</td></tr>
-        <tr><td>text-embedding-3-large</td><td>OpenAI (proprietary)</td><td>3072</td><td>Cloud API option</td></tr>
+    <h2>Embedding Models &mdash; The Current Landscape</h2>
+    <p style="font-size:0.65em; color:#aaa;">The bi-encoder works with <strong>any embedding model</strong>. The field moves fast — here is where it stands in 2025.</p>
+    <table class="vs-table" style="margin-top:0.3em; font-size:0.78em;">
+        <tr><th>Model</th><th>Dims</th><th>Tokens</th><th>Cost</th><th>Status / Use</th></tr>
+        <tr>
+            <td>MiniLM-L6-v2</td>
+            <td>384</td><td>256</td>
+            <td style="color:#4caf50;">Free</td>
+            <td style="color:#888;">⚠️ Legacy — use for this lab only</td>
+        </tr>
+        <tr>
+            <td><span class="highlight">Qwen3-Embedding-0.6B</span></td>
+            <td>1024</td><td>32768</td>
+            <td style="color:#4caf50;">Free (local)</td>
+            <td>✅ Modern lightweight — replaces MiniLM</td>
+        </tr>
+        <tr>
+            <td><span class="highlight">BGE-M3</span></td>
+            <td>1024</td><td>8192</td>
+            <td style="color:#4caf50;">Free (local)</td>
+            <td>✅ Production workhorse — dense + sparse + hybrid</td>
+        </tr>
+        <tr>
+            <td>text-embedding-3-large</td>
+            <td>3072</td><td>8191</td>
+            <td style="color:var(--accent2);">Paid API</td>
+            <td>☁️ Safe cloud default — supports MRL</td>
+        </tr>
+        <tr>
+            <td>Gemini Embedding 2</td>
+            <td>3072</td><td>32768</td>
+            <td style="color:var(--accent2);">Paid API</td>
+            <td>☁️ Top-tier — long docs, multimodal</td>
+        </tr>
     </table>
-    <div class="takeaway">Every embedding model in <strong>L1&ndash;2&rsquo;s</strong> labs is a <strong>bi-encoder</strong> &mdash; a BERT-style encoder trained for similarity.</div>
+    <div class="two-col" style="margin-top:0.4em; font-size:0.8em;">
+        <div class="card">
+            <h3>🏠 Self-hosted?</h3>
+            <p style="font-size:0.75em; color:#aaa;"><strong>BGE-M3</strong> — best open-source choice. Unique: one model for dense, sparse, AND hybrid retrieval. 100+ languages. Data stays local.</p>
+        </div>
+        <div class="card">
+            <h3>☁️ Cloud API?</h3>
+            <p style="font-size:0.75em; color:#aaa;"><strong>text-embedding-3-large</strong> or <strong>Gemini Embedding 2</strong>. Easy, high quality. text-3-large supports Matryoshka — truncate dims without quality loss.</p>
+        </div>
+    </div>
+    <div class="takeaway">⚠️ <strong>Critical rule: index model = query model.</strong> Different models = different vector spaces = garbage similarity scores. Also: don't trust MTEB rankings alone — benchmark on <em>your own data</em>.</div>
 </section>
 
-<!-- Slide 16: Hybrid Retrieval — Best of Both -->
+
+<!-- Slide 20: Hybrid Retrieval — Best of Both -->
 <section>
     <h2>Hybrid Retrieval &mdash; Best of Both Worlds</h2>
     <p style="font-size:0.7em; color:#aaa;">Production systems combine keyword and semantic search.</p>
@@ -430,8 +585,7 @@
     <div class="two-col" style="margin-top:0.4em; font-size:0.75em;">
         <div class="card">
             <h3>Example &mdash; query: &ldquo;sick leave regulations&rdquo;</h3>
-            <p style="font-size:0.8em; color:#aaa;">BM25: finds docs with exact word &ldquo;sick&rdquo; &rarr; 0.72</p>
-            <p style="font-size:0.8em; color:#aaa;">Dense: finds docs about &ldquo;illness, absence, medical leave&rdquo; &rarr; 0.85</p>
+            <p style="font-size:0.8em; color:#aaa;">BM25 <em>(normalized)</em>: 0.72 &nbsp;|&nbsp; Dense: 0.85</p>
             <p style="font-size:0.8em; color:#4caf50;">Hybrid (&alpha;=0.4): 0.4&times;0.72 + 0.6&times;0.85 = <strong>0.799</strong></p>
         </div>
         <div class="card">
@@ -456,13 +610,13 @@
     </section>
 </section>
 
-<!-- Slide 16: Why Chunking Matters -->
+<!-- Slide 22: Why Chunking Matters -->
 <section>
     <h2>Why Chunking Matters</h2>
     <p style="font-size:0.7em; color:#aaa;">Documents are too long to embed as a single vector. We must split them into <strong>chunks</strong>.</p>
     <div class="card" style="text-align:center;">
         <p style="font-size:0.8em;">A 50-page HR manual = <strong>~25,000 tokens</strong></p>
-        <p style="font-size:0.7em; color:#aaa;">Embedding models have a limit of <strong>512 tokens</strong> (MiniLM) or <strong>8192 tokens</strong> (BGE-M3)</p>
+        <p style="font-size:0.7em; color:#aaa;">Embedding models have a limit of <strong>256 tokens</strong> (MiniLM-L6-v2) or <strong>8192 tokens</strong> (BGE-M3)</p>
         <p style="font-size:0.7em; color:#aaa;">Even if you could embed it all, one vector cannot capture 50 different topics</p>
     </div>
     <div class="two-col" style="margin-top:0.5em;">
@@ -480,7 +634,7 @@
     <div class="takeaway">Chunking is not just a technical step &mdash; it <strong>determines retrieval quality</strong>. Bad chunks = bad answers.</div>
 </section>
 
-<!-- Slide 17: Chunking Strategies -->
+<!-- Slide 23: Chunking Strategies -->
 <section>
     <h2>Three Chunking Strategies</h2>
     <div style="font-size:0.9em;">
@@ -490,8 +644,8 @@
         </div>
         <div class="card" style="border-color: var(--accent3);">
             <h3>2. Recursive / Structural ⭐</h3>
-            <p style="font-size:0.75em; color:#aaa;">Split on natural boundaries: paragraphs → sentences → characters. Preserves <span class="highlight">semantic coherence</span>.</p>
-            <p style="font-size:0.65em; color:#aaa;">Try to split at &ldquo;\n\n&rdquo; first. If chunk still too large, split at &ldquo;. &rdquo; — and so on.</p>
+            <p style="font-size:0.75em; color:#aaa;">Split on natural boundaries: paragraphs &rarr; sentences &rarr; characters. Preserves <span class="highlight">semantic coherence</span>.</p>
+            <p style="font-size:0.65em; color:#aaa;">Try <code>\n\n</code> (paragraph) first. If the piece is still <strong>longer than your target chunk size</strong> (e.g. 400 tokens), try <code>. </code> (sentence). Still too long? Try commas. Go coarse to fine until each piece fits.</p>
         </div>
         <div class="card">
             <h3>3. Semantic</h3>
@@ -503,7 +657,7 @@
     <div class="takeaway"><strong>Recursive chunking</strong> is the best default for most RAG systems.</div>
 </section>
 
-<!-- Slide 18: The Chunk Size Trade-Off -->
+<!-- Slide 24: The Chunk Size Trade-Off -->
 <section>
     <h2>The Chunk Size Trade-Off</h2>
     <div class="two-col">
@@ -529,38 +683,59 @@
     <div class="card" style="border-color: #4caf50; text-align:center; margin-top:0.5em;">
         <h3 style="color:#4caf50;">✅ Sweet Spot: 300&ndash;500 tokens</h3>
         <p style="font-size:0.7em;">With <span class="highlight">50&ndash;100 token overlap</span> between consecutive chunks</p>
-        <p style="font-size:0.65em; color:#aaa;">Overlap ensures boundary sentences appear in both chunks</p>
+        <p style="font-size:0.65em; color:#aaa;">Overlap = the end of chunk N is repeated at the start of chunk N+1</p>
     </div>
+    <div style="font-size:0.6em; color:#aaa; font-family: var(--r-code-font); margin-top:0.4em; text-align:left; background:rgba(108,99,255,0.05); border-radius:8px; padding:0.5em 0.8em; line-height:1.8em;">
+        Chunk 1: <em>&ldquo;...mandatory maternity leave. <span style="color:var(--accent3); font-weight:bold;">During this period, they receive 80%</span>&rdquo;</em><br>
+        Chunk 2: <em>&ldquo;<span style="color:var(--accent3); font-weight:bold;">During this period, they receive 80%</span> of their salary. Optional parental...&rdquo;</em><br>
+        <span style="color:var(--accent3);">&#x25B2; overlap zone &mdash; appears in both chunks</span>
+    </div>
+    <div class="takeaway">Without overlap, a sentence at the boundary might be <strong>split across two chunks</strong> and lost to both. Overlap guarantees boundary context is always retrievable.</div>
 </section>
 
-<!-- Slide 20b: Chunking — See the Difference -->
+<!-- Slide 25: Chunking — All Three Approaches Compared -->
 <section>
-    <h2>Chunking in Practice &mdash; See the Difference</h2>
-    <p style="font-size:0.65em; color:#aaa;">Original text: <em>&ldquo;Employees are entitled to 5 months of mandatory maternity leave. During this period, they receive 80% of their salary. Optional parental leave can be extended up to 6 additional months at reduced pay.&rdquo;</em></p>
-    <div class="two-col" style="margin-top:0.5em;">
+    <h2>Chunking in Practice &mdash; All Three Approaches</h2>
+    <p style="font-size:0.62em; color:#aaa;">Same source text. <strong>Target size: 400 tokens.</strong> &nbsp;|&nbsp; <em>&ldquo;Employees are entitled to 5 months of mandatory maternity leave. During this period, they receive 80% of their salary. Optional parental leave can be extended up to 6 additional months at reduced pay. Requests must be submitted to HR at least 30 days in advance.&rdquo;</em></p>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.7em; margin-top:0.4em; font-size:0.82em;">
         <div class="card" style="border-color: var(--accent2);">
-            <h3>❌ Fixed-Size (50 chars)</h3>
-            <p style="font-size:0.65em; color:#aaa; font-family: var(--r-code-font);">
+            <h3>❌ 1. Fixed-Size</h3>
+            <p style="font-size:0.62em; color:#aaa;">Split every 50 characters. No understanding of language.</p>
+            <p style="font-size:0.6em; color:#aaa; font-family: var(--r-code-font); line-height:1.7em;">
                 Chunk 1: <em>&ldquo;Employees are entitled to 5 months of mand&rdquo;</em><br>
-                Chunk 2: <em>&ldquo;atory maternity leave. During this period,&rdquo;</em><br>
-                Chunk 3: <em>&ldquo;they receive 80% of their salary. Optional&rdquo;</em>
+                Chunk 2: <em>&ldquo;atory maternity leave. During this peri&rdquo;</em><br>
+                Chunk 3: <em>&ldquo;od, they receive 80% of their salary...&rdquo;</em>
             </p>
-            <p style="font-size:0.6em; color:var(--accent2);">Words cut mid-sentence. &ldquo;mand-atory&rdquo; split across chunks.</p>
+            <p style="font-size:0.58em; color:var(--accent2); margin-top:0.3em;">Word &ldquo;mandatory&rdquo; split in half. Neither chunk is meaningful alone.</p>
         </div>
         <div class="card" style="border-color: #4caf50;">
-            <h3>✅ Recursive (by sentence)</h3>
-            <p style="font-size:0.65em; color:#aaa; font-family: var(--r-code-font);">
+            <h3>✅ 2. Recursive ⭐</h3>
+            <p style="font-size:0.62em; color:#aaa;">Try paragraph → sentence → comma. Stop when &le; 400 tokens.</p>
+            <p style="font-size:0.6em; color:#aaa; font-family: var(--r-code-font); line-height:1.7em;">
                 Chunk 1: <em>&ldquo;Employees are entitled to 5 months of mandatory maternity leave.&rdquo;</em><br>
                 Chunk 2: <em>&ldquo;During this period, they receive 80% of their salary.&rdquo;</em><br>
-                Chunk 3: <em>&ldquo;Optional parental leave can be extended up to 6 additional months at reduced pay.&rdquo;</em>
+                Chunk 3: <em>&ldquo;Optional parental leave... up to 6 months at reduced pay. Requests must be submitted 30 days in advance.&rdquo;</em>
             </p>
-            <p style="font-size:0.6em; color:#4caf50;">Each chunk is a complete thought. Searchable and meaningful.</p>
+            <p style="font-size:0.58em; color:#4caf50; margin-top:0.3em;">Each chunk = one complete idea. Clean boundaries, full sentences.</p>
+        </div>
+        <div class="card">
+            <h3>🧠 3. Semantic</h3>
+            <p style="font-size:0.62em; color:#aaa;">Embed each sentence. Split where cosine similarity drops below &theta; = 0.7.</p>
+            <p style="font-size:0.6em; color:#aaa; font-family: var(--r-code-font); line-height:1.7em;">
+                s1&rarr;s2: cos = 0.91 &nbsp;(same topic, keep)<br>
+                s2&rarr;s3: cos = 0.88 &nbsp;(still related, keep)<br>
+                s3&rarr;s4: cos = <span style="color:var(--accent2);">0.41</span> &nbsp;&rarr; topic shift! <strong>split here</strong><br><br>
+                Chunk 1: sentences 1&ndash;3 (leave &amp; salary)<br>
+                Chunk 2: sentence 4 (HR process)
+            </p>
+            <p style="font-size:0.58em; color:var(--accent3); margin-top:0.3em;">Most accurate. Needs an embedding model just to chunk — more complex.</p>
         </div>
     </div>
-    <div class="takeaway">Same text, <strong>completely different retrieval quality</strong>. Recursive chunking preserves meaning.</div>
+    <div class="takeaway"><strong>Recursive is the best default.</strong> Add semantic chunking only when topics shift within paragraphs and retrieval quality is still poor after tuning chunk size.</div>
 </section>
 
-<!-- Slide 19: Metadata — The Fourth Dimension -->
+
+<!-- Slide 26: Metadata — The Fourth Dimension -->
 <section>
     <h2>Metadata &mdash; The Fourth Dimension</h2>
     <p style="font-size:0.7em; color:#aaa;">Every chunk carries structured data alongside its text and embedding.</p>
@@ -575,8 +750,27 @@
         <tr><td><code>date</code></td><td>2024-01-15</td><td>Recency filtering</td></tr>
         <tr><td><code>department</code></td><td>HR</td><td>Access control / routing</td></tr>
     </table>
-    <div class="takeaway">Metadata enables <strong>hybrid filtering</strong>: &ldquo;Find 2024 HR policies about remote work&rdquo; = vector search + metadata filter.</div>
+    <div class="card" style="margin-top:0.4em; font-size:0.78em; border-color: var(--accent3);">
+        <h3>🤔 How does the system know to filter by 2024?</h3>
+        <p style="font-size:0.72em; color:#aaa;">User asks: <em>&ldquo;What was the remote work policy in 2024?&rdquo;</em> &mdash; How does &ldquo;in 2024&rdquo; become <code>date = 2024</code>?</p>
+        <div style="display:flex; gap:0.8em; margin-top:0.4em; font-size:0.72em; color:#aaa;">
+            <div style="flex:1; padding:0.3em; border:1px solid #444; border-radius:6px;">
+                <strong style="color:var(--accent3);">1. LLM parses query</strong><br>
+                An LLM reads the question first, extracts <code>{&quot;date&quot;: &quot;2024&quot;}</code>, then the retriever uses that as a filter. <em>Most common.</em>
+            </div>
+            <div style="flex:1; padding:0.3em; border:1px solid #444; border-radius:6px;">
+                <strong style="color:var(--accent3);">2. UI filter</strong><br>
+                User picks &ldquo;Year: 2024&rdquo; from a dropdown before asking. No extraction needed.
+            </div>
+            <div style="flex:1; padding:0.3em; border:1px solid #444; border-radius:6px;">
+                <strong style="color:var(--accent3);">3. Rule-based</strong><br>
+                Regex detects date patterns (e.g. <code>\b20\d{2}\b</code>) and maps to metadata. Simple but brittle.
+            </div>
+        </div>
+    </div>
+    <div class="takeaway">Metadata enables <strong>hybrid filtering</strong>: vector search + structured filter. But filters don&rsquo;t appear magically &mdash; your system must <strong>extract or collect</strong> them before retrieval. Deep dive in <strong>Lecture 5</strong> (query routing).</div>
 </section>
+
 
 <!-- ============================================ -->
 <!-- SECTION 4: VECTOR DATABASES -->
@@ -590,70 +784,109 @@
     </section>
 </section>
 
-<!-- Slide 21: The ANN Problem -->
+<!-- Slide 28: The ANN Problem — Why Brute Force Fails -->
 <section>
     <h2>The Search Problem at Scale</h2>
-    <p style="font-size:0.7em; color:#aaa;">Finding the most similar vectors in a large collection.</p>
-    <div class="card" style="text-align:center;">
-        <p style="font-size:0.8em;">You have <strong>1 million</strong> chunks, each with a <strong>384-dimensional</strong> embedding.</p>
-        <p style="font-size:0.7em; color:#aaa;">Brute-force: compute cosine similarity with all 1M vectors = <span class="warn">too slow</span></p>
-    </div>
-    <div class="two-col" style="margin-top:0.5em;">
+    <p style="font-size:0.7em; color:#aaa;">You have <strong>1 million chunks</strong>, each with a 384-dim embedding. A user asks a question. How do you find the most similar vectors?</p>
+    <div class="two-col" style="margin-top:0.4em;">
         <div class="card" style="border-color: var(--accent2);">
-            <h3>Exact Search (KNN)</h3>
-            <p style="font-size:0.7em;">Compare query to <strong>every</strong> vector.</p>
-            <p style="font-size:0.65em; color:#aaa;">O(n &middot; d) &mdash; scales linearly</p>
-            <p style="font-size:0.65em; color:#aaa;">1M vectors &times; 384 dims = slow</p>
-            <p style="font-size:0.65em; color:var(--accent2);">Perfect recall, terrible speed</p>
+            <h3>❌ Brute Force (KNN)</h3>
+            <p style="font-size:0.7em; color:#aaa;">Compare query to <strong>every</strong> vector.</p>
+            <div class="formula" style="font-size:0.7em;">O(n &middot; d) &mdash; 1M &times; 384 = 384M ops</div>
+            <p style="font-size:0.65em; color:var(--accent2);">~300ms per query. Perfect recall, unusable speed.</p>
         </div>
         <div class="card" style="border-color: #4caf50;">
-            <h3>Approximate Search (ANN)</h3>
-            <p style="font-size:0.7em;">Build an <strong>index</strong> that enables shortcuts.</p>
-            <p style="font-size:0.65em; color:#aaa;">O(log n) to O(n<sup>0.5</sup>) &mdash; sublinear</p>
-            <p style="font-size:0.65em; color:#aaa;">1M vectors &rarr; milliseconds</p>
-            <p style="font-size:0.65em; color:#4caf50;">~95%+ recall, excellent speed</p>
+            <h3>✅ Approximate Nearest Neighbor (ANN)</h3>
+            <p style="font-size:0.7em; color:#aaa;">Build an <strong>index</strong> that creates intelligent shortcuts.</p>
+            <div class="formula" style="font-size:0.7em;">O(log n) to O(n<sup>0.5</sup>) &mdash; sublinear</div>
+            <p style="font-size:0.65em; color:#4caf50;">~1ms per query. 95%+ recall, 300&times; faster.</p>
         </div>
     </div>
-</section>
-
-<!-- Slide 22: HNSW — How Vector Search Actually Works -->
-<section>
-    <h2>HNSW &mdash; The Algorithm Behind Vector Search</h2>
-    <p style="font-size:0.7em; color:#aaa;"><strong>Hierarchical Navigable Small World</strong> &mdash; used by most vector databases.</p>
-    <div class="card" style="font-size:0.8em;">
-        <h3>The intuition: a multi-layer map</h3>
-        <ul>
-            <li><strong>Top layer:</strong> few nodes, long-range connections &mdash; like a <em>world map</em> (continent to continent)</li>
-            <li><strong>Middle layers:</strong> more nodes, medium range &mdash; like a <em>country map</em> (city to city)</li>
-            <li><strong>Bottom layer:</strong> all nodes, short range &mdash; like a <em>street map</em> (block to block)</li>
-        </ul>
+    <div class="card" style="margin-top:0.4em; font-size:0.78em;">
+        <h3>Three families of ANN algorithms</h3>
+        <table class="vs-table" style="font-size:0.82em;">
+            <tr><th>Algorithm</th><th>Idea</th><th>Used By</th></tr>
+            <tr><td><span class="highlight">HNSW</span></td><td>Multi-layer navigable graph &mdash; coarse to fine</td><td>ChromaDB, Qdrant, pgvector</td></tr>
+            <tr><td>IVF (Inverted File)</td><td>Partition space into clusters, search only nearby clusters</td><td>FAISS, pgvector</td></tr>
+            <tr><td>PQ (Product Quantization)</td><td>Compress vectors to reduce memory &amp; speed up comparisons</td><td>FAISS (large-scale)</td></tr>
+        </table>
     </div>
-    <div class="card" style="margin-top:0.3em; font-size:0.8em;">
-        <h3>Search: &ldquo;find the restaurant nearest to me&rdquo;</h3>
-        <p style="font-size:0.8em; color:#aaa;">1. World map: jump to the right <strong>continent</strong> &rarr; Europe</p>
-        <p style="font-size:0.8em; color:#aaa;">2. Country map: zoom to the right <strong>city</strong> &rarr; Milan</p>
-        <p style="font-size:0.8em; color:#aaa;">3. Street map: walk to the nearest <strong>restaurant</strong> &rarr; return result</p>
-        <p style="font-size:0.75em; color:#4caf50;">Each layer dramatically reduces the search space. O(log n) instead of O(n).</p>
-    </div>
-    <p class="paper-ref">Malkov &amp; Yashunin, &ldquo;Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs&rdquo;, <em>IEEE TPAMI</em>, 2020</p>
+    <div class="takeaway">ANN trades <strong>2&ndash;5% accuracy</strong> for <strong>300&times; speed</strong>. HNSW is the most common. You don&rsquo;t implement it &mdash; your vector database does it for you.</div>
 </section>
 
-<!-- Slide 23: Vector DB Landscape -->
+<!-- Slide 29: HNSW Deep Dive — The Algorithm -->
 <section>
-    <h2>Vector Database Landscape</h2>
-    <table class="vs-table">
-        <tr><th>Database</th><th>Type</th><th>ANN Algorithm</th><th>Best For</th></tr>
-        <tr><td><span class="highlight">ChromaDB</span></td><td>Embedded (Python)</td><td>HNSW</td><td>Prototyping, learning</td></tr>
-        <tr><td>Qdrant</td><td>Client-Server</td><td>HNSW</td><td>Production, filtering</td></tr>
-        <tr><td>Pinecone</td><td>Managed Cloud</td><td>Proprietary</td><td>Zero-ops, enterprise</td></tr>
-        <tr><td>pgvector</td><td>PostgreSQL ext.</td><td>IVFFlat / HNSW</td><td>Existing Postgres stack</td></tr>
-        <tr><td>FAISS</td><td>Library (Meta)</td><td>IVF, PQ, HNSW</td><td>Research, large-scale</td></tr>
-    </table>
-    <div class="takeaway">The Lecture 5 lab uses <strong>ChromaDB</strong> (zero setup). Production systems typically graduate to <strong>Qdrant</strong> or <strong>pgvector</strong>.</div>
-    <p class="paper-ref">Johnson, Douze &amp; J&eacute;gou, &ldquo;Billion-Scale Similarity Search with GPUs&rdquo; (FAISS), <em>IEEE Transactions on Big Data</em>, 2021</p>
+    <h2>HNSW &mdash; How It Actually Works</h2>
+    <p style="font-size:0.65em; color:#aaa;"><strong>Hierarchical Navigable Small World</strong> &mdash; the default algorithm in ChromaDB, Qdrant, and most vector databases.</p>
+    <div class="card" style="font-size:0.78em;">
+        <h3>🗺️ The City Navigation Analogy</h3>
+        <p style="font-size:0.8em; color:#aaa;">HNSW builds <strong>multiple layers</strong> of a navigable graph. To find the nearest chunk:</p>
+        <div style="display:flex; gap:0.8em; margin-top:0.3em; font-size:0.8em; color:#aaa; text-align:center;">
+            <div style="flex:1; padding:0.4em; border:1px solid #444; border-radius:6px;">
+                🌍 <strong>Top layer</strong><br>Few nodes, long jumps<br><em>World map &rarr; Europe</em>
+            </div>
+            <div style="flex:1; padding:0.4em; border:1px solid #444; border-radius:6px;">
+                🗾 <strong>Mid layer</strong><br>More nodes, medium jumps<br><em>Country map &rarr; Milan</em>
+            </div>
+            <div style="flex:1; padding:0.4em; border:1px solid var(--accent3); border-radius:6px;">
+                🏙️ <strong>Bottom layer</strong><br>All nodes, short steps<br><em>Street map &rarr; exact restaurant</em>
+            </div>
+        </div>
+    </div>
+    <div class="card" style="margin-top:0.3em; font-size:0.78em;">
+        <h3>🔍 Search algorithm: greedy navigation</h3>
+        <p style="font-size:0.8em; color:#aaa;">1. Start at a random node on the <strong>top layer</strong></p>
+        <p style="font-size:0.8em; color:#aaa;">2. Greedily move to whichever neighbor is <strong>closest to the query vector</strong></p>
+        <p style="font-size:0.8em; color:#aaa;">3. When no neighbor is closer &rarr; <strong>drop to the next layer</strong> at the same node</p>
+        <p style="font-size:0.8em; color:#aaa;">4. Repeat until the <strong>bottom layer</strong> &rarr; return the nearest nodes as results</p>
+        <p style="font-size:0.72em; color:#4caf50; margin-top:0.3em;">Each layer dramatically narrows the search space. Total: ~20 hops instead of 1M scans.</p>
+    </div>
+    <div class="takeaway">You never implement HNSW yourself. <code>collection.query()</code> in ChromaDB runs it automatically. Understanding the intuition helps you <strong>tune</strong> it (e.g., <code>ef_search</code>, <code>M</code> parameters).</div>
+    <p class="paper-ref">Malkov &amp; Yashunin, &ldquo;Efficient and Robust Approximate Nearest Neighbor Search Using HNSW Graphs&rdquo;, <em>IEEE TPAMI</em>, 2020</p>
 </section>
 
-<!-- Slide 24: The Complete Pipeline — Theory -->
+
+
+
+<!-- Slide 30: Vector Database Landscape (2025) -->
+<section>
+    <h2>Vector Database Landscape (2025)</h2>
+    <p style="font-size:0.65em; color:#aaa;">Three categories. The trend: <strong>every major database now supports vectors</strong>. Choose based on your existing stack.</p>
+    <div style="font-size:0.78em;">
+        <div class="card" style="margin-bottom:0.3em;">
+            <h3>🔷 Purpose-Built Vector Databases</h3>
+            <table class="vs-table" style="font-size:0.82em;">
+                <tr><th>Database</th><th>Type</th><th>ANN</th><th>Best For</th></tr>
+                <tr><td><span class="highlight">ChromaDB</span></td><td>Embedded (Python)</td><td>HNSW</td><td>Prototyping, learning &mdash; <em>our lab</em></td></tr>
+                <tr><td>Qdrant</td><td>Client-Server</td><td>HNSW</td><td>Production RAG, advanced filtering</td></tr>
+                <tr><td>Pinecone</td><td>Managed Cloud</td><td>Proprietary</td><td>Zero-ops enterprise</td></tr>
+                <tr><td>Weaviate</td><td>Client-Server</td><td>HNSW</td><td>Multi-modal, hybrid search built-in</td></tr>
+            </table>
+        </div>
+        <div class="card" style="margin-bottom:0.3em;">
+            <h3>🔶 Traditional DBs + Vector Extensions</h3>
+            <table class="vs-table" style="font-size:0.82em;">
+                <tr><th>Database</th><th>Extension</th><th>ANN</th><th>Best For</th></tr>
+                <tr><td>PostgreSQL</td><td><code>pgvector</code></td><td>IVFFlat / HNSW</td><td>Already on Postgres &mdash; no new infra</td></tr>
+                <tr><td>MongoDB</td><td>Atlas Vector Search</td><td>HNSW</td><td>Already on Mongo &mdash; document + vector</td></tr>
+                <tr><td>Elasticsearch</td><td>kNN search (8.x+)</td><td>HNSW</td><td>Already on Elastic &mdash; keyword + vector</td></tr>
+                <tr><td>Neo4j</td><td>Vector Index</td><td>HNSW</td><td>GraphRAG &mdash; relationships + vectors</td></tr>
+            </table>
+        </div>
+        <div class="card" style="margin-bottom:0.3em;">
+            <h3>🔧 Libraries (not databases)</h3>
+            <table class="vs-table" style="font-size:0.82em;">
+                <tr><th>Library</th><th>By</th><th>ANN</th><th>Best For</th></tr>
+                <tr><td>FAISS</td><td>Meta</td><td>IVF, PQ, HNSW</td><td>Research, billion-scale, GPU</td></tr>
+                <tr><td>Annoy</td><td>Spotify</td><td>Random projection trees</td><td>Read-heavy, memory-mapped</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Decision guide:</strong> New project &rarr; ChromaDB (prototype) then Qdrant (production). Already have Postgres &rarr; pgvector. Already have MongoDB &rarr; Atlas Vector Search. Need graph relationships &rarr; Neo4j. Need billion-scale &rarr; FAISS.</div>
+</section>
+
+
+<!-- Slide 31: The Complete Pipeline — Theory -->
 <section>
     <h2>The Complete RAG Pipeline</h2>
     <p style="font-size:0.7em; color:#aaa;">Five components, each with its own design decisions.</p>
@@ -669,7 +902,7 @@
     <p style="font-size:0.5em; color:#555; text-align:center; margin-top:0.6em;">🔬 You will build this exact pipeline in the <strong>Lecture 5 combined lab</strong>.</p>
 </section>
 
-<!-- Slide 25: The Prompt Template — Design Principles -->
+<!-- Slide 32: The Prompt Template — Design Principles -->
 <section>
     <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
     <p class="section-title">Section 4 &mdash; Pipeline &amp; Prompt Design</p>
@@ -701,7 +934,7 @@
     </div>
 </section>
 
-<!-- Slide 26: Common Failure Modes -->
+<!-- Slide 33: Common Failure Modes -->
 <section>
     <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
     <p class="section-title">Section 4 — Pipeline &amp; Prompt Design</p>
@@ -720,20 +953,6 @@
 </section>
 
 <!-- ============================================ -->
-<!-- BREAK -->
-<!-- ============================================ -->
-<section>
-    <div style="text-align:center;">
-        <p class="section-title" style="margin-bottom:0.5em;">Midpoint Check &mdash; Lecture 4</p>
-        <p style="font-size:4em; margin-bottom:0.2em;">&#9749;</p>
-        <h1>5-Minute Break</h1>
-        <p class="subtitle" style="margin-top:0.5em;">Stretch your legs</p>
-        <br>
-        <p style="font-size:0.7em; color:#666;">Next up: The Decision Matrix &mdash; Prompting vs. RAG vs. Fine-Tuning</p>
-    </div>
-</section>
-
-<!-- ============================================ -->
 <!-- SECTION 5: DECISION MATRIX -->
 <!-- ============================================ -->
 <section>
@@ -745,7 +964,7 @@
     </section>
 </section>
 
-<!-- Slide 30: The Three Approaches -->
+<!-- Slide 35: The Three Approaches -->
 <section>
     <h2>Three Tools, Three Problems</h2>
     <div style="display:flex; gap:0.8em; justify-content:center;">
@@ -761,7 +980,7 @@
             <h3>RAG</h3>
             <p style="font-size:0.7em;">Give the model <strong>knowledge</strong></p>
             <p style="font-size:0.6em; color:#aaa;">External docs at query time</p>
-            <p style="font-size:0.6em; color:#aaa;">Low cost, instant updates</p>
+            <p style="font-size:0.6em; color:#aaa;">Low cost, fast updates</p>
         </div>
         <div class="card" style="flex:1; text-align:center;">
             <p style="font-size:2em;">🔧</p>
@@ -774,7 +993,7 @@
     <div class="takeaway">Each tool solves a <strong>different problem</strong>. Using the wrong tool wastes time and money.</div>
 </section>
 
-<!-- Slide 31: The Decision Matrix -->
+<!-- Slide 36: The Decision Matrix -->
 <section>
     <h2>The Decision Matrix</h2>
     <table class="vs-table">
@@ -784,13 +1003,13 @@
         <tr><td>Compute cost</td><td style="color:#4caf50;">$0</td><td style="color:var(--accent3);">Low ($)</td><td style="color:var(--accent2);">High ($$$)</td></tr>
         <tr><td>Update speed</td><td style="color:#4caf50;">Instant</td><td style="color:var(--accent3);">Minutes</td><td style="color:var(--accent2);">Hours</td></tr>
         <tr><td>Customization</td><td>Low</td><td>Medium</td><td>High</td></tr>
-        <tr><td>Hallucination</td><td style="color:var(--accent2);">High risk</td><td style="color:#4caf50;">Low (grounded)</td><td>Medium</td></tr>
+        <tr><td>Hallucination</td><td style="color:var(--accent2);">High risk</td><td style="color:#4caf50;">Reduced (grounded)</td><td>Medium</td></tr>
         <tr><td>Best for</td><td>General tasks</td><td>Knowledge Q&amp;A</td><td>Style / domain</td></tr>
     </table>
     <div class="takeaway">Use <strong>Prompting first</strong> (minutes), then <strong>RAG</strong> if you need external knowledge (hours), then <strong>Fine-Tuning</strong> only if behavior/style needs changing (days). Each escalation multiplies cost by 10&times;.</div>
 </section>
 
-<!-- Slide 32: Decision Flowchart -->
+<!-- Slide 37: Decision Flowchart -->
 <section>
     <h2>Decision Flowchart</h2>
     <div style="text-align:center; font-size:0.75em;">
@@ -818,22 +1037,22 @@
     </div>
 </section>
 
-<!-- Slide 33: Cloud vs Local -->
+<!-- Slide 38: Cloud vs Local -->
 <section>
     <h2>Cloud vs. Local Inference</h2>
     <table class="vs-table">
         <tr><th></th><th>☁️ Cloud API</th><th>🏠 Local Inference</th></tr>
-        <tr><td>Setup time</td><td style="color:#4caf50;">5 minutes</td><td>Hours (GPU setup)</td></tr>
+        <tr><td>Setup time</td><td style="color:#4caf50;">5–10 min (API key + env)</td><td><span style="color:#4caf50;">15–30 min</span> with Ollama / LM Studio<br><span style="font-size:0.8em; color:#888;">2–4 h only if full CUDA GPU drivers needed</span></td></tr>
         <tr><td>Cost model</td><td>Per token ($)</td><td>Fixed (hardware cost)</td></tr>
         <tr><td>Privacy</td><td style="color:var(--accent2);">Data leaves premises</td><td style="color:#4caf50;">Data stays local</td></tr>
         <tr><td>Models</td><td>GPT-4, Gemini, Claude</td><td>LLaMA, Mistral, Phi</td></tr>
         <tr><td>Quality</td><td style="color:#4caf50;">Best available</td><td>Smaller, quantized</td></tr>
-        <tr><td>Tools</td><td>API calls</td><td>Ollama, vLLM, LM Studio</td></tr>
+        <tr><td>Tools</td><td>API calls</td><td>Ollama, vLLM, LM Studio, 🤗 HuggingFace</td></tr>
     </table>
     <div class="takeaway"><strong>Start with cloud</strong> (development &amp; prototyping). Move to <strong>local</strong> when privacy, cost, or latency requires it.</div>
 </section>
 
-<!-- Slide 34: Real Scenarios -->
+<!-- Slide 39: Real Scenarios -->
 <section>
     <h2>Apply the Matrix &mdash; 5 Real Scenarios</h2>
     <div style="font-size:0.8em;">

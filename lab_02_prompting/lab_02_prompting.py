@@ -511,6 +511,199 @@ def step_10_production(client, model):
 
 
 # ============================================================
+# STEP 11: Chat Templates — Under the Hood
+# ============================================================
+
+def step_11_chat_templates():
+    """
+    Show students what the model ACTUALLY sees when they send messages.
+
+    Key concepts from Slide 10:
+      - APIs wrap messages in special tokens (<|im_start|>, <|im_end|>)
+      - The model generates ONLY after the assistant header token
+      - add_generation_prompt=True  → adds the assistant header (inference)
+      - add_generation_prompt=False → no header (training / inspection)
+
+    We show 4 scenarios so students build real intuition:
+      A) Single-turn inference  (add_generation_prompt=True)
+      B) Same thing WITHOUT the generation prompt — model wouldn't know to start
+      C) Training data — full conversation with the assistant's response included
+      D) Multi-turn — how context accumulates over multiple exchanges
+    """
+    console.print(Panel(
+        "[bold]Step 11: Chat Templates — Under the Hood[/]\n"
+        "When you call the API you send a [cyan]messages list[/].\n"
+        "But the model doesn't see 'system' or 'user' labels —\n"
+        "it sees [bold yellow]special tokens[/] that mark each role.\n\n"
+        "[dim]We'll use a real Qwen tokenizer to show exactly what the model receives.\n"
+        "Different models use different templates (ChatML, Llama, Gemma).[/]",
+        title="🧠 Under the Hood", border_style="cyan"
+    ))
+
+    try:
+        from transformers import AutoTokenizer
+        tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct")
+    except ImportError:
+        console.print("[yellow]⚠ pip install transformers[/] to see the live template generator!")
+        console.print("[dim]Skipping Step 11 — install transformers and re-run.[/]\n")
+        return
+
+    # ── Scenario A: Single-turn INFERENCE ──────────────────────
+    # This is what happens when you call the API normally.
+    # add_generation_prompt=True adds <|im_start|>assistant\n
+    # so the model knows: "start generating your response HERE."
+    messages_a = [
+        {"role": "system", "content": "You are a sentiment classifier. Respond with one word."},
+        {"role": "user", "content": "Classify: 'Easy to use but crashes frequently.'"},
+    ]
+    text_a = tokenizer.apply_chat_template(
+        messages_a, tokenize=False, add_generation_prompt=True
+    )
+    console.print(Panel(
+        text_a,
+        title="[green]Scenario A: Single-Turn Inference (add_generation_prompt=True)[/]",
+        subtitle="[dim]↑ The model starts generating right after the last line[/]",
+        border_style="green"
+    ))
+    console.print(
+        "[dim]  Notice the [bold]<|im_start|>assistant[/bold] at the end — "
+        "that's the cue for the model to start writing.\n"
+        "  Without it, the model wouldn't know it's supposed to respond.[/]\n"
+    )
+
+    # ── Scenario B: Same messages WITHOUT generation prompt ────
+    # This is how you'd inspect the template or prepare training data
+    # where you DON'T want the model to generate yet.
+    text_b = tokenizer.apply_chat_template(
+        messages_a, tokenize=False, add_generation_prompt=False
+    )
+    console.print(Panel(
+        text_b,
+        title="[yellow]Scenario B: Same Messages — WITHOUT Generation Prompt[/]",
+        subtitle="[dim]↑ No assistant header — model has no cue to start generating[/]",
+        border_style="yellow"
+    ))
+
+    # Side-by-side comparison of what changed
+    table_ab = Table(title="What Changed?", box=box.SIMPLE_HEAVY, show_lines=True)
+    table_ab.add_column("", style="bold", width=30)
+    table_ab.add_column("add_generation_prompt=True", style="green", width=35)
+    table_ab.add_column("add_generation_prompt=False", style="yellow", width=35)
+    table_ab.add_row(
+        "Ends with",
+        "<|im_start|>assistant\\n",
+        "<|im_end|>  (user msg closed)"
+    )
+    table_ab.add_row(
+        "Model knows to respond?",
+        "✅ Yes — sees the cue",
+        "❌ No — no assistant header"
+    )
+    table_ab.add_row(
+        "Use case",
+        "API calls / Inference",
+        "Inspecting templates"
+    )
+    console.print(table_ab)
+    console.print()
+
+    # ── Scenario C: TRAINING data ──────────────────────────────
+    # During instruction tuning, you provide the full conversation
+    # INCLUDING the assistant's response. The model is trained to
+    # predict only the assistant tokens (loss is masked for the rest).
+    messages_c = [
+        {"role": "system", "content": "You are a sentiment classifier. Respond with one word."},
+        {"role": "user", "content": "Classify: 'Easy to use but crashes frequently.'"},
+        {"role": "assistant", "content": "NEGATIVE"},
+    ]
+    text_c = tokenizer.apply_chat_template(
+        messages_c, tokenize=False, add_generation_prompt=False
+    )
+    console.print(Panel(
+        text_c,
+        title="[magenta]Scenario C: Training Data (full conversation with assistant response)[/]",
+        subtitle="[dim]↑ During training, loss is computed ONLY on the assistant's tokens[/]",
+        border_style="magenta"
+    ))
+    console.print(
+        "[dim]  The system + user tokens are [bold]context[/bold] (no gradient).\n"
+        "  The assistant tokens are the [bold]target[/bold] (model learns to predict these).\n"
+        "  This is why we set add_generation_prompt=False for training — \n"
+        "  the assistant's actual response is already included.[/]\n"
+    )
+
+    # ── Scenario D: MULTI-TURN conversation ────────────────────
+    # Real conversations have multiple back-and-forth exchanges.
+    # Each turn is wrapped in its own <|im_start|>...<|im_end|> block.
+    # The model sees the ENTIRE history as context for the next response.
+    messages_d = [
+        {"role": "system", "content": "You are a helpful ERP assistant for Zucchetti."},
+        {"role": "user", "content": "What modules does your ERP offer?"},
+        {"role": "assistant", "content": "We offer Finance, HR, Supply Chain, and CRM modules."},
+        {"role": "user", "content": "Tell me more about the HR module."},
+        {"role": "assistant", "content": "The HR module handles payroll, attendance, and recruitment workflows."},
+        {"role": "user", "content": "Does it support Italian labor law compliance?"},
+    ]
+    text_d = tokenizer.apply_chat_template(
+        messages_d, tokenize=False, add_generation_prompt=True
+    )
+    console.print(Panel(
+        text_d,
+        title="[blue]Scenario D: Multi-Turn Conversation (3 user messages, 2 prior responses)[/]",
+        subtitle="[dim]↑ The model sees ALL previous turns as context before generating[/]",
+        border_style="blue"
+    ))
+
+    # Count tokens for the multi-turn example
+    token_ids = tokenizer.apply_chat_template(messages_d, tokenize=True, add_generation_prompt=True)
+    console.print(
+        f"[dim]  This multi-turn prompt is [bold]{len(token_ids)} tokens[/bold] long.\n"
+        f"  Each new turn adds to the context window — this is why long conversations\n"
+        f"  cost more tokens and eventually hit the context window limit.[/]\n"
+    )
+
+    # Summary table
+    table_summary = Table(
+        title="Chat Template Scenarios — Summary",
+        box=box.ROUNDED, show_lines=True
+    )
+    table_summary.add_column("Scenario", style="bold cyan", width=18)
+    table_summary.add_column("Messages", width=28)
+    table_summary.add_column("Generation Prompt", width=18)
+    table_summary.add_column("Purpose", width=30)
+    table_summary.add_row(
+        "A — Inference",
+        "system + user",
+        "[green]True[/]",
+        "Normal API call"
+    )
+    table_summary.add_row(
+        "B — No gen prompt",
+        "system + user",
+        "[yellow]False[/]",
+        "Template inspection"
+    )
+    table_summary.add_row(
+        "C — Training",
+        "system + user + assistant",
+        "[yellow]False[/]",
+        "Supervised fine-tuning data"
+    )
+    table_summary.add_row(
+        "D — Multi-turn",
+        "system + 3×user + 2×assistant",
+        "[green]True[/]",
+        "Ongoing conversation"
+    )
+    console.print(table_summary)
+    console.print(
+        "\n[dim]💡 Key insight: Different models use different templates "
+        "(ChatML, Llama [INST], Gemma <start_of_turn>).\n"
+        "   The API handles this automatically — you just pass the messages list.[/]\n"
+    )
+
+
+# ============================================================
 # MAIN
 # ============================================================
 
@@ -575,6 +768,9 @@ def main():
     # Step 10: Production
     step_10_production(client, model)
 
+    # Step 11: Chat Templates — Under the Hood (offline, no API needed)
+    step_11_chat_templates()
+
     # Summary
     console.print(Panel(
         "[bold green]Lab 02 Complete![/]\n\n"
@@ -584,7 +780,8 @@ def main():
         "  3. [bold]CoT[/] = explainable reasoning (but uses more tokens)\n"
         "  4. [bold]JSON[/] = production-ready, parseable output\n"
         "  5. [bold]Temperature[/] = tighter prompt → lower temperature\n"
-        "  6. [bold]Injection defense[/] = always needed for user-facing apps\n\n"
+        "  6. [bold]Injection defense[/] = always needed for user-facing apps\n"
+        "  7. [bold]Chat templates[/] = special tokens wrap your messages for the model\n\n"
         "[dim]Next: Lecture 4 will combine prompts + embeddings → RAG![/]",
         title="✅ Summary",
         border_style="green",
@@ -593,51 +790,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# ============================================================
-# STEP X: Chat Templates & Training Mechanics
-# ============================================================
-def show_chat_templates():
-    """
-    In modern NLP, we don't send raw strings, we send a messages list.
-    Under the hood, APIs use a 'Chat Template' to stringify this list.
-    
-    During Instruction Tuning, the model calculates loss ONLY on the 
-    tokens belonging to the 'assistant'. The system and user tokens are
-    treated as context.
-    """
-    console.print("\n[bold cyan]╭───────────────────── 🧠 Under the Hood ──────────────────────╮[/]")
-    console.print("[cyan]│ Chat Templates & Training Mechanics                        │[/]")
-    console.print("[cyan]│ Models are trained to predict only the 'assistant' tokens. │[/]")
-    console.print("[cyan]╰────────────────────────────────────────────────────────────╯[/]")
-    
-    try:
-        from transformers import AutoTokenizer
-        tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct")
-        
-        # Scenario A: Training
-        messages_train = [
-            {"role": "system", "content": "You are a bot."},
-            {"role": "user", "content": "Hi!"},
-            {"role": "assistant", "content": "Hello! How can I help?"}
-        ]
-        
-        # Scenario B: Inference
-        messages_infer = [
-            {"role": "system", "content": "You are a bot."},
-            {"role": "user", "content": "Hi!"}
-        ]
-        
-        text_train = tokenizer.apply_chat_template(messages_train, tokenize=False, add_generation_prompt=False)
-        console.print(Panel(text_train, title="Scenario A: Training (add_generation_prompt=False)", border_style="magenta"))
-        
-        text_infer = tokenizer.apply_chat_template(messages_infer, tokenize=False, add_generation_prompt=True)
-        console.print(Panel(text_infer, title="Scenario B: Inference (add_generation_prompt=True)", border_style="green"))
-
-    except ImportError:
-        console.print("[yellow]pip install transformers[/] to see the live template generator!")
-
-# Add to the execution flow at the end
-if __name__ == "__main__":
-    # The existing main block will run normally, we just append this for the terminal script.
-    pass
