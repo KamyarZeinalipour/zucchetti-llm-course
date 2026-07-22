@@ -336,22 +336,25 @@ def step_8_temperature(client, model):
         title="🌡️ Temperature", border_style="yellow"
     ))
 
-    prompt = "Write a one-sentence description of what an ERP system does."
-    temps = [0.0, 0.5, 1.0, 1.5]
+    prompt = "Write a 2-sentence story about a robot that discovers it can dream."
+    temps = [0.0, 0.5, 1.0, 2.0]
 
-    table = Table(title="Temperature Effect", box=box.ROUNDED)
-    table.add_column("Temp", style="cyan", width=6)
-    table.add_column("Output", style="white", width=70)
+    table = Table(title="Temperature Effect — Same Prompt, Different Creativity", box=box.ROUNDED)
+    table.add_column("Temp", style="cyan", width=8)
+    table.add_column("Label", style="yellow", width=10)
+    table.add_column("Output", style="white", width=60)
 
+    labels = {0.0: "❄️ Frozen", 0.5: "🌤️ Warm", 1.0: "🔥 Hot", 2.0: "💥 Chaotic"}
     for t in temps:
         try:
             text, _ = call_llm(client, model, prompt, temperature=t)
-            table.add_row(f"T={t}", text[:150])
+            table.add_row(f"T={t}", labels[t], text.replace('\n', ' ').strip()[:200])
         except Exception as e:
-            table.add_row(f"T={t}", f"[red]Error: {str(e)[:80]}[/]")
+            table.add_row(f"T={t}", labels[t], f"[red]Error: {str(e)[:80]}[/]")
         time.sleep(1)
 
     console.print(table)
+    console.print("[dim]Run it again — T=0 won't change, but T=2.0 will tell a different story![/]")
     console.print()
 
 # ============================================================
@@ -367,15 +370,23 @@ def step_8b_advanced_parameters(client, model):
         title="🎛️ Parameters", border_style="yellow"
     ))
 
-    prompt = "Write a highly creative, bizarre sentence about a flying toaster."
+    prompt = "Describe a sunset on Mars in 3 sentences. Be poetic."
     
-    console.print("[bold cyan]Top-P Experiment[/]")
+    console.print("[bold cyan]Top-P Experiment — Same T=1.0, different vocabulary pools[/]")
     try:
         t_low, _ = call_llm(client, model, prompt, temperature=1.0, top_p=0.1)
-        console.print(f"[dim]Top-P = 0.1 (Focused):[/] {t_low}")
+        console.print(f"[dim]Top-P = 0.1 (Narrow — safe, predictable words):[/]")
+        console.print(t_low)
+        console.print()
         
-        t_high, _ = call_llm(client, model, prompt, temperature=1.0, top_p=1.0)
-        console.print(f"[dim]Top-P = 1.0 (Diverse):[/] {t_high}")
+        t_mid, _ = call_llm(client, model, prompt, temperature=1.0, top_p=0.5)
+        console.print(f"[dim]Top-P = 0.5 (Moderate — balanced vocabulary):[/]")
+        console.print(t_mid)
+        console.print()
+        
+        t_high, _ = call_llm(client, model, prompt, temperature=1.0, top_p=0.95)
+        console.print(f"[dim]Top-P = 0.95 (Wide — rare, surprising words allowed):[/]")
+        console.print(t_high)
     except Exception as e:
         console.print(f"[red]Error in top_p: {e}[/]")
 
