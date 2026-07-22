@@ -19,19 +19,19 @@
 | 0:02 | Agenda | 2 min |
 | 0:04 | §1 The Retrieval Problem & RAG | 20 min |
 | 0:24 | ☕ Break | 10 min |
-| 0:29 | §2 Evolution of Search (table) | 3 min |
-| 0:32 | §2 Boolean Search (new slide) | 3 min |
-| 0:35 | §2 TF-IDF | 4 min |
-| 0:39 | §2 BM25 | 4 min |
-| 0:43 | §2 Dense Retrieval | 4 min |
-| 0:47 | §2 Bi-Encoder vs Cross-Encoder | 3 min |
-| 0:50 | §2 Sentence Transformers | 2 min |
-| 0:52 | §2 Hybrid Retrieval | 2 min |
-| 0:54 | §3 Document Processing & Chunking | 15 min |
-| 1:09 | §4 Vector Databases & Pipeline | 10 min |
-| 1:19 | §5 Decision Matrix | 10 min |
-| 1:29 | Takeaways + Q&A | 5 min |
-| **1:34** | **End** | |
+| 0:34 | §2 Evolution of Search (table) | 3 min |
+| 0:37 | §2 Boolean Search (new slide) | 3 min |
+| 0:40 | §2 TF-IDF | 4 min |
+| 0:44 | §2 BM25 | 4 min |
+| 0:48 | §2 Dense Retrieval | 4 min |
+| 0:52 | §2 Bi-Encoder vs Cross-Encoder | 3 min |
+| 0:55 | §2 Sentence Transformers | 2 min |
+| 0:57 | §2 Hybrid Retrieval | 2 min |
+| 0:59 | §3 Document Processing & Chunking | 15 min |
+| 1:14 | §4 Vector Databases & Pipeline | 10 min |
+| 1:24 | §5 Decision Matrix | 10 min |
+| 1:34 | Takeaways + Q&A | 5 min |
+| **1:39** | **End** | |
 
 ---
 
@@ -223,11 +223,11 @@ When we come back we go into the technical heart of RAG — how retrieval actual
 ---
 
 # ═══ SECTION 2: FROM KEYWORDS TO VECTORS ═══
-## *20 minutes total · Clock: 0:29 → 0:49*
+## *20 minutes total · Clock: 0:34 → 0:54*
 
 ---
 
-## 🎬 SLIDE 10 — Section 2 Intro · *0:29 · 1 min*
+## 🎬 SLIDE 10 — Section 2 Intro · *0:34 · 1 min*
 
 Welcome back. Section two.
 
@@ -235,7 +235,7 @@ This section answers a question most people never think about: how do you actual
 
 ---
 
-## 🎬 SLIDE 11 — The Evolution of Search · *0:30 · 3 min*
+## 🎬 SLIDE 11 — The Evolution of Search · *0:35 · 3 min*
 
 Let me take you through 50 years of information retrieval in 3 minutes.
 
@@ -255,7 +255,7 @@ Let me take you through 50 years of information retrieval in 3 minutes.
 
 ---
 
-## 🎬 SLIDE 12 — Boolean Search · *0:33 · 3 min*
+## 🎬 SLIDE 12 — Boolean Search · *0:38 · 3 min*
 
 Let's spend a moment on Boolean search because most of you have probably used it without realizing it — SQL WHERE clauses, Excel filters, CTRL+F with "whole word only." That's all Boolean logic.
 
@@ -287,7 +287,7 @@ This was **revolutionary at the time**. Before this, finding a document in a lib
 
 ---
 
-## 🎬 SLIDE 13 — TF-IDF · *0:36 · 4 min*
+## 🎬 SLIDE 13 — TF-IDF · *0:41 · 4 min*
 
 Let's understand TF-IDF properly. This is the foundation that BM25 and even modern hybrid systems are built on.
 
@@ -313,7 +313,7 @@ Here's the intuition: the word "the" appears in every document — so log(N/N) =
 
 ---
 
-## 🎬 SLIDE 14a — BM25: The Formula · *0:37 · 2 min*
+## 🎬 SLIDE 14a — BM25: The Formula · *0:42 · 2 min*
 
 BM25 is TF-IDF with two important improvements. It's what Elasticsearch uses by default. If you've ever used a search engine built on Elasticsearch, you've been using BM25.
 
@@ -341,7 +341,7 @@ Imagine "policy" appears 3 times in a 2-page memo and 50 times in a 100-page man
 
 ---
 
-## 🎬 SLIDE 14b — BM25 Scoring in Action · *0:39 · 2 min*
+## 🎬 SLIDE 14b — BM25 Scoring in Action · *0:44 · 2 min*
 
 *[Point to the BM25 Scoring in Action table]*
 
@@ -371,7 +371,7 @@ chunk1 (only "policy"): 1.8×0.8 = **1.44** — common word, lowest score
 
 ---
 
-## 🎬 SLIDE 15 — From Formula to Results: How Retrieval Works · *0:41 · 3 min*
+## 🎬 SLIDE 15 — From Formula to Results: How Retrieval Works · *0:46 · 3 min*
 
 Before I explain the mechanics, I need to clarify one important terminology point.
 
@@ -420,7 +420,7 @@ Notice: no inverted index, no word matching. The system compares the *direction*
 
 ---
 
-## 🎬 SLIDE 16 — Dense Retrieval · *0:44 · 4 min*
+## 🎬 SLIDE 16 — Dense Retrieval · *0:49 · 4 min*
 
 This is the big leap. Everything we've covered until now — TF-IDF, BM25 — was about matching words. Dense retrieval is fundamentally different: we match **meaning**.
 
@@ -454,7 +454,7 @@ Those two vectors point in almost the same direction. Cosine similarity = 0.89. 
 
 ---
 
-## 🎬 SLIDE 17 — The Scale Problem: Why We Need ANN · *0:44 · 1 min*
+## 🎬 SLIDE 17 — The Scale Problem: Why We Need ANN · *0:53 · 1 min*
 
 Quick important question: **"You have 1 million chunk vectors. Do you compute cosine similarity with all of them every time someone asks a question?"**
 
@@ -467,7 +467,7 @@ The most popular ANN algorithm is called **HNSW — Hierarchical Navigable Small
 ---
 
 
-## 🎬 SLIDE 18 — Two Retrieval Approaches · *0:47 · 3 min*
+## 🎬 SLIDE 18 — Two Retrieval Approaches · *0:52 · 3 min*
 
 This slide is about a choice you will make when building a RAG system. Two approaches. Different trade-offs. Let me explain both clearly.
 
@@ -506,7 +506,7 @@ The bi-encoder is fast but approximate. The cross-encoder is slow but precise. T
 ---
 
 
-## 🎬 SLIDE 19 — Embedding Models · *0:48 · 2 min*
+## 🎬 SLIDE 19 — Embedding Models · *0:55 · 2 min*
 
 This slide shows where the embedding model landscape actually stands today — because it moves fast.
 
@@ -542,7 +542,7 @@ Second — **don't blindly trust MTEB leaderboard rankings.** MTEB is a great sh
 
 
 
-## 🎬 SLIDE 20 — Hybrid Retrieval · *0:48 · 2 min*
+## 🎬 SLIDE 20 — Hybrid Retrieval · *0:57 · 2 min*
 
 In practice, production systems almost always combine BM25 and dense retrieval. Neither alone is enough.
 
@@ -569,11 +569,11 @@ Query: "sick leave regulations." BM25 score (exact word match): 0.72. Dense scor
 ---
 
 # ═══ SECTION 3: DOCUMENT PROCESSING & CHUNKING ═══
-## *15 minutes total · Clock: 0:49 → 1:04*
+## *15 minutes total · Clock: 0:54 → 1:09*
 
 ---
 
-## 🎬 SLIDE 21 — Section 3 Intro · *0:49 · 1 min*
+## 🎬 SLIDE 21 — Section 3 Intro · *0:54 · 1 min*
 
 Section three. Document processing and chunking.
 
@@ -583,7 +583,7 @@ This is the section that surprises most people. They build a RAG system, the ret
 
 ---
 
-## 🎬 SLIDE 22 — Why Chunking Matters · *0:50 · 3 min*
+## 🎬 SLIDE 22 — Why Chunking Matters · *0:55 · 3 min*
 
 Let me explain why we need to chunk at all.
 
@@ -603,7 +603,7 @@ But even if your embedding model supports long inputs, there's still a problem.
 
 ---
 
-## 🎬 SLIDE 23 — Three Chunking Strategies · *0:53 · 4 min*
+## 🎬 SLIDE 23 — Three Chunking Strategies · *0:58 · 4 min*
 
 Three main approaches.
 
@@ -629,7 +629,7 @@ Most accurate but most expensive — you need to embed every sentence just to de
 
 ---
 
-## 🎬 SLIDE 24 — Chunk Size Trade-Off · *0:57 · 3 min*
+## 🎬 SLIDE 24 — Chunk Size Trade-Off · *1:02 · 3 min*
 
 Even with the right strategy, you need to pick the right size.
 
@@ -654,7 +654,7 @@ Look at the example: chunk 1 ends with "...mandatory maternity leave. **During t
 ---
 
 
-## 🎬 SLIDE 25 — Chunking in Practice: All Three Approaches · *1:00 · 3 min*
+## 🎬 SLIDE 25 — Chunking in Practice: All Three Approaches · *1:05 · 3 min*
 
 Let me show you exactly what each strategy produces on the same text. All three strategies, same source, same target size of 400 tokens.
 
@@ -681,7 +681,7 @@ Four sentences: maternity leave entitlement → salary during leave → optional
 ---
 
 
-## 🎬 SLIDE 26 — Metadata · *1:02 · 2 min*
+## 🎬 SLIDE 26 — Metadata · *1:07 · 2 min*
 
 One more important idea: metadata.
 
@@ -716,11 +716,11 @@ User asks: "What are HR regulations about sick leave?" — Search for similar ch
 ---
 
 # ═══ SECTION 4: VECTOR DATABASES & THE COMPLETE PIPELINE ═══
-## *10 minutes total · Clock: 1:04 → 1:14*
+## *10 minutes total · Clock: 1:09 → 1:19*
 
 ---
 
-## 🎬 SLIDE 27 — Section 4 Intro · *1:04 · 1 min*
+## 🎬 SLIDE 27 — Section 4 Intro · *1:09 · 1 min*
 
 Section four. Vector databases and the complete pipeline.
 
@@ -731,7 +731,7 @@ Back in Section 2, I showed you that dense retrieval uses cosine similarity to f
 ---
 
 
-## 🎬 SLIDE 28 — The Search Problem at Scale · *1:05 · 2 min*
+## 🎬 SLIDE 28 — The Search Problem at Scale · *1:10 · 2 min*
 
 Let me put concrete numbers on this problem so you feel why it matters.
 
@@ -753,7 +753,7 @@ You have 1 million chunks. Each chunk has a 384-dimensional vector. A user asks 
 
 ---
 
-## 🎬 SLIDE 29 — HNSW Deep Dive · *1:07 · 3 min*
+## 🎬 SLIDE 29 — HNSW Deep Dive · *1:12 · 3 min*
 
 Now let's zoom into HNSW — the algorithm most vector databases use. Let me explain the intuition with an analogy.
 
@@ -793,7 +793,7 @@ You never implement HNSW yourself. When you call `collection.query()` in ChromaD
 
 
 
-## 🎬 SLIDE 30 — Vector Database Landscape (2025) · *1:10 · 3 min*
+## 🎬 SLIDE 30 — Vector Database Landscape (2025) · *1:15 · 3 min*
 
 The vector database world has changed dramatically in the last two years. The big trend: **every major database now supports vectors**. You no longer need a separate vector database in many cases.
 
@@ -850,7 +850,7 @@ Need **billion-scale** → **FAISS** (but you'll need to build your own persiste
 ---
 
 
-## 🎬 SLIDE 31 — The Complete Pipeline · *1:12 · 2 min*
+## 🎬 SLIDE 31 — The Complete Pipeline · *1:17 · 2 min*
 
 Let's put all five components together. This is exactly what you'll build in the lab.
 
@@ -874,7 +874,7 @@ So if you index all your documents with MiniLM, and then someone updates your co
 
 ---
 
-## 🎬 SLIDES 32 & 33 — Prompt Design + Failure Modes · *1:13 · 2 min*
+## 🎬 SLIDES 32 & 33 — Prompt Design + Failure Modes · *1:18 · 2 min*
 
 Two quick but important slides.
 
@@ -908,11 +908,11 @@ And the last one — **stale answers.** This happens when your source documents 
 ---
 
 # ═══ SECTION 5: DECISION MATRIX ═══
-## *15 minutes total · Clock: 1:14 → 1:29*
+## *15 minutes total · Clock: 1:19 → 1:34*
 
 ---
 
-## 🎬 SLIDE 34 — Section 5 Intro · *1:14 · 1 min*
+## 🎬 SLIDE 34 — Section 5 Intro · *1:19 · 1 min*
 
 Section five. The Decision Matrix.
 
@@ -920,7 +920,7 @@ This is the most practical section of the entire lecture. After this, every time
 
 ---
 
-## 🎬 SLIDE 35 — Three Tools, Three Problems · *1:15 · 2 min*
+## 🎬 SLIDE 35 — Three Tools, Three Problems · *1:20 · 2 min*
 
 Three tools in your LLM toolkit. Each solves a different problem.
 
@@ -936,7 +936,7 @@ Three tools in your LLM toolkit. Each solves a different problem.
 
 ---
 
-## 🎬 SLIDE 36 — The Decision Matrix Table · *1:17 · 4 min*
+## 🎬 SLIDE 36 — The Decision Matrix Table · *1:22 · 4 min*
 
 *[Go row by row]*
 
@@ -960,7 +960,7 @@ Three tools in your LLM toolkit. Each solves a different problem.
 
 ---
 
-## 🎬 SLIDE 37 — The Decision Flowchart · *1:21 · 3 min*
+## 🎬 SLIDE 37 — The Decision Flowchart · *1:26 · 3 min*
 
 Three questions. Memorize these.
 
@@ -976,7 +976,7 @@ Three questions. Memorize these.
 
 ---
 
-## 🎬 SLIDE 38 — Cloud vs Local Inference · *1:24 · 2 min*
+## 🎬 SLIDE 38 — Cloud vs Local Inference · *1:29 · 2 min*
 
 One more decision: cloud API vs local inference.
 
@@ -992,7 +992,7 @@ One more decision: cloud API vs local inference.
 
 ---
 
-## 🎬 SLIDE 39 — Real Scenarios · *1:26 · 3 min*
+## 🎬 SLIDE 39 — Real Scenarios · *1:31 · 3 min*
 
 Let's apply the matrix to real examples.
 
@@ -1017,7 +1017,7 @@ Let's apply the matrix to real examples.
 
 ---
 
-## 🎬 SLIDE 40 — Key Takeaways · *1:29 · 3 min*
+## 🎬 SLIDE 40 — Key Takeaways · *1:34 · 3 min*
 
 Seven things to remember.
 
@@ -1039,7 +1039,7 @@ Seven things to remember.
 
 ---
 
-## 🎬 SLIDE 41 — Questions · *1:32 · 3 min*
+## 🎬 SLIDE 41 — Questions · *1:37 · 3 min*
 
 That's the theory for today.
 
