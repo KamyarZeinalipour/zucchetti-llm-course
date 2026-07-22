@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 4: RAG Foundations &amp; Decision Matrix</title>
+    <meta name="description" content="Lecture 4 of the Zucchetti LLM Course: RAG Foundations and Decision Matrix. Covers retrieval-augmented generation, chunking theory, vector databases, and when to use prompting vs RAG vs fine-tuning.">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --r-background-color: #0a0a1a;
+            --r-main-font: 'Inter', sans-serif;
+            --r-heading-font: 'Inter', sans-serif;
+            --r-code-font: 'JetBrains Mono', monospace;
+            --r-main-font-size: 24px;
+            --r-heading-color: #fff;
+            --r-main-color: #e0e0e8;
+            --r-link-color: #64b5f6;
+            --accent: #6c63ff;
+            --accent2: #e94560;
+            --accent3: #00d9ff;
+            --surface: rgba(255,255,255,0.05);
+        }
+        .reveal { font-weight: 300; }
+        .reveal .slides > section, .reveal .slides > section > section { padding: 10px 20px; box-sizing: border-box; overflow: hidden; }
+        .reveal .slides > section > *, .reveal .slides > section > section > * { max-width: 100%; box-sizing: border-box; }
+        .reveal h1 { font-size: 2em; font-weight: 700; background: linear-gradient(135deg, #6c63ff, #00d9ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.3em; }
+        .reveal h2 { font-size: 1.4em; font-weight: 600; color: #fff; margin-bottom: 0.4em; }
+        .reveal h3 { font-size: 1.05em; font-weight: 500; color: var(--accent3); margin-bottom: 0.3em; }
+        .reveal .subtitle { font-size: 0.65em; color: #888; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
+        .reveal .highlight { color: var(--accent3); font-weight: 500; }
+        .reveal .warn { color: var(--accent2); font-weight: 500; }
+        .reveal ul { list-style: none; padding-left: 0; margin: 0.3em 0; }
+        .reveal ul li { padding: 0.2em 0; padding-left: 1.3em; position: relative; font-size: 0.82em; }
+        .reveal ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+        .reveal .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; text-align: left; max-width: 100%; overflow: hidden; }
+        .reveal .card { background: var(--surface); border: 1px solid rgba(108,99,255,0.2); border-radius: 10px; padding: 0.8em 1em; margin: 0.3em 0; }
+        .reveal .card h3 { margin-top: 0; margin-bottom: 0.3em; }
+        .reveal code { font-family: var(--r-code-font); background: rgba(108,99,255,0.15); padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.85em; }
+        .reveal pre code { background: #1a1a2e; padding: 0.8em; border-radius: 8px; font-size: 0.5em; line-height: 1.5; }
+        .reveal .emoji { font-size: 1.3em; margin-right: 0.2em; }
+        .reveal .agenda-item { display: flex; align-items: center; gap: 0.8em; padding: 0.45em 0.8em; margin: 0.3em 0; background: var(--surface); border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.75em; }
+        .reveal .agenda-item .time { color: var(--accent3); font-weight: 500; min-width: 55px; }
+        .reveal .big-number { font-size: 2.5em; font-weight: 700; color: var(--accent); }
+        .reveal .formula { background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; padding: 0.5em 1.2em; font-size: 1em; text-align: center; margin: 0.5em auto; font-family: var(--r-code-font); color: var(--accent3); }
+        .reveal .vs-table { width: 100%; border-collapse: collapse; font-size: 0.65em; table-layout: fixed; word-wrap: break-word; }
+        .reveal .vs-table th { background: rgba(108,99,255,0.35); padding: 0.45em; text-align: left; font-weight: 600; color: #e0e0ff; border-bottom: 2px solid rgba(108,99,255,0.5); }
+        .reveal .vs-table td { padding: 0.4em 0.5em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .reveal .vs-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+        .reveal .takeaway { background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,217,255,0.1)); border: 1px solid rgba(108,99,255,0.3); border-radius: 10px; padding: 0.6em 1em; margin-top: 0.5em; text-align: left; font-size: 0.82em; }
+        .reveal .takeaway::before { content: '💡 KEY TAKEAWAY'; display: block; font-size: 0.55em; font-weight: 600; color: var(--accent); letter-spacing: 0.15em; margin-bottom: 0.3em; }
+        .reveal .section-title { font-size: 0.5em; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 0.2em; }
+        .reveal .progress-bar { display: flex; gap: 4px; margin: 0.6em 0; }
+        .reveal .progress-bar .step { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); }
+        .reveal .progress-bar .step.active { background: var(--accent); }
+        .reveal .progress-bar .step.done { background: var(--accent3); }
+        .slide-number { color: #555 !important; font-size: 14px !important; right: auto !important; left: 12px !important; top: 12px !important; bottom: auto !important; }
+        .reveal .footer-info { position: absolute; bottom: 1em; left: 1em; font-size: 0.4em; color: #555; }
+        .reveal .paper-ref { font-size: 0.5em; color: #888; margin-top: 8px; font-style: italic; }
+        .reveal .paper-ref a { color: var(--accent); }
+        .reveal p { margin: 0.3em 0; }
+        .reveal br { display: block; content: ''; margin: 0.2em 0; }
+        .reveal .pipeline-step { display: inline-block; background: var(--surface); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; padding: 0.3em 0.7em; margin: 0.15em; font-size: 0.7em; }
+        .reveal .pipeline-arrow { color: var(--accent3); font-size: 1.2em; margin: 0 0.2em; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================ -->
+<!-- TITLE SLIDE -->
+<!-- ============================================ -->
+<section>
+    <p class="section-title">Zucchetti LLM Course &mdash; Lecture 4 of 10</p>
+    <h1>RAG Foundations<br>&amp; Decision Matrix</h1>
+    <p class="subtitle">From frozen knowledge to live data &mdash; and when to use what</p>
+    <br>
+    <p style="font-size:0.6em; color:#666;">Kamyar Zeinalipour &middot; 90 minutes</p>
+</section>
+
+<!-- ============================================ -->
+<!-- AGENDA -->
+<!-- ============================================ -->
+<section>
+    <h2>Today&rsquo;s Agenda</h2>
+    <div style="max-width:650px; margin:0 auto; text-align:left;">
+        <div class="agenda-item"><span class="time">20 min</span> The Retrieval Problem &amp; The RAG Architecture</div>
+        <div class="agenda-item"><span class="time">20 min</span> From Keywords to Vectors &mdash; How Retrieval Evolved</div>
+        <div class="agenda-item"><span class="time">15 min</span> Document Processing &amp; Chunking Theory</div>
+        <div class="agenda-item"><span class="time">10 min</span> Vector Databases &mdash; Similarity Search at Scale</div>
+        <div class="agenda-item" style="border-left-color: #888; background:rgba(255,255,255,0.03);"><span class="time" style="color:#888;">5 min</span> &#9749; Short Break</div>
+        <div class="agenda-item"><span class="time">15 min</span> Decision Matrix: Prompt vs. RAG vs. Fine-Tune</div>
+        <div class="agenda-item"><span class="time">5 min</span> Key Takeaways &amp; Q&amp;A</div>
+    </div>
+    <div style="margin-top:10px; font-size:0.55em; color:#888;">Total: 90 minutes &middot; Pure theory &mdash; <span class="highlight">hands-on lab in Lecture 5</span> (combined Lab 4 + Lab 5)</div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 1: THE RETRIEVAL PROBLEM -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 1 of 5</p>
+        <h1>The Retrieval Problem</h1>
+        <p style="font-size:0.75em; color:#aaa;">Why LLMs need external knowledge</p>
+    </section>
+</section>
+
+<!-- Slide 3: The Fundamental Problem -->
+<section>
+    <h2>The Fundamental Problem</h2>
+    <p style="font-size:0.75em; color:#aaa;">LLMs have two critical limitations:</p>
+    <div class="two-col">
+        <div class="card">
+            <h3>🧊 Frozen Knowledge</h3>
+            <p style="font-size:0.75em;">Model knowledge is fixed at <span class="highlight">training cutoff</span>.</p>
+            <p style="font-size:0.7em; color:#aaa;">GPT-4 does not know what happened yesterday.</p>
+            <p style="font-size:0.7em; color:#aaa;">It cannot access your internal documents.</p>
+            <p style="font-size:0.7em; color:#aaa;">It has never seen your company&rsquo;s policies.</p>
+        </div>
+        <div class="card">
+            <h3>🎭 Hallucination Under Pressure</h3>
+            <p style="font-size:0.75em;">When the model lacks knowledge, it does not say <span class="warn">&ldquo;I don&rsquo;t know.&rdquo;</span></p>
+            <p style="font-size:0.7em; color:#aaa;">It generates a <strong>plausible-sounding</strong> answer.</p>
+            <p style="font-size:0.7em; color:#aaa;">The answer looks correct.</p>
+            <p style="font-size:0.7em; color:#aaa;">It is <span class="warn">completely fabricated</span>.</p>
+        </div>
+    </div>
+    <div class="takeaway">We need a way to <strong>inject real, verifiable knowledge</strong> into the model at query time.</div>
+</section>
+
+<!-- Slide 4: Two Ways to Add Knowledge -->
+<section>
+    <h2>Two Ways to Add Knowledge</h2>
+    <div class="two-col">
+        <div class="card">
+            <h3>Approach 1: Fine-Tuning</h3>
+            <p style="font-size:0.75em;">Bake knowledge <strong>into the weights</strong>.</p>
+            <ul>
+                <li>Train on domain-specific data</li>
+                <li>Knowledge becomes &ldquo;permanent&rdquo;</li>
+                <li>Expensive, slow to update</li>
+                <li>Model may still hallucinate</li>
+            </ul>
+            <p style="font-size:0.65em; color:#aaa; margin-top:0.5em;">Like memorizing a textbook &mdash; you might misremember.</p>
+        </div>
+        <div class="card" style="border-color: var(--accent3);">
+            <h3>Approach 2: RAG ⭐</h3>
+            <p style="font-size:0.75em;">Provide knowledge <strong>at query time</strong>.</p>
+            <ul>
+                <li>Retrieve relevant documents</li>
+                <li>Inject into the prompt as context</li>
+                <li>Cheap, instantly updatable</li>
+                <li>Answers are <span class="highlight">grounded in sources</span></li>
+            </ul>
+            <p style="font-size:0.65em; color:#aaa; margin-top:0.5em;">Like an open-book exam &mdash; you can check your answers.</p>
+        </div>
+    </div>
+    <div class="takeaway">Fine-tuning changes <strong>behavior</strong>. RAG provides <strong>knowledge</strong>. They solve different problems.</div>
+</section>
+
+<!-- Slide 5: What is RAG? -->
+<section>
+    <h2>Retrieval-Augmented Generation</h2>
+    <p style="font-size:0.7em; color:#aaa;">The idea: instead of asking the model to <em>remember</em>, let it <em>look things up</em>.</p>
+    <div style="text-align:center; margin:0.8em 0;">
+        <span class="pipeline-step">📄 Your Documents</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">✂️ Chunks</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">🔢 Embed</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step" style="border-color: var(--accent3);">💾 Index</span>
+    </div>
+    <div style="text-align:center; font-size:1.2em; color: var(--accent3); margin:0.2em 0;">⬇ at query time ⬇</div>
+    <div style="text-align:center; margin:0.5em 0;">
+        <span class="pipeline-step">❓ Question</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">🔍 Retrieve</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">📝 Augment</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step" style="border-color: var(--accent2);">🤖 Generate</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step" style="border-color: #4caf50;">✅ Grounded Answer</span>
+    </div>
+    <p style="font-size:0.6em; color:#aaa; text-align:center; margin-top:0.5em;">Two phases: <strong>Offline</strong> (index once) &mdash; <strong>Online</strong> (retrieve &amp; generate per query)</p>
+    <div class="formula" style="font-size:0.7em; margin-top:0.4em;">P(y | x) = &sum;<sub>d&isin;D</sub> P(d | x) &sdot; P(y | x, d)</div>
+    <p style="font-size:0.55em; color:#888; text-align:center;">y = answer, x = query, d = retrieved doc &mdash; RAG marginalizes over retrieved documents (Lewis et al., 2020)</p>
+    <p class="paper-ref">Lewis et al., &ldquo;Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks&rdquo;, NeurIPS 2020</p>
+</section>
+
+<!-- Slide 6: RAG in Action — A Concrete Example -->
+<section>
+    <h2>RAG in Action &mdash; Step by Step</h2>
+    <p style="font-size:0.7em; color:#aaa;">A concrete example of the full pipeline.</p>
+    <div class="card" style="font-size:0.75em;">
+        <h3>👤 User asks: <em>&ldquo;What is the maternity leave policy?&rdquo;</em></h3>
+    </div>
+    <div class="card" style="font-size:0.7em;">
+        <h3>🔍 Step 1: Retrieve &mdash; system searches vector DB, finds 3 relevant chunks</h3>
+        <p style="color:#aaa;">Chunk 1 (hr_policy.pdf, p.12): <em>&ldquo;Employees are entitled to 5 months of mandatory maternity leave...&rdquo;</em></p>
+        <p style="color:#aaa;">Chunk 2 (hr_policy.pdf, p.13): <em>&ldquo;Optional parental leave can be extended up to 6 additional months...&rdquo;</em></p>
+        <p style="color:#aaa;">Chunk 3 (hr_policy.pdf, p.14): <em>&ldquo;During maternity leave, employees receive 80% of their salary...&rdquo;</em></p>
+    </div>
+    <div class="card" style="font-size:0.7em; border-color:#4caf50;">
+        <h3 style="color:#4caf50;">✅ Step 2: Augment &amp; Generate &mdash; LLM reads chunks and produces a grounded answer</h3>
+        <p><em>&ldquo;Maternity leave is 5 months mandatory at 80% salary, with an option to extend up to 6 additional months. (Source: hr_policy.pdf, pages 12&ndash;14)&rdquo;</em></p>
+    </div>
+    <div class="takeaway">The answer comes from <strong>your documents</strong>, not the model&rsquo;s imagination. The user can verify by checking page 12.</div>
+    <p class="paper-ref">Lewis et al., &ldquo;Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks&rdquo;, NeurIPS 2020</p>
+</section>
+
+<!-- Slide 7: Why RAG Works — Grounding -->
+<section>
+    <h2>Why RAG Works &mdash; The Grounding Principle</h2>
+    <p style="font-size:0.75em; color:#aaa;">RAG transforms the generation task from <em>recall</em> to <em>reading comprehension</em>.</p>
+    <div class="two-col" style="margin-top:0.5em;">
+        <div class="card" style="border-color:var(--accent2);">
+            <h3 style="color:var(--accent2);">❌ Without RAG &mdash; Hallucination</h3>
+            <p style="font-size:0.68em;"><em>&ldquo;What is Zucchetti&rsquo;s remote work policy?&rdquo;</em></p>
+            <p style="font-size:0.65em; color:var(--accent2);">Model output: <em>&ldquo;Employees may work remotely up to 3 days per week, as per the 2022 Smart Working Agreement.&rdquo;</em></p>
+            <p style="font-size:0.6em; color:#888;">⚠️ Completely invented. Confident. Wrong.</p>
+        </div>
+        <div class="card" style="border-color:#4caf50;">
+            <h3 style="color:#4caf50;">✅ With RAG &mdash; Grounded</h3>
+            <p style="font-size:0.68em;"><em>&ldquo;What is Zucchetti&rsquo;s remote work policy?&rdquo;</em></p>
+            <p style="font-size:0.65em; color:#4caf50;">Model output: <em>&ldquo;According to hr_policy_2024.pdf p.8: employees may request up to 2 remote days per week after 6 months of employment.&rdquo;</em></p>
+            <p style="font-size:0.6em; color:#888;">✅ From document. Verifiable. Cited.</p>
+        </div>
+    </div>
+    <p style="font-size:0.62em; text-align:center; color:#aaa; margin-top:0.4em;">LLMs excel at <strong>reading comprehension</strong> &mdash; RAG converts recall into comprehension.</p>
+</section>
+
+<!-- Slide 8: RAG vs Fine-Tuning — Deep Comparison -->
+<section>
+    <h2>RAG vs. Fine-Tuning &mdash; When to Use Each</h2>
+    <table class="vs-table">
+        <tr><th></th><th>📚 RAG</th><th>🔧 Fine-Tuning</th></tr>
+        <tr><td>What it changes</td><td><span class="highlight">Knowledge available</span></td><td>Model behavior / weights</td></tr>
+        <tr><td>Knowledge source</td><td>External documents</td><td>Baked into parameters</td></tr>
+        <tr><td>Update frequency</td><td><span class="highlight">Instant</span> (swap documents)</td><td>Retrain required (hours&ndash;days)</td></tr>
+        <tr><td>Cost</td><td><span class="highlight">Low</span> (embeddings + DB)</td><td>High (GPU compute)</td></tr>
+        <tr><td>Hallucination</td><td><span class="highlight">Low</span> (grounded in text)</td><td>Medium (may still confabulate)</td></tr>
+        <tr><td>Interpretability</td><td><span class="highlight">High</span> (can show sources)</td><td>Low (black box)</td></tr>
+        <tr><td>Best for</td><td>Facts, policies, Q&amp;A</td><td>Style, format, behavior</td></tr>
+    </table>
+    <div class="takeaway">RAG and fine-tuning are <strong>complementary</strong>, not competing. Many production systems use both.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 2: RETRIEVAL EVOLUTION -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 2 of 5</p>
+        <h1>From Keywords<br>to Vectors</h1>
+        <p style="font-size:0.75em; color:#aaa;">How information retrieval evolved over 50 years</p>
+    </section>
+</section>
+
+<!-- Slide 10: The Evolution of Search -->
+<section>
+    <h2>The Evolution of Search</h2>
+    <table class="vs-table">
+        <tr><th>Era</th><th>Method</th><th>How It Works</th><th>Limitation</th></tr>
+        <tr><td>1970s</td><td><span class="highlight">Boolean</span></td><td>Exact keyword match (AND, OR, NOT)</td><td>No ranking, no synonyms</td></tr>
+        <tr><td>1990s</td><td><span class="highlight">TF-IDF</span></td><td>Rank by term frequency &times; rarity</td><td>No semantic understanding</td></tr>
+        <tr><td>2000s</td><td><span class="highlight">BM25</span></td><td>Improved TF-IDF with saturation</td><td>Still keyword-based</td></tr>
+        <tr><td>2019+</td><td><span class="highlight">Dense Retrieval</span></td><td>Embed query &amp; docs as vectors, compare similarity</td><td>Needs good embeddings</td></tr>
+    </table>
+    <div class="takeaway">RAG uses <strong>dense retrieval</strong> &mdash; searching by <strong>meaning</strong>, not keywords. This connects directly to the embeddings and cosine similarity you learned in <strong>Lectures 1 &amp; 2</strong>.</div>
+</section>
+
+<!-- Slide 11: TF-IDF — The Math -->
+<section>
+    <h2>TF-IDF &mdash; The Classic Approach</h2>
+    <p style="font-size:0.7em; color:#aaa;">The foundation of keyword search. Still used today in hybrid systems.</p>
+    <div class="formula">TF-IDF(t, d) = TF(t, d) &times; IDF(t)</div>
+    <div class="two-col" style="margin-top:0.5em;">
+        <div class="card">
+            <h3>TF (Term Frequency)</h3>
+            <p style="font-size:0.75em;">How often does the word appear <strong>in this document</strong>?</p>
+            <div class="formula" style="font-size:0.7em;">TF(t, d) = count(t in d) / |d|</div>
+            <p style="font-size:0.65em; color:#aaa;">More occurrences = more relevant</p>
+        </div>
+        <div class="card">
+            <h3>IDF (Inverse Document Frequency)</h3>
+            <p style="font-size:0.75em;">How <strong>rare</strong> is this word across all documents?</p>
+            <div class="formula" style="font-size:0.7em;">IDF(t) = log(N / df(t))</div>
+            <p style="font-size:0.65em; color:#aaa;">&ldquo;the&rdquo; appears everywhere = low IDF<br>&ldquo;maternity&rdquo; is rare = high IDF</p>
+        </div>
+    </div>
+    <div class="takeaway">TF-IDF works well for <strong>exact keyword matching</strong>. But it fails when the user says &ldquo;parental leave&rdquo; and the document says &ldquo;maternity policy.&rdquo;</div>
+    <p style="font-size:0.55em; color:#888; text-align:center; margin-top:0.3em;">Note: Modern implementations use smoothed IDF = log(N / (df+1)) + 1 to avoid division by zero.</p>
+    <p class="paper-ref">Sp&auml;rck Jones, &ldquo;A Statistical Interpretation of Term Specificity and Its Application in Retrieval&rdquo;, <em>Journal of Documentation</em>, 1972</p>
+</section>
+
+<!-- Slide 12: BM25 -->
+<section>
+    <h2>BM25 &mdash; The Industry Standard</h2>
+    <p style="font-size:0.7em; color:#aaa;">The default ranking in Elasticsearch, Solr, OpenSearch. Still the strongest sparse retriever.</p>
+    <div class="formula" style="font-size:0.65em;">BM25(q,d) = &sum;<sub>i</sub> IDF(t<sub>i</sub>) &middot; <sup>TF(t<sub>i</sub>,d) &middot; (k<sub>1</sub>+1)</sup>&frasl;<sub>TF(t<sub>i</sub>,d) + k<sub>1</sub>&middot;(1&minus;b+b&middot;|d|/avgdl)</sub></div>
+    <div class="two-col" style="margin-top:0.3em;">
+        <div class="card">
+            <h3>1. Term Saturation (k<sub>1</sub>)</h3>
+            <p style="font-size:0.75em;">The 100th &ldquo;policy&rdquo; adds <strong>almost nothing</strong> to the score.</p>
+            <p style="font-size:0.65em; color:#aaa;">k<sub>1</sub> &isin; [1.2, 2.0] controls saturation speed. TF-IDF has no cap.</p>
+        </div>
+        <div class="card">
+            <h3>2. Length Normalization (b)</h3>
+            <p style="font-size:0.75em;">&ldquo;policy&rdquo; 3&times; in a 2-page memo vs. 50&times; in a 100-page manual.</p>
+            <p style="font-size:0.65em; color:#aaa;">b &isin; [0, 1] controls length penalty. b=0.75 is default. <span class="highlight">The memo wins.</span></p>
+        </div>
+    </div>
+    <div class="card" style="border-color: var(--accent2); text-align:center; margin-top:0.3em; font-size:0.8em;">
+        <p><strong>Still keyword-based:</strong> <em>&ldquo;vacation days&rdquo;</em> &ne; <em>&ldquo;time off&rdquo;</em> &mdash; this is why we need <span class="highlight">dense retrieval</span></p>
+    </div>
+    <p class="paper-ref">Robertson &amp; Zaragoza, &ldquo;The Probabilistic Relevance Framework: BM25 and Beyond&rdquo;, <em>Foundations and Trends in IR</em>, 2009</p>
+</section>
+
+<!-- Slide 13: Dense Retrieval — The Semantic Leap -->
+<section>
+    <h2>Dense Retrieval &mdash; The Semantic Leap</h2>
+    <p style="font-size:0.7em; color:#aaa;">Instead of matching keywords, we match <strong>meaning</strong>. The key intuition: similar meanings point in the same <strong>direction</strong> in vector space.</p>
+    <div class="two-col">
+        <div class="card" style="border-color: var(--accent2);">
+            <h3>Sparse (BM25)</h3>
+            <p style="font-size:0.75em;">Each document is a <strong>bag of words</strong>.</p>
+            <p style="font-size:0.7em; color:#aaa;">Vector has 50,000+ dimensions (one per word).</p>
+            <p style="font-size:0.7em; color:#aaa;">Most values are <strong>zero</strong> (sparse).</p>
+            <p style="font-size:0.7em; color:#aaa;">Match = shared words exist. No synonyms.</p>
+        </div>
+        <div class="card" style="border-color: #4caf50;">
+            <h3>Dense (Embeddings)</h3>
+            <p style="font-size:0.75em;">Each document is a <strong>meaning direction</strong> in space.</p>
+            <p style="font-size:0.7em; color:#aaa;">Vector has 384&ndash;3072 dims. All non-zero.</p>
+            <p style="font-size:0.7em; color:#aaa;">Cosine measures <strong>angle</strong> between two directions.</p>
+            <div class="formula" style="font-size:0.58em; margin:0.3em 0;">cos(A,B) = <sup>A&sdot;B</sup>&frasl;<sub>||A|| &middot; ||B||</sub> &isin; [&minus;1, 1]</div>
+            <p style="font-size:0.6em; color:#aaa;">1 = same direction = same meaning &nbsp;|&nbsp; 0 = unrelated &nbsp;|&nbsp; &minus;1 = opposite</p>
+        </div>
+    </div>
+    <div class="card" style="text-align:center; margin-top:0.4em; font-size:0.8em;">
+        <p><em>&ldquo;vacation days&rdquo;</em> &rarr; embed &rarr; [0.21, &minus;0.45, 0.78, ...]</p>
+        <p><em>&ldquo;time off&rdquo;</em> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rarr; embed &rarr; [0.19, &minus;0.41, 0.82, ...]</p>
+        <p style="margin-top:0.3em;"><span class="highlight">cosine similarity = 0.89</span> &nbsp;&mdash;&nbsp; <span style="color:#aaa; font-size:0.85em;">BM25 score = 0 (no shared words)</span></p>
+    </div>
+    <p style="font-size:0.6em; color:#888; text-align:center; margin-top:0.2em;">💡 Unit-normalized vectors: &lVert;e&rVert; = 1 &rArr; cos(A,B) = A&sdot;B &nbsp;(how FAISS/ChromaDB compute similarity internally)</p>
+    <div class="takeaway">Dense retrieval finds <strong>meaning</strong>, not keywords. Two texts are similar if they <strong>point in the same direction</strong> — even when they share zero words.</div>
+</section>
+
+<!-- Slide 14: Bi-Encoder vs Cross-Encoder — How Dense Retrieval Actually Works -->
+<section>
+    <h2>The Encoder Connection &mdash; From L1&ndash;2 to RAG</h2>
+    <p style="font-size:0.7em; color:#aaa;">Remember <strong>encoders</strong> from Lectures 1&ndash;2? This is exactly where they plug into RAG.</p>
+    <div class="two-col">
+        <div class="card" style="border-color: var(--accent3);">
+            <h3>Bi-Encoder (for retrieval) &star;</h3>
+            <p style="font-size:0.7em;">Encode query and document <strong>separately</strong>.</p>
+            <div class="formula" style="font-size:0.6em;">sim(q, d) = cos(BERT(q), BERT(d))</div>
+            <p style="font-size:0.6em; color:#4caf50;">WHY it is fast: all <strong>1M document vectors</strong> are computed <strong>offline</strong> at index time and stored. At query time you only run the encoder <strong>once</strong> (for the query), then do ANN search.</p>
+        </div>
+        <div class="card">
+            <h3>Cross-Encoder (for re-ranking)</h3>
+            <p style="font-size:0.7em;">Encode query + document <strong>together</strong>.</p>
+            <div class="formula" style="font-size:0.6em;">score = BERT([q; d])</div>
+            <p style="font-size:0.6em; color:var(--accent2);">WHY it is slow: both texts enter the model <strong>together</strong> &rarr; you cannot precompute anything offline &rarr; must run the full model for every single query-document pair.</p>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Bi-encoders</strong> power the initial retrieval (fast, scalable). <strong>Cross-encoders</strong> re-rank the top results (accurate, slow). This two-stage re-ranking pattern is explored in depth in <strong>Lecture 5</strong>.</div>
+    <div class="formula" style="font-size:0.72em; margin-top:0.4em;">D* = top-k<sub>d &isin; D</sub> cos(E<sub>q</sub>(q),&thinsp; E<sub>d</sub>(d))</div>
+    <p style="font-size:0.55em; color:#888; text-align:center;">At query time: embed query, find the k documents with highest cosine similarity in the vector index.</p>
+    <p class="paper-ref">Reimers &amp; Gurevych, &ldquo;Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks&rdquo;, EMNLP 2019</p>
+</section>
+
+<!-- Slide 15: Sentence Transformers — The Models We Use -->
+<section>
+    <h2>Sentence Transformers &mdash; The Models Behind RAG</h2>
+    <p style="font-size:0.7em; color:#aaa;">BERT was not designed for similarity. <strong>Sentence-BERT</strong> (2019) fixed this.</p>
+    <div class="card" style="font-size:0.8em;">
+        <h3>The problem with raw BERT</h3>
+        <p style="font-size:0.75em;">BERT produces <strong>token-level</strong> embeddings (one per word). To get a sentence embedding you need to pool all tokens — but this was never what BERT was trained to do. Comparing two sentences = cross-encoder = <span class="warn">O(n&sup2;)</span> pairs for n sentences = 65 hours for 10,000 sentences.</p>
+    </div>
+    <div class="card" style="font-size:0.8em; border-color:#4caf50;">
+        <h3>The Sentence-BERT solution &mdash; HOW it works</h3>
+        <p style="font-size:0.75em;">Train <strong>two identical BERT encoders</strong> in parallel on labeled sentence pairs. For similar pairs, push their vectors <strong>closer</strong>. For dissimilar pairs, push them <strong>apart</strong>. This is called <strong>contrastive learning</strong>. Result: one vector per sentence, directly comparable with cosine similarity. Same computation reduced from 65 hours to <span class="highlight">5 seconds</span>.</p>
+    </div>
+    <table class="vs-table" style="margin-top:0.3em;">
+        <tr><th>Model</th><th>Architecture</th><th>Dims</th><th>Use in Our Course</th></tr>
+        <tr><td>MiniLM-L6-v2</td><td>MiniLM (distilled)</td><td>384</td><td>Lab (fast, lightweight)</td></tr>
+        <tr><td>BGE-M3</td><td>XLM-RoBERTa</td><td>1024</td><td>Multilingual production</td></tr>
+        <tr><td>text-embedding-3-large</td><td>OpenAI (proprietary)</td><td>3072</td><td>Cloud API option</td></tr>
+    </table>
+    <div class="takeaway">Every embedding model in <strong>L1&ndash;2&rsquo;s</strong> labs is a <strong>bi-encoder</strong> &mdash; a BERT-style encoder trained for similarity.</div>
+</section>
+
+<!-- Slide 16: Hybrid Retrieval — Best of Both -->
+<section>
+    <h2>Hybrid Retrieval &mdash; Best of Both Worlds</h2>
+    <p style="font-size:0.7em; color:#aaa;">Production systems combine keyword and semantic search.</p>
+    <div style="text-align:center; margin:0.8em 0;">
+        <div style="display:inline-flex; gap:1em; align-items:center;">
+            <div class="card" style="min-width:180px; text-align:center;">
+                <h3>BM25</h3>
+                <p style="font-size:0.7em;">Keyword precision</p>
+                <p style="font-size:0.65em; color:#aaa;">&ldquo;Article 47&rdquo; &rarr; exact match</p>
+            </div>
+            <p style="font-size:2em; color:var(--accent3);">+</p>
+            <div class="card" style="min-width:180px; text-align:center;">
+                <h3>Dense</h3>
+                <p style="font-size:0.7em;">Semantic recall</p>
+                <p style="font-size:0.65em; color:#aaa;">&ldquo;time off&rdquo; &rarr; &ldquo;vacation&rdquo;</p>
+            </div>
+            <p style="font-size:2em; color:var(--accent3);">=</p>
+            <div class="card" style="min-width:180px; text-align:center; border-color:#4caf50;">
+                <h3 style="color:#4caf50;">Hybrid</h3>
+                <p style="font-size:0.7em;">Precision + recall</p>
+                <p style="font-size:0.65em; color:#aaa;">Ranked by combined score</p>
+            </div>
+        </div>
+    </div>
+    <div class="formula" style="font-size:0.8em;">score(q, d) = &alpha; &middot; BM25(q, d) + (1 &minus; &alpha;) &middot; cos(embed(q), embed(d))</div>
+    <div class="two-col" style="margin-top:0.4em; font-size:0.75em;">
+        <div class="card">
+            <h3>Example &mdash; query: &ldquo;sick leave regulations&rdquo;</h3>
+            <p style="font-size:0.8em; color:#aaa;">BM25: finds docs with exact word &ldquo;sick&rdquo; &rarr; 0.72</p>
+            <p style="font-size:0.8em; color:#aaa;">Dense: finds docs about &ldquo;illness, absence, medical leave&rdquo; &rarr; 0.85</p>
+            <p style="font-size:0.8em; color:#4caf50;">Hybrid (&alpha;=0.4): 0.4&times;0.72 + 0.6&times;0.85 = <strong>0.799</strong></p>
+        </div>
+        <div class="card">
+            <h3>Why normalization is required</h3>
+            <p style="font-size:0.8em; color:#aaa;">BM25 scores can be 0&ndash;20+. Cosine scores are 0&ndash;1. You cannot add them raw &mdash; BM25 would always dominate.</p>
+            <p style="font-size:0.75em; color:#aaa;">&rarr; Normalize each to [0,1] first (min-max or softmax), then apply &alpha;.</p>
+            <p style="font-size:0.75em; color:var(--accent3);">Advanced alternative: Reciprocal Rank Fusion (covered in L5) &mdash; avoids score normalization entirely.</p>
+        </div>
+    </div>
+    <p class="paper-ref">Craswell et al., &ldquo;MS MARCO: Benchmarking Ranking Models in the Large-Data Regime&rdquo;, <em>SIGIR 2021</em></p>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 3: DOCUMENT PROCESSING & CHUNKING -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 3 of 5</p>
+        <h1>Document Processing<br>&amp; Chunking Theory</h1>
+        <p style="font-size:0.75em; color:#aaa;">The hidden bottleneck of every RAG system</p>
+    </section>
+</section>
+
+<!-- Slide 16: Why Chunking Matters -->
+<section>
+    <h2>Why Chunking Matters</h2>
+    <p style="font-size:0.7em; color:#aaa;">Documents are too long to embed as a single vector. We must split them into <strong>chunks</strong>.</p>
+    <div class="card" style="text-align:center;">
+        <p style="font-size:0.8em;">A 50-page HR manual = <strong>~25,000 tokens</strong></p>
+        <p style="font-size:0.7em; color:#aaa;">Embedding models have a limit of <strong>512 tokens</strong> (MiniLM) or <strong>8192 tokens</strong> (BGE-M3)</p>
+        <p style="font-size:0.7em; color:#aaa;">Even if you could embed it all, one vector cannot capture 50 different topics</p>
+    </div>
+    <div class="two-col" style="margin-top:0.5em;">
+        <div class="card">
+            <h3>The embedding dilution problem</h3>
+            <p style="font-size:0.7em; color:#aaa;">Long text &rarr; the embedding becomes an <strong>average</strong> of everything &rarr; it matches nothing well.</p>
+            <p style="font-size:0.65em; color:#888;">Analogy: mix all paint colors together &rarr; you get grey. The grey matches no specific color. Same with meaning: average of 50 topics = matches none of them.</p>
+        </div>
+        <div class="card">
+            <h3>The retrieval granularity problem</h3>
+            <p style="font-size:0.7em; color:#aaa;">User asks about &ldquo;sick leave&rdquo; &rarr; you need just those 3 paragraphs, not the whole manual.</p>
+            <p style="font-size:0.65em; color:#888;">Returning the full 50-page manual as context would fill the entire LLM context window with noise.</p>
+        </div>
+    </div>
+    <div class="takeaway">Chunking is not just a technical step &mdash; it <strong>determines retrieval quality</strong>. Bad chunks = bad answers.</div>
+</section>
+
+<!-- Slide 17: Chunking Strategies -->
+<section>
+    <h2>Three Chunking Strategies</h2>
+    <div style="font-size:0.9em;">
+        <div class="card">
+            <h3>1. Fixed-Size</h3>
+            <p style="font-size:0.75em; color:#aaa;">Split every N characters. Simple but <span class="warn">cuts mid-sentence</span>. Not recommended.</p>
+        </div>
+        <div class="card" style="border-color: var(--accent3);">
+            <h3>2. Recursive / Structural ⭐</h3>
+            <p style="font-size:0.75em; color:#aaa;">Split on natural boundaries: paragraphs → sentences → characters. Preserves <span class="highlight">semantic coherence</span>.</p>
+            <p style="font-size:0.65em; color:#aaa;">Try to split at &ldquo;\n\n&rdquo; first. If chunk still too large, split at &ldquo;. &rdquo; — and so on.</p>
+        </div>
+        <div class="card">
+            <h3>3. Semantic</h3>
+            <p style="font-size:0.75em; color:#aaa;">Use embeddings to detect <strong>topic shifts</strong>. Most accurate but most complex.</p>
+            <div class="formula" style="font-size:0.6em; margin:0.3em 0;">split at i &hArr; cos(emb(s<sub>i</sub>), emb(s<sub>i+1</sub>)) &lt; &theta;</div>
+            <p style="font-size:0.6em; color:#aaa;">Compare adjacent sentence embeddings. When similarity drops below threshold &theta;, start a new chunk.</p>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Recursive chunking</strong> is the best default for most RAG systems.</div>
+</section>
+
+<!-- Slide 18: The Chunk Size Trade-Off -->
+<section>
+    <h2>The Chunk Size Trade-Off</h2>
+    <div class="two-col">
+        <div class="card" style="border-color: var(--accent2);">
+            <h3>❌ Too Small (50&ndash;100 tokens)</h3>
+            <ul>
+                <li>High retrieval precision</li>
+                <li>But <span class="warn">context fragmentation</span></li>
+                <li><em>&ldquo;...must submit the request to...&rdquo;</em></li>
+                <li>No surrounding context &rarr; useless</li>
+            </ul>
+        </div>
+        <div class="card" style="border-color: var(--accent2);">
+            <h3>❌ Too Large (1000+ tokens)</h3>
+            <ul>
+                <li>Full context preserved</li>
+                <li>But <span class="warn">retrieval dilution</span></li>
+                <li>Embedding averages over many topics</li>
+                <li>Returns irrelevant surrounding text</li>
+            </ul>
+        </div>
+    </div>
+    <div class="card" style="border-color: #4caf50; text-align:center; margin-top:0.5em;">
+        <h3 style="color:#4caf50;">✅ Sweet Spot: 300&ndash;500 tokens</h3>
+        <p style="font-size:0.7em;">With <span class="highlight">50&ndash;100 token overlap</span> between consecutive chunks</p>
+        <p style="font-size:0.65em; color:#aaa;">Overlap ensures boundary sentences appear in both chunks</p>
+    </div>
+</section>
+
+<!-- Slide 20b: Chunking — See the Difference -->
+<section>
+    <h2>Chunking in Practice &mdash; See the Difference</h2>
+    <p style="font-size:0.65em; color:#aaa;">Original text: <em>&ldquo;Employees are entitled to 5 months of mandatory maternity leave. During this period, they receive 80% of their salary. Optional parental leave can be extended up to 6 additional months at reduced pay.&rdquo;</em></p>
+    <div class="two-col" style="margin-top:0.5em;">
+        <div class="card" style="border-color: var(--accent2);">
+            <h3>❌ Fixed-Size (50 chars)</h3>
+            <p style="font-size:0.65em; color:#aaa; font-family: var(--r-code-font);">
+                Chunk 1: <em>&ldquo;Employees are entitled to 5 months of mand&rdquo;</em><br>
+                Chunk 2: <em>&ldquo;atory maternity leave. During this period,&rdquo;</em><br>
+                Chunk 3: <em>&ldquo;they receive 80% of their salary. Optional&rdquo;</em>
+            </p>
+            <p style="font-size:0.6em; color:var(--accent2);">Words cut mid-sentence. &ldquo;mand-atory&rdquo; split across chunks.</p>
+        </div>
+        <div class="card" style="border-color: #4caf50;">
+            <h3>✅ Recursive (by sentence)</h3>
+            <p style="font-size:0.65em; color:#aaa; font-family: var(--r-code-font);">
+                Chunk 1: <em>&ldquo;Employees are entitled to 5 months of mandatory maternity leave.&rdquo;</em><br>
+                Chunk 2: <em>&ldquo;During this period, they receive 80% of their salary.&rdquo;</em><br>
+                Chunk 3: <em>&ldquo;Optional parental leave can be extended up to 6 additional months at reduced pay.&rdquo;</em>
+            </p>
+            <p style="font-size:0.6em; color:#4caf50;">Each chunk is a complete thought. Searchable and meaningful.</p>
+        </div>
+    </div>
+    <div class="takeaway">Same text, <strong>completely different retrieval quality</strong>. Recursive chunking preserves meaning.</div>
+</section>
+
+<!-- Slide 19: Metadata — The Fourth Dimension -->
+<section>
+    <h2>Metadata &mdash; The Fourth Dimension</h2>
+    <p style="font-size:0.7em; color:#aaa;">Every chunk carries structured data alongside its text and embedding.</p>
+    <div class="card" style="font-size:0.8em;">
+        <p>A chunk is not just text. It is a tuple: <strong>(text, embedding, metadata)</strong></p>
+    </div>
+    <table class="vs-table" style="margin-top:0.5em;">
+        <tr><th>Metadata Field</th><th>Example</th><th>Why It Matters</th></tr>
+        <tr><td><code>source</code></td><td>hr_policy_2024.pdf</td><td>Source attribution &mdash; users can verify</td></tr>
+        <tr><td><code>page</code></td><td>12</td><td>Precise reference</td></tr>
+        <tr><td><code>section</code></td><td>Maternity Leave</td><td>Hierarchical filtering</td></tr>
+        <tr><td><code>date</code></td><td>2024-01-15</td><td>Recency filtering</td></tr>
+        <tr><td><code>department</code></td><td>HR</td><td>Access control / routing</td></tr>
+    </table>
+    <div class="takeaway">Metadata enables <strong>hybrid filtering</strong>: &ldquo;Find 2024 HR policies about remote work&rdquo; = vector search + metadata filter.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 4: VECTOR DATABASES -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
+        <p class="section-title">Section 4 of 5</p>
+        <h1>Vector Databases</h1>
+        <p style="font-size:0.75em; color:#aaa;">How similarity search works at scale</p>
+    </section>
+</section>
+
+<!-- Slide 21: The ANN Problem -->
+<section>
+    <h2>The Search Problem at Scale</h2>
+    <p style="font-size:0.7em; color:#aaa;">Finding the most similar vectors in a large collection.</p>
+    <div class="card" style="text-align:center;">
+        <p style="font-size:0.8em;">You have <strong>1 million</strong> chunks, each with a <strong>384-dimensional</strong> embedding.</p>
+        <p style="font-size:0.7em; color:#aaa;">Brute-force: compute cosine similarity with all 1M vectors = <span class="warn">too slow</span></p>
+    </div>
+    <div class="two-col" style="margin-top:0.5em;">
+        <div class="card" style="border-color: var(--accent2);">
+            <h3>Exact Search (KNN)</h3>
+            <p style="font-size:0.7em;">Compare query to <strong>every</strong> vector.</p>
+            <p style="font-size:0.65em; color:#aaa;">O(n &middot; d) &mdash; scales linearly</p>
+            <p style="font-size:0.65em; color:#aaa;">1M vectors &times; 384 dims = slow</p>
+            <p style="font-size:0.65em; color:var(--accent2);">Perfect recall, terrible speed</p>
+        </div>
+        <div class="card" style="border-color: #4caf50;">
+            <h3>Approximate Search (ANN)</h3>
+            <p style="font-size:0.7em;">Build an <strong>index</strong> that enables shortcuts.</p>
+            <p style="font-size:0.65em; color:#aaa;">O(log n) to O(n<sup>0.5</sup>) &mdash; sublinear</p>
+            <p style="font-size:0.65em; color:#aaa;">1M vectors &rarr; milliseconds</p>
+            <p style="font-size:0.65em; color:#4caf50;">~95%+ recall, excellent speed</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 22: HNSW — How Vector Search Actually Works -->
+<section>
+    <h2>HNSW &mdash; The Algorithm Behind Vector Search</h2>
+    <p style="font-size:0.7em; color:#aaa;"><strong>Hierarchical Navigable Small World</strong> &mdash; used by most vector databases.</p>
+    <div class="card" style="font-size:0.8em;">
+        <h3>The intuition: a multi-layer map</h3>
+        <ul>
+            <li><strong>Top layer:</strong> few nodes, long-range connections &mdash; like a <em>world map</em> (continent to continent)</li>
+            <li><strong>Middle layers:</strong> more nodes, medium range &mdash; like a <em>country map</em> (city to city)</li>
+            <li><strong>Bottom layer:</strong> all nodes, short range &mdash; like a <em>street map</em> (block to block)</li>
+        </ul>
+    </div>
+    <div class="card" style="margin-top:0.3em; font-size:0.8em;">
+        <h3>Search: &ldquo;find the restaurant nearest to me&rdquo;</h3>
+        <p style="font-size:0.8em; color:#aaa;">1. World map: jump to the right <strong>continent</strong> &rarr; Europe</p>
+        <p style="font-size:0.8em; color:#aaa;">2. Country map: zoom to the right <strong>city</strong> &rarr; Milan</p>
+        <p style="font-size:0.8em; color:#aaa;">3. Street map: walk to the nearest <strong>restaurant</strong> &rarr; return result</p>
+        <p style="font-size:0.75em; color:#4caf50;">Each layer dramatically reduces the search space. O(log n) instead of O(n).</p>
+    </div>
+    <p class="paper-ref">Malkov &amp; Yashunin, &ldquo;Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs&rdquo;, <em>IEEE TPAMI</em>, 2020</p>
+</section>
+
+<!-- Slide 23: Vector DB Landscape -->
+<section>
+    <h2>Vector Database Landscape</h2>
+    <table class="vs-table">
+        <tr><th>Database</th><th>Type</th><th>ANN Algorithm</th><th>Best For</th></tr>
+        <tr><td><span class="highlight">ChromaDB</span></td><td>Embedded (Python)</td><td>HNSW</td><td>Prototyping, learning</td></tr>
+        <tr><td>Qdrant</td><td>Client-Server</td><td>HNSW</td><td>Production, filtering</td></tr>
+        <tr><td>Pinecone</td><td>Managed Cloud</td><td>Proprietary</td><td>Zero-ops, enterprise</td></tr>
+        <tr><td>pgvector</td><td>PostgreSQL ext.</td><td>IVFFlat / HNSW</td><td>Existing Postgres stack</td></tr>
+        <tr><td>FAISS</td><td>Library (Meta)</td><td>IVF, PQ, HNSW</td><td>Research, large-scale</td></tr>
+    </table>
+    <div class="takeaway">The Lecture 5 lab uses <strong>ChromaDB</strong> (zero setup). Production systems typically graduate to <strong>Qdrant</strong> or <strong>pgvector</strong>.</div>
+    <p class="paper-ref">Johnson, Douze &amp; J&eacute;gou, &ldquo;Billion-Scale Similarity Search with GPUs&rdquo; (FAISS), <em>IEEE Transactions on Big Data</em>, 2021</p>
+</section>
+
+<!-- Slide 24: The Complete Pipeline — Theory -->
+<section>
+    <h2>The Complete RAG Pipeline</h2>
+    <p style="font-size:0.7em; color:#aaa;">Five components, each with its own design decisions.</p>
+    <table class="vs-table">
+        <tr><th>#</th><th>Component</th><th>Key Decision</th><th>Our Choice (Lab)</th></tr>
+        <tr><td>1</td><td><strong>Document Loader</strong></td><td>Format handling</td><td><code>pypdf</code></td></tr>
+        <tr><td>2</td><td><strong>Text Splitter</strong></td><td>Chunk size, overlap, strategy</td><td>Recursive, 400 / 80</td></tr>
+        <tr><td>3</td><td><strong>Embedding Model</strong></td><td>Quality vs. speed vs. cost</td><td>MiniLM (384d)</td></tr>
+        <tr><td>4</td><td><strong>Vector Database</strong></td><td>Scale, features, hosting</td><td>ChromaDB</td></tr>
+        <tr><td>5</td><td><strong>Generator (LLM)</strong></td><td>Model, prompt template</td><td>Gemini 2.0 Flash</td></tr>
+    </table>
+    <div class="takeaway">The embedding model used at <strong>index time</strong> must be <strong>identical</strong> to the one used at <strong>query time</strong> &mdash; different models live in different vector spaces.</div>
+    <p style="font-size:0.5em; color:#555; text-align:center; margin-top:0.6em;">🔬 You will build this exact pipeline in the <strong>Lecture 5 combined lab</strong>.</p>
+</section>
+
+<!-- Slide 25: The Prompt Template — Design Principles -->
+<section>
+    <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
+    <p class="section-title">Section 4 &mdash; Pipeline &amp; Prompt Design</p>
+    <h2>The RAG Prompt &mdash; Design Principles</h2>
+    <p style="font-size:0.7em; color:#aaa;">You already master prompting from <strong>Lecture 3</strong>. Now apply it with <strong>grounding constraints</strong> specific to RAG.</p>
+    <p style="font-size:0.7em; color:#aaa;">The prompt template determines answer quality as much as retrieval does.</p>
+    <div style="font-size:0.85em;">
+        <div class="card" style="border-color:#4caf50;">
+            <h3 style="color:#4caf50;">✅ Grounding Instruction</h3>
+            <p style="font-size:0.75em;"><em>&ldquo;Answer based <strong>ONLY</strong> on the provided context&rdquo;</em> &mdash; prevents hallucination</p>
+        </div>
+        <div class="card" style="border-color:#4caf50;">
+            <h3 style="color:#4caf50;">✅ Refusal Instruction</h3>
+            <p style="font-size:0.75em;"><em>&ldquo;If the answer is not in the context, say: I don&rsquo;t have enough information&rdquo;</em></p>
+        </div>
+        <div class="card" style="border-color:#4caf50;">
+            <h3 style="color:#4caf50;">✅ Source Citation</h3>
+            <p style="font-size:0.75em;"><em>&ldquo;Always cite which document the information comes from&rdquo;</em></p>
+        </div>
+        <div class="card" style="border-color:var(--accent2);">
+            <h3 style="color:var(--accent2);">❌ Common Mistake</h3>
+            <p style="font-size:0.75em;">Not including grounding &rarr; model ignores context and uses its own knowledge &rarr; hallucination</p>
+        </div>
+    </div>
+    <div style="margin-top:0.5em; font-size:0.6em; background:rgba(108,99,255,0.08); border:1px solid rgba(108,99,255,0.2); border-radius:8px; padding:0.5em 1em; font-family: var(--r-code-font); color:#aaa; text-align:left;">
+        prompt = f&quot;&quot;&quot;Answer ONLY from the context below. If not found, say: I don&rsquo;t have this information. Cite the source.<br>
+        Context: {context}<br>
+        Question: {question}&quot;&quot;&quot;
+    </div>
+</section>
+
+<!-- Slide 26: Common Failure Modes -->
+<section>
+    <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
+    <p class="section-title">Section 4 — Pipeline &amp; Prompt Design</p>
+    <h2>RAG Failure Modes</h2>
+    <p style="font-size:0.7em; color:#aaa;">Understanding failures helps you debug and improve your system.</p>
+    <table class="vs-table">
+        <tr><th>Failure</th><th>Symptom</th><th>Root Cause</th><th>Solution</th></tr>
+        <tr><td><span class="warn">Wrong chunks</span></td><td>Answer about wrong topic</td><td>Embedding model too weak</td><td>Better model; hybrid search &rarr; L5</td></tr>
+        <tr><td><span class="warn">Chunks too small</span></td><td>Incomplete answers</td><td>Context fragmented</td><td>Increase chunk size</td></tr>
+        <tr><td><span class="warn">Chunks too large</span></td><td>Irrelevant noise in answer</td><td>Diluted embeddings</td><td>Decrease chunk size</td></tr>
+        <tr><td><span class="warn">No relevant docs</span></td><td>Hallucinated answer</td><td>Missing refusal prompt</td><td>Add &ldquo;I don&rsquo;t know&rdquo; instruction</td></tr>
+        <tr><td><span class="warn">Ignores context</span></td><td>Uses own knowledge</td><td>Weak grounding prompt</td><td>Stronger &ldquo;ONLY context&rdquo; instruction</td></tr>
+        <tr><td><span class="warn">Stale answers</span></td><td>Outdated information</td><td>Documents not re-ingested</td><td>Schedule periodic re-indexing</td></tr>
+    </table>
+    <div class="takeaway">Most RAG failures are <strong>retrieval failures</strong>, not generation failures. Fix retrieval first.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- BREAK -->
+<!-- ============================================ -->
+<section>
+    <div style="text-align:center;">
+        <p class="section-title" style="margin-bottom:0.5em;">Midpoint Check &mdash; Lecture 4</p>
+        <p style="font-size:4em; margin-bottom:0.2em;">&#9749;</p>
+        <h1>5-Minute Break</h1>
+        <p class="subtitle" style="margin-top:0.5em;">Stretch your legs</p>
+        <br>
+        <p style="font-size:0.7em; color:#666;">Next up: The Decision Matrix &mdash; Prompting vs. RAG vs. Fine-Tuning</p>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 5: DECISION MATRIX -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div></div>
+        <p class="section-title">Section 5 of 5</p>
+        <h1>Decision Matrix</h1>
+        <p style="font-size:0.75em; color:#aaa;">The most important decision you will make on every project</p>
+    </section>
+</section>
+
+<!-- Slide 30: The Three Approaches -->
+<section>
+    <h2>Three Tools, Three Problems</h2>
+    <div style="display:flex; gap:0.8em; justify-content:center;">
+        <div class="card" style="flex:1; text-align:center;">
+            <p style="font-size:2em;">💬</p>
+            <h3>Prompting</h3>
+            <p style="font-size:0.7em;">Change the <strong>instructions</strong></p>
+            <p style="font-size:0.6em; color:#aaa;">Model stays unchanged</p>
+            <p style="font-size:0.6em; color:#aaa;">Zero data, zero compute</p>
+        </div>
+        <div class="card" style="flex:1; text-align:center; border-color: var(--accent3);">
+            <p style="font-size:2em;">📚</p>
+            <h3>RAG</h3>
+            <p style="font-size:0.7em;">Give the model <strong>knowledge</strong></p>
+            <p style="font-size:0.6em; color:#aaa;">External docs at query time</p>
+            <p style="font-size:0.6em; color:#aaa;">Low cost, instant updates</p>
+        </div>
+        <div class="card" style="flex:1; text-align:center;">
+            <p style="font-size:2em;">🔧</p>
+            <h3>Fine-Tuning</h3>
+            <p style="font-size:0.7em;">Change the model&rsquo;s <strong>behavior</strong></p>
+            <p style="font-size:0.6em; color:#aaa;">Retrain on your data</p>
+            <p style="font-size:0.6em; color:#aaa;">High cost, high customization</p>
+        </div>
+    </div>
+    <div class="takeaway">Each tool solves a <strong>different problem</strong>. Using the wrong tool wastes time and money.</div>
+</section>
+
+<!-- Slide 31: The Decision Matrix -->
+<section>
+    <h2>The Decision Matrix</h2>
+    <table class="vs-table">
+        <tr><th>Criterion</th><th>💬 Prompting</th><th>📚 RAG</th><th>🔧 Fine-Tuning</th></tr>
+        <tr><td>Setup effort</td><td style="color:#4caf50;">Minutes</td><td style="color:var(--accent3);">Hours</td><td style="color:var(--accent2);">Days&ndash;Weeks</td></tr>
+        <tr><td>Data required</td><td>None</td><td>Documents</td><td>100&ndash;10K examples</td></tr>
+        <tr><td>Compute cost</td><td style="color:#4caf50;">$0</td><td style="color:var(--accent3);">Low ($)</td><td style="color:var(--accent2);">High ($$$)</td></tr>
+        <tr><td>Update speed</td><td style="color:#4caf50;">Instant</td><td style="color:var(--accent3);">Minutes</td><td style="color:var(--accent2);">Hours</td></tr>
+        <tr><td>Customization</td><td>Low</td><td>Medium</td><td>High</td></tr>
+        <tr><td>Hallucination</td><td style="color:var(--accent2);">High risk</td><td style="color:#4caf50;">Low (grounded)</td><td>Medium</td></tr>
+        <tr><td>Best for</td><td>General tasks</td><td>Knowledge Q&amp;A</td><td>Style / domain</td></tr>
+    </table>
+    <div class="takeaway">Use <strong>Prompting first</strong> (minutes), then <strong>RAG</strong> if you need external knowledge (hours), then <strong>Fine-Tuning</strong> only if behavior/style needs changing (days). Each escalation multiplies cost by 10&times;.</div>
+</section>
+
+<!-- Slide 32: Decision Flowchart -->
+<section>
+    <h2>Decision Flowchart</h2>
+    <div style="text-align:center; font-size:0.75em;">
+        <div class="card" style="display:inline-block; margin:0.3em;">
+            <p>Does the model already know the answer well enough?</p>
+            <p><span style="color:#4caf50;">Yes &rarr;</span> <strong>💬 Prompting</strong></p>
+        </div>
+        <br>
+        <p style="color:var(--accent2);">&darr; No</p>
+        <div class="card" style="display:inline-block; margin:0.3em;">
+            <p>Is the knowledge in documents you can provide?</p>
+            <p><span style="color:#4caf50;">Yes &rarr;</span> <strong>📚 RAG</strong></p>
+        </div>
+        <br>
+        <p style="color:var(--accent2);">&darr; No</p>
+        <div class="card" style="display:inline-block; margin:0.3em;">
+            <p>Do you need specific behavior, format, or domain expertise?</p>
+            <p><span style="color:#4caf50;">Yes &rarr;</span> <strong>🔧 Fine-Tuning</strong> (Lecture 9)</p>
+        </div>
+        <br>
+        <p style="color:var(--accent2);">&darr; Still unsure?</p>
+        <div class="card" style="display:inline-block; margin:0.3em; border-color:var(--accent3);">
+            <p>Try <strong>RAG + better prompts</strong> first. Fine-tune only if that fails.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 33: Cloud vs Local -->
+<section>
+    <h2>Cloud vs. Local Inference</h2>
+    <table class="vs-table">
+        <tr><th></th><th>☁️ Cloud API</th><th>🏠 Local Inference</th></tr>
+        <tr><td>Setup time</td><td style="color:#4caf50;">5 minutes</td><td>Hours (GPU setup)</td></tr>
+        <tr><td>Cost model</td><td>Per token ($)</td><td>Fixed (hardware cost)</td></tr>
+        <tr><td>Privacy</td><td style="color:var(--accent2);">Data leaves premises</td><td style="color:#4caf50;">Data stays local</td></tr>
+        <tr><td>Models</td><td>GPT-4, Gemini, Claude</td><td>LLaMA, Mistral, Phi</td></tr>
+        <tr><td>Quality</td><td style="color:#4caf50;">Best available</td><td>Smaller, quantized</td></tr>
+        <tr><td>Tools</td><td>API calls</td><td>Ollama, vLLM, LM Studio</td></tr>
+    </table>
+    <div class="takeaway"><strong>Start with cloud</strong> (development &amp; prototyping). Move to <strong>local</strong> when privacy, cost, or latency requires it.</div>
+</section>
+
+<!-- Slide 34: Real Scenarios -->
+<section>
+    <h2>Apply the Matrix &mdash; 5 Real Scenarios</h2>
+    <div style="font-size:0.8em;">
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>1. &ldquo;Summarize this meeting transcript&rdquo;</h3>
+            <p style="font-size:0.7em;"><strong>&rarr; 💬 Prompting</strong> &mdash; general task, model already knows how. Just good instructions.</p>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent3);">
+            <h3>2. &ldquo;Answer questions about our HR policies&rdquo;</h3>
+            <p style="font-size:0.7em;"><strong>&rarr; 📚 RAG</strong> &mdash; knowledge is in company documents. Ground answers in retrieved chunks.</p>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent3);">
+            <h3>3. &ldquo;Customer support chatbot for our product manuals&rdquo;</h3>
+            <p style="font-size:0.7em;"><strong>&rarr; 📚 RAG</strong> (not prompting!) &mdash; domain-specific product knowledge. Prompting alone would hallucinate specs.</p>
+        </div>
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>4. &ldquo;Auto-categorize incoming support tickets&rdquo;</h3>
+            <p style="font-size:0.7em;"><strong>&rarr; 💬 Prompting first</strong>, then 🔧 Fine-Tune if accuracy isn&rsquo;t enough. Start simple, escalate only if needed.</p>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent2);">
+            <h3>5. &ldquo;Generate medical reports in our specific format&rdquo;</h3>
+            <p style="font-size:0.7em;"><strong>&rarr; 🔧 Fine-Tuning</strong> &mdash; needs specific style, clinical terminology, domain language.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- KEY TAKEAWAYS -->
+<!-- ============================================ -->
+<section>
+    <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div></div>
+    <h2>Lecture 4 &mdash; Key Takeaways</h2>
+    <div style="font-size:0.85em;">
+        <div class="card">
+            <p><span class="highlight">1.</span> RAG = <strong>Retrieve → Augment → Generate</strong> &mdash; give the model an open book</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">2.</span> Search evolved from <strong>keywords (TF-IDF, BM25)</strong> to <strong>meaning (dense embeddings)</strong></p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">3.</span> <strong>Chunking determines quality</strong> &mdash; 300&ndash;500 tokens, recursive, with overlap</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">4.</span> Vector databases use <strong>HNSW</strong> for millisecond similarity search at scale</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">5.</span> <strong>Prompt design matters</strong> &mdash; grounding, refusal, and citation instructions</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">6.</span> <strong>Prompting → RAG → Fine-Tuning</strong> &mdash; always try the simpler approach first</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">7.</span> Most RAG failures are <strong>retrieval failures</strong> &mdash; fix chunking and embeddings before touching the LLM</p>
+        </div>
+    </div>
+</section>
+
+<!-- QUESTIONS -->
+<!-- ============================================ -->
+<section>
+    <div style="text-align:center;">
+        <p style="font-size:3em; margin-bottom:0.3em;">&#10067;</p>
+        <h1>Questions?</h1>
+        <p class="subtitle" style="margin-top:1em;">Thank you!</p>
+        <br>
+        <p style="font-size:0.55em; color:#555;">Kamyar Zeinalipour &mdash; Zucchetti LLM Course</p>
+        <div style="margin-top:1.5em; font-size:0.5em; color:#444;">
+            <p>Next &rarr; <span class="highlight">Lecture 5: Advanced RAG &amp; Intelligent Routing</span></p>
+            <p style="color:#555; margin-top:0.3em;">Theory: Re-ranking &middot; HyDE &middot; Query decomposition &middot; Semantic routing</p>
+            <p style="color:var(--accent); margin-top:0.4em; font-weight:500;">🔬 Combined Lab: RAG Pipeline (L4) + Query Router (L5) &mdash; back-to-back hands-on session</p>
+        </div>
+    </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        width: 960,
+        height: 700,
+        margin: 0.04,
+        transition: 'slide',
+        transitionSpeed: 'default',
+        autoAnimateEasing: 'ease',
+        autoAnimateUnmatched: false,
+        autoAnimateDuration: 0.6,
+        plugins: [RevealHighlight],
+        navigationMode: 'linear',
+        highlight: {
+            highlightOnLoad: true,
+        },
+    });
+</script>
+</body>
+</html>

@@ -17,7 +17,7 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 │ ✅ L1  Transformer Blueprint  │      │ 🔒 L5  Advanced RAG & Routing        │
 │ ✅ L2  Tokenization & Embed.  │      │ 🔒 L6  Graph RAG & Knowledge Graphs  │
 │ ✅ L3  Prompt Engineering     │      │ 🔒 L7  Agentic RAG & Autonomous      │
-│ 🔒 L4  RAG & Decision Matrix  │      │ 🔒 L8  RAG Evaluation & Observability│
+│ ✅ L4  RAG & Decision Matrix  │      │ 🔒 L8  RAG Evaluation & Observability│
 └──────────────────────────────┘      │ 🔒 L9  Fine-Tuning (LoRA / QLoRA)   │
                                        │ 🔒 L10 Multimodal & Production      │
                                        └──────────────────────────────────────┘
@@ -120,6 +120,64 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 
 ---
 
+## 📖 Lecture 4: RAG Foundations & Decision Matrix
+
+**Duration:** 90 minutes · Pure theory — hands-on lab in Lecture 5 (combined Lab 4 + Lab 5)
+
+### 🎯 What You'll Learn
+
+- **The retrieval problem** — why LLMs hallucinate and why frozen knowledge isn't enough
+- **RAG architecture** — the full two-phase pipeline (offline indexing + online retrieval-augmented generation)
+- **The retrieval evolution** — from Boolean search → TF-IDF → BM25 → dense embeddings
+- **TF-IDF & BM25** — the math behind term frequency, IDF, term saturation (k₁), and length normalization (b)
+- **Dense retrieval** — cosine similarity, how similar meanings point in the same *direction* in vector space
+- **Bi-encoders vs Cross-encoders** — why bi-encoders are fast (offline precompute) and when cross-encoders are needed
+- **Sentence-BERT & contrastive learning** — how siamese training pushes similar sentences closer in vector space
+- **Hybrid retrieval** — combining BM25 + dense with α-weighted scores; why normalization is required
+- **Chunking strategies** — fixed-size vs recursive vs semantic (with the split condition formula)
+- **Chunk size trade-offs** — the sweet spot (300–500 tokens + 50–100 overlap) and the paint-mixing dilution analogy
+- **Metadata filtering** — (text, embedding, metadata) tuples; hybrid vector + metadata queries
+- **Vector databases** — KNN vs ANN, HNSW algorithm (the world/country/street map analogy), ChromaDB/Qdrant/FAISS landscape
+- **RAG prompt design** — grounding, refusal, and citation instructions (building on L3 prompt engineering)
+- **RAG failure modes** — 6 failure patterns and their fixes; most failures are retrieval failures
+- **Decision matrix** — Prompting vs RAG vs Fine-Tuning across 7 criteria; the decision flowchart
+- **Cloud vs Local inference** — when to use each
+
+### 📐 Key Formulas
+
+| Concept | Formula |
+|---------|--------|
+| TF-IDF | `TF-IDF(t,d) = TF(t,d) × log(N/df(t))` |
+| BM25 | `BM25(q,d) = Σ IDF(tᵢ) · TF·(k₁+1) / (TF + k₁·(1−b+b·|d|/avgdl))` |
+| Cosine Similarity | `cos(A,B) = A·B / (‖A‖·‖B‖) ∈ [−1, 1]` |
+| Retrieval (top-k) | `D* = top-k_{d∈D} cos(E_q(q), E_d(d))` |
+| Hybrid score | `score(q,d) = α·BM25(q,d) + (1−α)·cos(embed(q), embed(d))` |
+| Semantic chunking | `split at i ⟺ cos(emb(sᵢ), emb(sᵢ₊₁)) < θ` |
+| RAG objective | `P(y\|x) = Σ_d P(d\|x) · P(y\|x, d)` |
+
+### 📄 Key Papers Covered
+
+| Year | Paper | Venue |
+|------|-------|-------|
+| 1972 | *A Statistical Interpretation of Term Specificity* (Spärck Jones) | Journal of Documentation |
+| 2009 | *The Probabilistic Relevance Framework: BM25 and Beyond* (Robertson & Zaragoza) | Foundations & Trends in IR |
+| 2019 | *Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks* (Reimers & Gurevych) | EMNLP |
+| 2020 | *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks* (Lewis et al.) | NeurIPS |
+| 2020 | *Efficient and Robust ANN Search Using HNSW Graphs* (Malkov & Yashunin) | IEEE TPAMI |
+| 2021 | *Billion-Scale Similarity Search with GPUs* — FAISS (Johnson, Douze & Jégou) | IEEE Trans. on Big Data |
+| 2021 | *MS MARCO: Benchmarking Ranking Models* (Craswell et al.) | SIGIR |
+
+### 📂 Materials
+
+| Resource | Path | Description |
+|----------|------|-------------|
+| 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_04_rag_foundations.html) | Click to view slides in your browser |
+| 🔬 **Lab** | Coming in Lecture 5 | Combined Lab 4 + Lab 5 hands-on RAG pipeline |
+
+> **Note:** This is a pure-theory lecture. The full RAG pipeline implementation (ChromaDB + MiniLM + Gemini) is built hands-on in the **Lecture 5 combined lab**.
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
@@ -169,7 +227,7 @@ Open `slides/lecture_01_llm_embeddings.html` in your browser.
 | Lecture 1 | The Transformer Blueprint | ✅ **Available** |
 | Lecture 2 | Tokenization, Embeddings & Similarity | ✅ **Available** |
 | Lecture 3 | Prompt Engineering | ✅ **Available** |
-| Lecture 4 | RAG Foundations & Decision Matrix | 🔒 Coming soon |
+| Lecture 4 | RAG Foundations & Decision Matrix | ✅ **Available** |
 | Lecture 5 | Advanced RAG & Intelligent Routing | 🔒 Coming soon |
 | Lecture 6 | Graph RAG & Knowledge Graphs | 🔒 Coming soon |
 | Lecture 7 | Agentic RAG & Autonomous Systems | 🔒 Coming soon |
@@ -190,15 +248,21 @@ zucchetti-llm-course/
 ├── .env.example                     ← API key template
 │
 ├── slides/                          ← Lecture presentations
-│   ├── lecture_01_llm_embeddings.html        ← L1 slides
+│   ├── lecture_01_llm_embeddings.html         ← L1 slides
 │   ├── lecture_02_tokenization_embeddings.html ← L2 slides
-│   └── img_*.png / img_*.svg                ← Slide images
+│   ├── lecture_03_prompt_engineering.html     ← L3 slides
+│   ├── lecture_04_rag_foundations.html        ← L4 slides ← NEW
+│   └── img_*.png / img_*.svg                  ← Slide images
 │
-└── lab_01_embeddings/               ← Hands-on lab (L1 & L2)
-    ├── lab_01_embeddings.py             ← Main script
-    ├── lab_01_embeddings.ipynb          ← Jupyter notebook
-    ├── solutions.py                     ← Complete solutions
-    └── data/                            ← Sample datasets
+├── lab_01_embeddings/               ← Hands-on lab (L1 & L2)
+│   ├── lab_01_embeddings.py             ← Main script
+│   ├── lab_01_embeddings.ipynb          ← Jupyter notebook
+│   ├── solutions.py                     ← Complete solutions
+│   └── data/                            ← Sample datasets
+│
+└── lab_03_prompting/                ← Hands-on lab (L3)
+    ├── lab_03_prompting.py              ← Main script
+    └── lab_03_prompting.ipynb           ← Jupyter notebook
 ```
 
 ---
