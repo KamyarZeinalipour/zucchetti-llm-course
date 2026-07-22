@@ -18,7 +18,7 @@
 | 0:00 | Title + Intro | 2 min |
 | 0:02 | Agenda | 2 min |
 | 0:04 | §1 The Retrieval Problem & RAG | 20 min |
-| 0:24 | ☕ Break | 5 min |
+| 0:24 | ☕ Break | 10 min |
 | 0:29 | §2 Evolution of Search (table) | 3 min |
 | 0:32 | §2 Boolean Search (new slide) | 3 min |
 | 0:35 | §2 TF-IDF | 4 min |
@@ -208,15 +208,15 @@ Before we move on, let's compare these two approaches properly.
 
 ---
 
-## 🎬 BREAK SLIDE — ☕ 5-Minute Break · *0:24 · 5 min*
+## 🎬 BREAK SLIDE — ☕ 10-Minute Break · *0:24 · 10 min*
 
 Okay, we've done the first section. You now know what the problem is and what RAG is trying to solve.
 
-Take 5 minutes. Stand up, stretch, grab water.
+Take 10 minutes. Stand up, stretch, grab water or coffee.
 
 When we come back we go into the technical heart of RAG — how retrieval actually works. Keywords, vectors, the math behind search. It's one of the most interesting parts.
 
-*[Step away from the screen. Come back in exactly 5 minutes.]*
+*[Step away from the screen. Come back in exactly 10 minutes.]*
 
 ---
 
