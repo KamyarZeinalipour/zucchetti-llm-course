@@ -66,3 +66,6 @@ LLM_Course_Executive_Summary.md
 LLM_Course_Executive_Summary.pdf
 docker-compose.yml
 tests/
+
+# Teleprompter / instructor notes (private)
+slides/*_teleprompter.md

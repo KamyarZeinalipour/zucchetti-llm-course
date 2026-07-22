@@ -116,7 +116,6 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 | Resource | Path | Description |
 |----------|------|-------------|
 | 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_03_prompt_engineering.html) | Click to view slides in your browser |
-| 📝 **Teleprompter** | [`slides/lecture_03_teleprompter.md`](slides/lecture_03_teleprompter.md) | Instructor speaking notes |
 | 🔬 **Lab notebook** | [`lab_02_prompting/lab_02_prompting.py`](lab_02_prompting/lab_02_prompting.py) | Prompt engineering workshop |
 
 ---
@@ -173,7 +172,6 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 | Resource | Path | Description |
 |----------|------|-------------|
 | 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_04_rag_foundations.html) | Click to view slides in your browser |
-| 📝 **Teleprompter** | [`slides/lecture_04_teleprompter.md`](slides/lecture_04_teleprompter.md) | Instructor speaking notes |
 | 🔬 **Lab** | Coming in Lecture 5 | Combined Lab 4 + Lab 5 hands-on RAG pipeline |
 
 > **Note:** This is a pure-theory lecture. The full RAG pipeline implementation (ChromaDB + MiniLM + Gemini) is built hands-on in the **Lecture 5 combined lab**.
@@ -253,9 +251,7 @@ zucchetti-llm-course/
 │   ├── lecture_01_llm_embeddings.html         ← L1 slides
 │   ├── lecture_02_tokenization_embeddings.html ← L2 slides
 │   ├── lecture_03_prompt_engineering.html     ← L3 slides
-│   ├── lecture_03_teleprompter.md             ← L3 instructor notes
 │   ├── lecture_04_rag_foundations.html        ← L4 slides
-│   ├── lecture_04_teleprompter.md             ← L4 instructor notes
 │   └── img_*.png / img_*.svg                  ← Slide images
 │
 ├── lab_01_embeddings/               ← Hands-on lab (L1 & L2)
