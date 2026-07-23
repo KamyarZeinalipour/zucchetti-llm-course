@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 5: Advanced RAG &amp; Intelligent Routing</title>
+    <meta name="description" content="Lecture 5 of the Zucchetti LLM Course: Advanced RAG and Intelligent Routing. Covers re-ranking, HyDE, parent-child chunking, query decomposition, and semantic routing.">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --r-background-color: #0a0a1a;
+            --r-main-font: 'Inter', sans-serif;
+            --r-heading-font: 'Inter', sans-serif;
+            --r-code-font: 'JetBrains Mono', monospace;
+            --r-main-font-size: 24px;
+            --r-heading-color: #fff;
+            --r-main-color: #e0e0e8;
+            --r-link-color: #64b5f6;
+            --accent: #6c63ff;
+            --accent2: #e94560;
+            --accent3: #00d9ff;
+            --surface: rgba(255,255,255,0.05);
+        }
+        .reveal { font-weight: 300; }
+        .reveal .slides > section, .reveal .slides > section > section { padding: 10px 20px; box-sizing: border-box; }
+        .reveal .slides > section > *, .reveal .slides > section > section > * { max-width: 100%; box-sizing: border-box; }
+        .reveal h1 { font-size: 2em; font-weight: 700; background: linear-gradient(135deg, #6c63ff, #00d9ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.3em; }
+        .reveal h2 { font-size: 1.4em; font-weight: 600; color: #fff; margin-bottom: 0.4em; }
+        .reveal h3 { font-size: 1.05em; font-weight: 500; color: var(--accent3); margin-bottom: 0.3em; }
+        .reveal .subtitle { font-size: 0.65em; color: #888; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
+        .reveal .highlight { color: var(--accent3); font-weight: 500; }
+        .reveal .warn { color: var(--accent2); font-weight: 500; }
+        .reveal ul { list-style: none; padding-left: 0; margin: 0.3em 0; }
+        .reveal ul li { padding: 0.2em 0; padding-left: 1.3em; position: relative; font-size: 0.82em; }
+        .reveal ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+        .reveal .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; text-align: left; max-width: 100%; overflow: hidden; }
+        .reveal .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em; text-align: left; }
+        .reveal .card { background: var(--surface); border: 1px solid rgba(108,99,255,0.2); border-radius: 10px; padding: 0.6em 0.8em; margin: 0.2em 0; }
+        .reveal .card h3 { margin-top: 0; margin-bottom: 0.3em; }
+        .reveal .formula { background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; padding: 0.6em 1em; font-family: var(--r-code-font); font-size: 0.85em; margin: 0.5em 0; text-align: center; }
+        .reveal .takeaway { background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,217,255,0.1)); border: 1px solid rgba(108,99,255,0.3); border-radius: 10px; padding: 0.5em 0.8em; margin-top: 0.4em; text-align: left; font-size: 0.78em; }
+        .reveal .takeaway::before { content: '\1F4A1 KEY TAKEAWAY'; display: block; font-size: 0.55em; font-weight: 600; color: var(--accent); letter-spacing: 0.15em; margin-bottom: 0.3em; }
+        .reveal .section-title { font-size: 0.5em; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 0.2em; }
+        .reveal .progress-bar { display: flex; gap: 4px; margin: 0.6em 0; }
+        .reveal .progress-bar .step { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); }
+        .reveal .progress-bar .step.done { background: var(--accent3); }
+        .reveal .progress-bar .step.active { background: var(--accent); }
+        .slide-number { color: #555 !important; font-size: 14px !important; right: auto !important; left: 12px !important; top: 12px !important; bottom: auto !important; }
+        .reveal .footer-info { position: absolute; bottom: 1em; left: 1em; font-size: 0.4em; color: #555; }
+        .reveal .paper-ref { font-size: 0.5em; color: #888; margin-top: 8px; font-style: italic; }
+        .reveal .paper-ref a { color: var(--accent); }
+        .reveal p { margin: 0.3em 0; }
+        .reveal br { display: block; content: ''; margin: 0.2em 0; }
+        .reveal .section-intro { text-align: center; }
+        .reveal .section-intro h2 { font-size: 1.8em; background: linear-gradient(135deg, var(--accent), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .reveal .section-intro .subtitle { margin-top: 0.5em; }
+        .reveal table { width: 100%; border-collapse: collapse; font-size: 0.7em; margin: 0.5em 0; }
+        .reveal th { background: rgba(108,99,255,0.2); padding: 0.5em; text-align: left; font-weight: 600; border-bottom: 2px solid var(--accent); }
+        .reveal td { padding: 0.45em 0.5em; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .reveal .vs-table th:first-child, .reveal .vs-table td:first-child { font-weight: 500; color: #aaa; width: 25%; }
+        .reveal .pipeline { display: flex; align-items: center; gap: 0.3em; justify-content: center; flex-wrap: wrap; margin: 0.6em 0; }
+        .reveal .pipeline .box { background: var(--surface); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; padding: 0.4em 0.7em; font-size: 0.75em; font-weight: 500; }
+        .reveal .pipeline .arrow { color: var(--accent); font-size: 1.2em; }
+        .reveal .badge { display: inline-block; padding: 0.15em 0.6em; border-radius: 20px; font-size: 0.65em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .reveal .badge-new { background: rgba(0,217,255,0.2); color: var(--accent3); border: 1px solid rgba(0,217,255,0.3); }
+        .reveal .badge-key { background: rgba(108,99,255,0.2); color: #a9a4ff; border: 1px solid rgba(108,99,255,0.3); }
+        .reveal .badge-warn { background: rgba(233,69,96,0.2); color: var(--accent2); border: 1px solid rgba(233,69,96,0.3); }
+        .reveal code { font-family: var(--r-code-font); font-size: 0.9em; background: rgba(255,255,255,0.06); padding: 0.1em 0.3em; border-radius: 4px; }
+        .reveal .dim { color: #666; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================ -->
+<!-- TITLE -->
+<!-- ============================================ -->
+<section>
+    <p class="section-title">Zucchetti LLM Course &mdash; Lecture 5 of 10</p>
+    <h1>Advanced RAG<br>&amp; Intelligent Routing</h1>
+    <p style="font-size:0.75em; color:#aaa;">Beyond naive retrieval &mdash; making RAG systems that actually work on complex enterprise data</p>
+    <br>
+    <p style="font-size:0.6em; color:#666;">Kamyar Zeinalipour &middot; 2 hours</p>
+</section>
+
+<!-- Slide 2: Agenda -->
+<section>
+    <h2>Today&rsquo;s Agenda</h2>
+    <div style="font-size:0.85em;">
+        <div class="card" style="border-left: 3px solid var(--accent);">
+            <h3>Section 1: Why Naive RAG Fails (15 min)</h3>
+            <p style="font-size:0.8em;">Six failure modes you&rsquo;ll encounter in production</p>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent3);">
+            <h3>Section 2: Advanced Retrieval Strategies (40 min)</h3>
+            <p style="font-size:0.8em;">Re-ranking &middot; Cross-encoders &middot; HyDE &middot; Parent-child chunking</p>
+        </div>
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>Section 3: Query Decomposition (25 min)</h3>
+            <p style="font-size:0.8em;">Breaking complex questions into answerable sub-queries</p>
+        </div>
+        <div class="card" style="border-left: 3px solid #ff9800;">
+            <h3>Section 4: Semantic Routing (20 min)</h3>
+            <p style="font-size:0.8em;">Sending queries to the right data source automatically</p>
+        </div>
+    </div>
+    <div class="takeaway">Pure theory today. <strong>Lab is in Lecture 6</strong> &mdash; combined mega-lab covering L4 + L5 + L6 content.</div>
+</section>
+
+
+
+<!-- ============================================ -->
+<!-- SECTION 1: WHY NAIVE RAG FAILS -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 1 of 4</p>
+        <h1>Why Naive RAG Fails</h1>
+        <p style="font-size:0.75em; color:#aaa;">Diagnosing the six failure modes</p>
+    </section>
+</section>
+
+<!-- Slide: The naive pipeline -->
+<section>
+    <h2>The Naive RAG Pipeline</h2>
+    <div class="pipeline">
+        <div class="box">Query</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Embed</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Top-K Search</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Stuff into Prompt</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">LLM</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Answer</div>
+    </div>
+    <p style="font-size:0.8em; color:#aaa; margin-top:1em;">This is what we built in L4. It works for simple cases. It breaks on everything else.</p>
+    <div class="takeaway">If your RAG system returns <span class="warn">&ldquo;I don&rsquo;t know&rdquo;</span> when the answer is clearly in your documents &mdash; the problem is almost always <strong>retrieval</strong>, not the LLM.</div>
+</section>
+
+<!-- Slide: 6 Failure Modes -->
+<section>
+    <h2>Six Ways Naive RAG Fails</h2>
+    <div class="two-col" style="font-size:0.78em;">
+        <div>
+            <div class="card">
+                <h3>1. Semantic Mismatch</h3>
+                <p>Query uses different words than the document.<br><span class="dim">Q: &ldquo;sick leave policy&rdquo; → Doc says &ldquo;absence due to illness&rdquo;</span></p>
+            </div>
+            <div class="card">
+                <h3>2. Chunk Boundary Split</h3>
+                <p>The answer spans two chunks, but only one is retrieved.<br><span class="dim">Table header in chunk 1, data rows in chunk 2.</span></p>
+            </div>
+            <div class="card">
+                <h3>3. Context Dilution</h3>
+                <p>Top-K returns 10 chunks but only 1 is relevant. The signal drowns in noise.</p>
+            </div>
+        </div>
+        <div>
+            <div class="card">
+                <h3>4. Multi-Hop Failure</h3>
+                <p>Answer requires connecting info from 2+ documents.<br><span class="dim">&ldquo;Compare policy A with policy B&rdquo;</span></p>
+            </div>
+            <div class="card">
+                <h3>5. Recency Blindness</h3>
+                <p>Old and new versions of a document both match. System returns outdated info.</p>
+            </div>
+            <div class="card">
+                <h3>6. Wrong Granularity</h3>
+                <p>Chunks are too big (diluted) or too small (no context). Neither gives a good answer.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide: The Fix Map -->
+<section>
+    <h2>The Fix Map</h2>
+    <table>
+        <tr><th>Failure Mode</th><th>Fix</th><th>Section</th></tr>
+        <tr><td>Semantic mismatch</td><td><span class="highlight">HyDE</span> &mdash; generate a hypothetical answer, embed that instead</td><td>S2</td></tr>
+        <tr><td>Wrong chunks retrieved</td><td><span class="highlight">Re-ranking</span> &mdash; cross-encoder precision pass after coarse retrieval</td><td>S2</td></tr>
+        <tr><td>Chunk boundary splits</td><td><span class="highlight">Parent-child chunking</span> &mdash; retrieve child, pass parent context</td><td>S2</td></tr>
+        <tr><td>Context dilution</td><td><span class="highlight">Re-ranking + fewer chunks</span> &mdash; quality over quantity</td><td>S2</td></tr>
+        <tr><td>Multi-hop questions</td><td><span class="highlight">Query decomposition</span> &mdash; break into sub-queries</td><td>S3</td></tr>
+        <tr><td>Wrong data source</td><td><span class="highlight">Semantic routing</span> &mdash; route to the right system</td><td>S4</td></tr>
+    </table>
+    <div class="takeaway">Each technique in today&rsquo;s lecture solves a specific failure mode. Don&rsquo;t apply them all blindly &mdash; <strong>diagnose first, then fix</strong>.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 2: ADVANCED RETRIEVAL STRATEGIES -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 2 of 4</p>
+        <h1>Advanced Retrieval</h1>
+        <p style="font-size:0.75em; color:#aaa;">Re-ranking &middot; HyDE &middot; Parent-child chunks</p>
+    </section>
+</section>
+
+<!-- Slide: What Is Re-ranking? -->
+<section>
+    <h2>What Is Re-ranking?</h2>
+    <p style="font-size:0.8em; color:#aaa;">The single highest-ROI improvement for any RAG system</p>
+    <div class="two-col">
+        <div class="card" style="border-left: 3px solid var(--accent2);">
+            <h3>The Problem</h3>
+            <p style="font-size:0.8em;">Standard vector search returns the <strong>most similar</strong> documents &mdash; but similar &ne; relevant.</p>
+            <p style="font-size:0.75em; color:#aaa;">You search for "sick leave policy" and get 10 chunks about leave policies. But chunks #7 and #3 are the ones that actually answer the question. Chunks #1-2 are just vaguely similar.</p>
+        </div>
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>The Fix: Re-ranking</h3>
+            <p style="font-size:0.8em;">After initial retrieval, pass each result through a <strong>more powerful model</strong> that scores how well it actually answers the query.</p>
+            <p style="font-size:0.75em; color:#aaa;">Result: the truly relevant chunks move to positions #1 and #2. Noise drops to the bottom.</p>
+        </div>
+    </div>
+    <div class="takeaway">Re-ranking = a <strong>second pass</strong> with a smarter model. First pass casts a wide net (recall). Second pass picks the best fish (precision). +15&ndash;30% precision improvement.</div>
+</section>
+
+<!-- Slide: Bi-Encoder vs Cross-Encoder Diagram -->
+<section>
+    <h2>Bi-Encoder vs Cross-Encoder</h2>
+    <p style="font-size:0.75em; color:#aaa;">Why we need two different models</p>
+    <div class="two-col">
+        <div class="card" style="text-align:center;">
+            <h3>Bi-Encoder <span class="badge badge-key">STAGE 1</span></h3>
+            <p style="font-size:0.75em;">
+                Query &rarr; <code>[Encoder]</code> &rarr; <strong>vec_q</strong><br>
+                Doc &rarr; <code>[Encoder]</code> &rarr; <strong>vec_d</strong><br><br>
+                <code>score = cos(vec_q, vec_d)</code>
+            </p>
+            <p style="font-size:0.7em; color:#888;">Encoded <strong>separately</strong>. Doc vectors stored in DB.<br>Search = nearest neighbor lookup.<br><strong>Fast: ~1ms per 1M docs</strong></p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <h3>Cross-Encoder <span class="badge badge-new">STAGE 2</span></h3>
+            <p style="font-size:0.75em;">
+                <code>query + doc &rarr; [Encoder] &rarr; score</code><br><br>
+                Both texts fed <strong>together</strong> into one encoder.<br>
+                Full cross-attention between query and doc.<br>
+                Output: a single relevance score (0&ndash;1).
+            </p>
+            <p style="font-size:0.7em; color:#888;">Cannot precompute. Must run for <strong>every pair</strong>.<br><strong>Slow but much more accurate</strong></p>
+        </div>
+    </div>
+    <div class="formula">
+        Bi-Encoder: O(1) per query &nbsp;&nbsp;|&nbsp;&nbsp; Cross-Encoder: O(N) per query<br>
+        <span style="font-size:0.85em;">&rarr; Use bi-encoder for speed (Stage 1), cross-encoder for accuracy (Stage 2)</span>
+    </div>
+</section>
+
+<!-- Slide: Two-Stage Retrieval Pipeline -->
+<section>
+    <h2>Two-Stage Retrieval</h2>
+    <p style="font-size:0.75em; color:#aaa;">Putting it together: fast recall + precise re-ranking</p>
+    <div class="pipeline">
+        <div class="box">Query</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color: var(--accent3);">Stage 1: Bi-Encoder<br><span class="dim">Fast, approximate<br>Retrieve top-50</span></div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color: var(--accent2);">Stage 2: Cross-Encoder<br><span class="dim">Slow, precise<br>Re-rank to top-5</span></div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">LLM</div>
+    </div>
+    <div class="two-col" style="margin-top:0.8em;">
+        <div class="card">
+            <h3>Stage 1: Recall <span class="badge badge-key">RECALL</span></h3>
+            <p class="dim" style="margin-bottom:0.3em;">Recall = &ldquo;don&rsquo;t miss the right answer&rdquo;</p>
+            <ul>
+                <li>Encode query and docs <strong>independently</strong></li>
+                <li>Cosine similarity for ranking</li>
+                <li>~1ms per 1M docs (HNSW)</li>
+                <li>Retrieves many candidates (high recall)</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Stage 2: Precision <span class="badge badge-new">PRECISION</span></h3>
+            <p class="dim" style="margin-bottom:0.3em;">Precision = &ldquo;only return the right answers&rdquo;</p>
+            <ul>
+                <li>Encodes query + doc <strong>together</strong></li>
+                <li>Full attention between them</li>
+                <li>~100&ndash;200ms total for top-50</li>
+                <li>Much more accurate (high precision)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide: Embedding Model vs Re-ranker — The Key Distinction -->
+<section>
+    <h2>Embedding Model &ne; Re-ranker</h2>
+    <p style="font-size:0.75em; color:#aaa;">Two different models, two different jobs &mdash; don&rsquo;t confuse them</p>
+    <div class="two-col">
+        <div class="card" style="border-top: 3px solid var(--accent3);">
+            <h3>Stage 1: Embedding Model</h3>
+            <p style="font-size:0.78em;"><strong>What it does:</strong> Converts text into a <em>vector</em></p>
+            <p style="font-size:0.78em;"><strong>How it searches:</strong> Cosine similarity between vectors</p>
+            <p style="font-size:0.78em;"><strong>Speed:</strong> ~1ms per 1M docs</p>
+            <p style="font-size:0.78em;"><strong>Accuracy:</strong> Good (approximate)</p>
+            <div style="font-size:0.75em; background:rgba(0,0,0,0.3); padding:0.5em; border-radius:6px; margin-top:0.4em;">
+                <strong>Examples:</strong><br>
+                MiniLM &middot; BGE-M3 &middot; OpenAI text-embedding-3
+            </div>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent2);">
+            <h3>Stage 2: Re-ranker Model</h3>
+            <p style="font-size:0.78em;"><strong>What it does:</strong> Reads query + doc <em>together</em></p>
+            <p style="font-size:0.78em;"><strong>How it scores:</strong> Direct relevance score (0&ndash;1)</p>
+            <p style="font-size:0.78em;"><strong>Speed:</strong> ~100&ndash;200ms for 50 docs</p>
+            <p style="font-size:0.78em;"><strong>Accuracy:</strong> Excellent (precise)</p>
+            <div style="font-size:0.75em; background:rgba(0,0,0,0.3); padding:0.5em; border-radius:6px; margin-top:0.4em;">
+                <strong>Examples:</strong><br>
+                Cohere Rerank &middot; BGE Reranker &middot; ms-marco
+            </div>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Analogy:</strong> The embedding model is like a <strong>librarian who points you to the right shelf</strong>. The re-ranker is like an <strong>expert who reads each book</strong> and tells you which one actually answers your question.</div>
+</section>
+
+<!-- Slide: Re-ranking in Practice -->
+<section>
+    <h2>Re-ranking in Practice</h2>
+    <p style="font-size:0.75em; color:#aaa;">Re-rankers are <strong>cross-encoder models</strong> &mdash; not embedding models. They score (query, doc) pairs directly.</p>
+    <div style="font-size:0.85em;">
+        <div class="card">
+            <h3>Cross-Encoder Models for Stage 2</h3>
+            <table>
+                <tr><th>Model</th><th>Type</th><th>Quality</th><th>Notes</th></tr>
+                <tr><td><span class="highlight">Cohere Rerank</span></td><td>Cloud API</td><td>Excellent</td><td>Easiest to integrate, pay per call</td></tr>
+                <tr><td><span class="highlight">BGE Reranker v2</span></td><td>Local (GPU)</td><td>Very good</td><td>Open source, best for on-prem</td></tr>
+                <tr><td><span class="highlight">cross-encoder/ms-marco</span></td><td>Local (GPU)</td><td>Good</td><td>HuggingFace classic, well-tested</td></tr>
+                <tr><td><span class="highlight">ColBERT v2</span></td><td>Local (GPU)</td><td>Good</td><td>Late interaction &mdash; faster than cross-encoder</td></tr>
+            </table>
+        </div>
+        <div class="card" style="margin-top:0.4em;">
+            <h3>Don&rsquo;t Confuse Them</h3>
+            <p style="font-size:0.8em;"><strong>Stage 1</strong> (embedding model): MiniLM, BGE-M3, OpenAI &rarr; produces <em>vectors</em>, search by cosine similarity<br>
+            <strong>Stage 2</strong> (re-ranker): Cohere, BGE Reranker &rarr; reads query + doc <em>together</em>, outputs a relevance score</p>
+        </div>
+        <div class="takeaway"><strong>Rule of thumb:</strong> Re-ranking improves precision by 15&ndash;30% on most benchmarks. It&rsquo;s the single highest-ROI improvement you can add to a naive RAG pipeline.</div>
+    </div>
+</section>
+
+<!-- Slide: HyDE — The Problem -->
+<section>
+    <h2>HyDE &mdash; The Problem It Solves</h2>
+    <p style="font-size:0.75em; color:#aaa;">When the question and the answer use completely different words</p>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>Semantic Mismatch</h3>
+        <div class="two-col" style="font-size:0.85em;">
+            <div>
+                <p><strong>User asks:</strong></p>
+                <p style="font-family:var(--r-code-font); font-size:0.9em;">&ldquo;What is our policy on working from home?&rdquo;</p>
+            </div>
+            <div>
+                <p><strong>Real document says:</strong></p>
+                <p style="font-family:var(--r-code-font); font-size:0.9em;">&ldquo;Remote work arrangements are governed by the Telecommuting and Hybrid Work Guidelines, Section 4.2...&rdquo;</p>
+            </div>
+        </div>
+    </div>
+    <div class="two-col" style="margin-top:0.6em;">
+        <div class="card" style="border-left: 3px solid var(--accent2);">
+            <h3>&ldquo;working from home&rdquo;</h3>
+            <p style="font-size:0.78em;">&ne; &ldquo;remote work arrangements&rdquo;<br>&ne; &ldquo;telecommuting&rdquo;<br>&ne; &ldquo;hybrid work guidelines&rdquo;</p>
+            <p class="dim">Embedding similarity: <strong>LOW</strong> &mdash; different vocabulary</p>
+        </div>
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>The Insight</h3>
+            <p style="font-size:0.78em;">Questions and answers use <strong>different language</strong>. But answers and other answers use <strong>similar language</strong>.</p>
+            <p class="dim">What if we generate a <strong>fake answer</strong> first?</p>
+        </div>
+    </div>
+    <div class="takeaway"><strong>HyDE idea:</strong> Instead of searching with the question, generate a <em>hypothetical answer</em> and search with <em>that</em> instead.</div>
+</section>
+
+<!-- Slide: HyDE — How It Works -->
+<section>
+    <h2>HyDE &mdash; How It Works</h2>
+    <p style="font-size:0.75em; color:#aaa;">Two LLM calls: one to search better, one to answer</p>
+    <div style="font-size:0.85em;">
+        <div class="card" style="margin-bottom:0.4em;">
+            <h3>Step 1 &mdash; LLM Call #1: Generate Fake Answer <span class="badge badge-new">EXTRA</span></h3>
+            <div class="pipeline">
+                <div class="box">User Query</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color: var(--accent2);">LLM</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color: var(--accent3);">Hypothetical Answer<br><span class="dim">(may be wrong &mdash; that&rsquo;s OK)</span></div>
+            </div>
+        </div>
+        <div class="card" style="margin-bottom:0.4em;">
+            <h3>Step 2 &mdash; Search with the Fake Answer</h3>
+            <div class="pipeline">
+                <div class="box" style="border-color: var(--accent3);">Hypothetical Answer</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box">Embed</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box">Vector Search</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color: #4caf50;">Real Documents</div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Step 3 &mdash; LLM Call #2: Generate Real Answer <span class="badge badge-key">STANDARD RAG</span></h3>
+            <div class="pipeline">
+                <div class="box">User Query</div>
+                <div class="arrow">+</div>
+                <div class="box" style="border-color: #4caf50;">Real Documents</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color: var(--accent);">LLM</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color: var(--accent);">Final Answer</div>
+            </div>
+        </div>
+    </div>
+    <div class="formula">
+        <span style="font-size:0.85em;">Cost: <strong>2 LLM calls</strong> (1 extra vs normal RAG) &middot; +0.5&ndash;2s latency &middot; 📄 Gao et al. (2023), ACL</span>
+    </div>
+</section>
+
+<!-- Slide: HyDE — Walk-Through Example -->
+<section>
+    <h2>HyDE &mdash; Walk-Through</h2>
+    <div style="font-size:0.82em;">
+        <div class="card" style="border-left: 3px solid var(--accent2);">
+            <h3>1. User Query</h3>
+            <p><em>&ldquo;What is our policy on working from home?&rdquo;</em></p>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent);">
+            <h3>2. LLM generates hypothetical answer (NOT from your docs &mdash; made up)</h3>
+            <p><em>&ldquo;Employees may work from home up to three days per week with manager approval. Remote work arrangements must be documented in the HR system and reviewed quarterly...&rdquo;</em></p>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent3);">
+            <h3>3. We embed this fake answer and search &mdash; it matches real docs about:</h3>
+            <p><strong>&ldquo;remote work arrangements&rdquo;</strong> &middot; <strong>&ldquo;telecommuting policy&rdquo;</strong> &middot; <strong>&ldquo;hybrid work guidelines&rdquo;</strong></p>
+            <p class="dim">Terms the original question never used &mdash; but the fake answer did!</p>
+        </div>
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>4. Real docs + original query &rarr; LLM &rarr; correct final answer</h3>
+            <p class="dim">The fake answer is thrown away. Only the real docs are used for the final answer.</p>
+        </div>
+    </div>
+    <div class="takeaway">The fake answer doesn&rsquo;t need to be <em>correct</em>. It just needs to be in the <strong>same semantic neighborhood</strong> as the real answer. We never show it to the user.</div>
+</section>
+
+<!-- Slide: Query Rewriting -->
+<section>
+    <h2>Query Rewriting &mdash; What &amp; Why</h2>
+    <p style="font-size:0.75em; color:#aaa;">Users type bad queries. Fix them before they reach retrieval.</p>
+    <div class="card" style="margin-bottom:0.5em;">
+        <h3>The Pipeline</h3>
+        <div class="pipeline">
+            <div class="box">Bad Query</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: var(--accent2);">LLM<br><span class="dim">&ldquo;Rewrite as a clear search query&rdquo;</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: #4caf50;">Clean Query</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box">Embed &amp; Search</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box">Docs</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: var(--accent);">LLM &rarr; Answer</div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Examples</h3>
+        <table style="font-size:0.8em;">
+            <tr><th style="width:50%;">&cross; Raw User Query</th><th>&check; Rewritten Query</th></tr>
+            <tr><td><em>&ldquo;that leave thing for new people&rdquo;</em></td><td><em>&ldquo;What is the annual leave policy for newly hired employees?&rdquo;</em></td></tr>
+            <tr><td><em>&ldquo;how fix error 500&rdquo;</em></td><td><em>&ldquo;How to troubleshoot HTTP 500 internal server error?&rdquo;</em></td></tr>
+            <tr><td><em>&ldquo;can I do the thing remotely&rdquo;</em></td><td><em>&ldquo;Is remote access to the internal ERP system available?&rdquo;</em></td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>Cost:</strong> 1 extra LLM call (very small output &mdash; just one sentence). <strong>Cheapest query transformation technique.</strong></div>
+</section>
+
+<!-- Slide: Query Rewriting vs HyDE -->
+<section>
+    <h2>Query Rewriting vs HyDE</h2>
+    <p style="font-size:0.75em; color:#aaa;">Both transform the query &mdash; but they solve different problems</p>
+    <div class="two-col">
+        <div class="card" style="border-top: 3px solid #4caf50;">
+            <h3>Query Rewriting</h3>
+            <p style="font-size:0.8em;"><strong>LLM generates:</strong> a better <em>question</em></p>
+            <p style="font-size:0.8em;"><strong>Solves:</strong> vague, informal user input</p>
+            <p style="font-size:0.8em;"><strong>When:</strong> chatbots, search bars, internal tools</p>
+            <p style="font-size:0.8em;"><strong>Output size:</strong> 1 sentence (cheap)</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent);">
+            <h3>HyDE</h3>
+            <p style="font-size:0.8em;"><strong>LLM generates:</strong> a fake <em>answer</em></p>
+            <p style="font-size:0.8em;"><strong>Solves:</strong> vocabulary mismatch (question &ne; document language)</p>
+            <p style="font-size:0.8em;"><strong>When:</strong> domain-specific jargon, technical docs</p>
+            <p style="font-size:0.8em;"><strong>Output size:</strong> full paragraph (more expensive)</p>
+        </div>
+    </div>
+    <div class="card" style="margin-top:0.5em;">
+        <h3>When to Use Which?</h3>
+        <table style="font-size:0.8em;">
+            <tr><th>Situation</th><th>Use</th></tr>
+            <tr><td>Users type vague, informal queries</td><td><span class="highlight">Query Rewriting</span></td></tr>
+            <tr><td>Question &amp; document use different vocabulary</td><td><span class="highlight">HyDE</span></td></tr>
+            <tr><td>Both problems at once</td><td><span class="highlight">Rewrite first, then HyDE</span></td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>Use Rewriting always</strong> (cheapest, rarely hurts). Add HyDE only when vocabulary mismatch is the problem. <em>We&rsquo;ll add a third technique &mdash; Decomposition &mdash; in Section 3.</em></div>
+</section>
+
+<!-- Slide: Parent-Child Chunking -->
+<!-- Slide: Parent-Child Chunking — The Problem -->
+<section>
+    <h2>Parent-Child Chunking &mdash; The Problem</h2>
+    <p style="font-size:0.75em; color:#aaa;">The fundamental trade-off in chunk size</p>
+    <div class="two-col">
+        <div class="card" style="border-top: 3px solid var(--accent2);">
+            <h3>Small Chunks (100&ndash;200 tokens)</h3>
+            <ul>
+                <li>&check; <strong>Precise retrieval</strong> &mdash; the right chunk matches exactly</li>
+                <li>&cross; <strong>Lost context</strong> &mdash; missing surrounding sentences, section headers, the paragraph before</li>
+            </ul>
+            <p class="dim">LLM gets the right sentence but can&rsquo;t understand the full picture</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent3);">
+            <h3>Large Chunks (500&ndash;1000 tokens)</h3>
+            <ul>
+                <li>&check; <strong>Rich context</strong> &mdash; full sections with headers and transitions</li>
+                <li>&cross; <strong>Diluted relevance</strong> &mdash; the matching sentence is buried in noise</li>
+            </ul>
+            <p class="dim">LLM gets too much text, the answer is lost inside it</p>
+        </div>
+    </div>
+    <div class="takeaway"><strong>You can&rsquo;t win with a single chunk size.</strong> Small = precise but no context. Large = context but imprecise. What if you could have both?</div>
+</section>
+
+<!-- Slide: Parent-Child Chunking — The Solution -->
+<section>
+    <h2>Parent-Child Chunking &mdash; The Solution</h2>
+    <p style="font-size:0.75em; color:#aaa;">Use two levels: search on small, read on big</p>
+    <div class="card" style="margin-bottom:0.5em;">
+        <h3>How It Works</h3>
+        <div class="pipeline">
+            <div class="box">Document</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: var(--accent);">Split into<br><span class="dim">Parent Chunks<br>(500&ndash;1000 tokens)</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: var(--accent3);">Split each parent<br><span class="dim">into Children<br>(100&ndash;200 tokens)</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: #4caf50;">Index the<br><span class="dim">Children only</span></div>
+        </div>
+    </div>
+    <div class="two-col">
+        <div class="card">
+            <h3>At Search Time</h3>
+            <ul>
+                <li><strong>Step 1:</strong> Query matches a <em>child</em> chunk (precise)</li>
+                <li><strong>Step 2:</strong> Look up which <em>parent</em> that child belongs to</li>
+                <li><strong>Step 3:</strong> Send the <em>parent</em> to the LLM (full context)</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Why It Works</h3>
+            <ul>
+                <li><strong>Search accuracy:</strong> small chunks match precisely</li>
+                <li><strong>LLM context:</strong> parent gives full section with headers</li>
+                <li><strong>Cost:</strong> ~2&times; index size (storage is cheap)</li>
+            </ul>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Search on small, read on big.</strong> Best of both worlds. Like finding a paragraph using a book&rsquo;s index (precise), then reading the whole page (context).</div>
+</section>
+
+<!-- Slide: Parent-Child Chunking — Example -->
+<section>
+    <h2>Parent-Child Chunking &mdash; Example</h2>
+    <div style="text-align:center;">
+        <div class="card" style="background: rgba(108,99,255,0.1); border-color: rgba(108,99,255,0.3);">
+            <p style="font-size:0.7em; font-weight:600; color:var(--accent3);">PARENT CHUNK (sent to LLM) &mdash; 800 tokens</p>
+            <p style="font-size:0.7em; color:#aaa;">Section 3.2: Remote Work Policy</p>
+            <p style="font-size:0.65em; color:#666;">Full section with eligibility, process, exceptions, and appeals...</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:0.5em;">
+                <div class="card" style="padding:0.4em; font-size:0.65em; border-color:var(--accent3);">Child 1<br><span class="dim">eligibility requirements</span></div>
+                <div class="card" style="padding:0.4em; font-size:0.65em; border-color:#4caf50; background:rgba(76,175,80,0.1);"><strong>Child 2</strong><br><span style="color:#4caf50;">&larr; SEARCH MATCHED THIS</span></div>
+                <div class="card" style="padding:0.4em; font-size:0.65em; border-color:var(--accent3);">Child 3<br><span class="dim">exceptions &amp; appeals</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="card" style="margin-top:0.4em;">
+        <h3>What Happened</h3>
+        <table style="font-size:0.78em;">
+            <tr><th style="width:30%;">Step</th><th>Detail</th></tr>
+            <tr><td><strong>User asks:</strong></td><td><em>&ldquo;How do I apply for remote work?&rdquo;</em></td></tr>
+            <tr><td><strong>Search matches:</strong></td><td>Child 2 &mdash; the application process paragraph (precise!)</td></tr>
+            <tr><td><strong>Sent to LLM:</strong></td><td>Parent &mdash; the full Remote Work Policy section (eligibility + process + exceptions)</td></tr>
+            <tr><td><strong>Result:</strong></td><td>LLM gives complete answer including eligibility criteria the user didn&rsquo;t ask about</td></tr>
+        </table>
+    </div>
+    <div class="takeaway">Without parent-child: LLM sees only the application process. <strong>With parent-child: LLM sees the full policy</strong> and can say &ldquo;you&rsquo;re eligible if...&rdquo;</div>
+</section>
+
+<!-- Slide: Hybrid Search — The Normalization Problem -->
+<section>
+    <h2>Hybrid Search &mdash; The Problem We Left</h2>
+    <p style="font-size:0.75em; color:#aaa;">In L4, we introduced: score = &alpha; &middot; BM25 + (1&minus;&alpha;) &middot; Dense. But there&rsquo;s a catch.</p>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>The Normalization Headache</h3>
+        <table style="font-size:0.8em;">
+            <tr><th>Ranker</th><th>Score Range</th><th>Example</th></tr>
+            <tr><td>BM25</td><td>0 to 20+</td><td>12.4</td></tr>
+            <tr><td>Dense (cosine)</td><td>-1 to 1</td><td>0.87</td></tr>
+        </table>
+        <p style="font-size:0.78em; margin-top:0.3em;">If you add them raw: <code>12.4 + 0.87 = 13.27</code> &mdash; BM25 <strong>always dominates</strong>. Dense is meaningless.</p>
+        <p style="font-size:0.78em;">Min-max normalization helps, but is <strong>fragile</strong>: depends on the batch, changes between queries, hard to tune &alpha;.</p>
+    </div>
+    <div class="card" style="border-left: 3px solid #4caf50;">
+        <h3>What If We Didn&rsquo;t Need Scores At All?</h3>
+        <p style="font-size:0.8em;">What if we only used the <strong>rank positions</strong> &mdash; &ldquo;this doc was #1 in BM25 and #3 in Dense&rdquo; &mdash; instead of raw scores?</p>
+        <p class="dim">That&rsquo;s exactly what <strong>Reciprocal Rank Fusion (RRF)</strong> does.</p>
+    </div>
+</section>
+
+<!-- Slide: RRF — Reciprocal Rank Fusion -->
+<section>
+    <h2>Reciprocal Rank Fusion (RRF)</h2>
+    <p style="font-size:0.75em; color:#aaa;">Combine rankings without scores &mdash; just positions</p>
+    <div class="formula" style="font-size:0.85em;">
+        RRF(d) = &Sigma;<sub>r&isin;rankers</sub> 1 / (k + rank<sub>r</sub>(d)) &nbsp;&nbsp; where k = 60
+    </div>
+    <div class="card" style="margin-top:0.5em;">
+        <h3>Example &mdash; Merging BM25 and Dense results</h3>
+        <table style="font-size:0.75em;">
+            <tr><th>Document</th><th>BM25 Rank</th><th>Dense Rank</th><th>RRF Score</th><th>Final Rank</th></tr>
+            <tr><td>Doc A</td><td>#1</td><td>#3</td><td>1/61 + 1/63 = <strong>0.0323</strong></td><td style="color:#4caf50;"><strong>#1</strong></td></tr>
+            <tr><td>Doc B</td><td>#4</td><td>#1</td><td>1/64 + 1/61 = <strong>0.0320</strong></td><td>#2</td></tr>
+            <tr><td>Doc C</td><td>#2</td><td>#5</td><td>1/62 + 1/65 = <strong>0.0315</strong></td><td>#3</td></tr>
+        </table>
+        <p class="dim">Documents that rank high in <strong>both</strong> rankers rise to the top. No normalization needed.</p>
+    </div>
+    <div class="two-col" style="margin-top:0.3em;">
+        <div class="card">
+            <h3>When to Use Score Fusion (&alpha;)</h3>
+            <ul>
+                <li>You control both rankers</li>
+                <li>Scores are already on similar scales</li>
+                <li>You want fine-grained control via &alpha;</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>When to Use RRF</h3>
+            <ul>
+                <li>Different rankers with different scales</li>
+                <li>3+ rankers (BM25 + Dense + re-ranker)</li>
+                <li>Simple, robust, no tuning needed</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide: Hierarchical Indexing — The Problem -->
+<section>
+    <h2>Hierarchical Indexing &mdash; The Problem</h2>
+    <p style="font-size:0.75em; color:#aaa;">Flat search breaks down at scale</p>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>Flat Search: 500,000 chunks</h3>
+        <p style="font-size:0.8em;">10,000 documents &times; ~50 chunks each = <strong>500K chunks to search through</strong></p>
+        <p style="font-size:0.78em;">User asks: <em>&ldquo;What is the sick leave policy?&rdquo;</em></p>
+    </div>
+    <div class="card" style="margin-top:0.3em;">
+        <h3>What Flat Search Returns</h3>
+        <table style="font-size:0.78em;">
+            <tr><th>Rank</th><th>Chunk From</th><th>Why It Matched</th><th>Correct?</th></tr>
+            <tr><td>#1</td><td>HR Policy Manual</td><td>Contains &ldquo;sick leave&rdquo;</td><td style="color:#4caf50;">&check;</td></tr>
+            <tr><td>#2</td><td>Employee Handbook Intro</td><td>Mentions &ldquo;policies&rdquo; generically</td><td style="color:var(--accent2);">&cross;</td></tr>
+            <tr><td>#3</td><td>IT Security Policy</td><td>Contains &ldquo;leave your device...&rdquo;</td><td style="color:var(--accent2);">&cross;</td></tr>
+            <tr><td>#4</td><td>Finance Handbook</td><td>Mentions &ldquo;sick day deductions&rdquo;</td><td style="color:#ff9800;">~</td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>The answer exists</strong>, but it&rsquo;s competing with 500K chunks from unrelated documents that use similar words.</div>
+</section>
+
+<!-- Slide: Hierarchical Indexing — The Solution -->
+<section>
+    <h2>Hierarchical Indexing &mdash; The Solution</h2>
+    <p style="font-size:0.75em; color:#aaa;">Search in layers: broad first, then narrow</p>
+    <div class="card" style="margin-bottom:0.4em;">
+        <h3>Three Levels of Search</h3>
+        <div class="pipeline">
+            <div class="box" style="border-color: var(--accent);">Level 1<br><span class="dim">Document Index<br>10,000 &rarr; top 5</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: var(--accent3);">Level 2<br><span class="dim">Section Index<br>~50 sections &rarr; top 10</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: #4caf50;">Level 3<br><span class="dim">Paragraph Index<br>~30 paragraphs &rarr; top 3</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: var(--accent);">LLM</div>
+        </div>
+    </div>
+    <div class="two-col">
+        <div class="card">
+            <h3>The Library Analogy</h3>
+            <ul>
+                <li><strong>Level 1:</strong> Find the right <em>shelf</em> &mdash; HR, not IT</li>
+                <li><strong>Level 2:</strong> Find the right <em>book</em> &mdash; Leave Policy, not Hiring</li>
+                <li><strong>Level 3:</strong> Find the right <em>page</em> &mdash; Sick leave, not vacation</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>When to Use</h3>
+            <ul>
+                <li>Large collections <strong>(1,000+ docs)</strong></li>
+                <li>Structured docs (manuals, policies, legal)</li>
+                <li>Similar vocabulary across many docs</li>
+            </ul>
+            <p class="dim">Skip if &lt; 100 docs &mdash; flat search is fine</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide: Hierarchical Indexing — Example -->
+<section>
+    <h2>Hierarchical Indexing &mdash; Example</h2>
+    <p style="font-size:0.75em; color:#aaa;">Query: &ldquo;What is the sick leave policy?&rdquo;</p>
+    <div style="font-size:0.85em;">
+        <div class="card" style="border-left: 3px solid var(--accent);">
+            <h3>Level 1: Which document? (10,000 &rarr; 5)</h3>
+            <p style="font-size:0.8em;">Embed document summaries. Match: <strong>HR Policy Manual</strong>, Employee Handbook, Benefits Guide, Payroll FAQ, Onboarding Guide</p>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent3);">
+            <h3>Level 2: Which section? (5 docs &times; ~10 sections &rarr; 10)</h3>
+            <p style="font-size:0.8em;">Search within those 5 docs. Match: <strong>Sick Leave</strong>, Annual Leave, Parental Leave, Public Holidays...</p>
+        </div>
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>Level 3: Which paragraph? (10 sections &times; ~5 paragraphs &rarr; 3)</h3>
+            <p style="font-size:0.8em;">Match: <strong>Sick leave entitlement</strong>, Sick leave process, Doctor&rsquo;s note requirements</p>
+        </div>
+    </div>
+    <div class="two-col" style="margin-top:0.3em;">
+        <div class="card">
+            <h3>Flat Search</h3>
+            <p style="font-size:0.78em;">500,000 chunks &rarr; 3 results<br><span class="dim">Many near-misses from wrong documents</span></p>
+        </div>
+        <div class="card" style="border-color:#4caf50;">
+            <h3>Hierarchical Search</h3>
+            <p style="font-size:0.78em;">10K &rarr; 5 &rarr; 10 &rarr; 3 results<br><span style="color:#4caf50;">All from the right document and section</span></p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide: Contextual Retrieval — The Problem -->
+<section>
+    <h2>Contextual Retrieval &mdash; The Problem</h2>
+    <p style="font-size:0.75em; color:#aaa;">When you chunk a document, each chunk loses its identity</p>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>This chunk is ambiguous</h3>
+        <div style="font-size:0.8em; background:rgba(0,0,0,0.3); padding:0.6em; border-radius:6px; font-family:var(--r-code-font);">
+            &ldquo;Employees are entitled to 15 days of paid leave per year.&rdquo;
+        </div>
+    </div>
+    <div class="card" style="margin-top:0.4em;">
+        <h3>Questions the chunk can&rsquo;t answer</h3>
+        <table style="font-size:0.8em;">
+            <tr><th>Question</th><th>The chunk doesn&rsquo;t say</th></tr>
+            <tr><td><strong>Which employees?</strong></td><td>Full-time? Part-time? Interns? Contractors?</td></tr>
+            <tr><td><strong>Which document?</strong></td><td>HR Policy Manual? Italian labor law? Company handbook?</td></tr>
+            <tr><td><strong>Which section?</strong></td><td>Annual leave? Sick leave? Parental leave?</td></tr>
+            <tr><td><strong>Which company?</strong></td><td>Parent company? Subsidiary? Joint venture?</td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>The context was in the document header and section title</strong> &mdash; but they got lost during chunking. The embedding captures &ldquo;leave&rdquo; but not &ldquo;full-time annual leave in HR policy.&rdquo;</div>
+</section>
+
+<!-- Slide: Contextual Retrieval — The Solution -->
+<section>
+    <h2>Contextual Retrieval &mdash; The Solution</h2>
+    <p style="font-size:0.75em; color:#aaa;">Prepend context to each chunk before embedding</p>
+    <div class="card" style="margin-bottom:0.4em;">
+        <h3>The Pipeline</h3>
+        <div class="pipeline">
+            <div class="box">Document<br>+ Chunk</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: var(--accent2);">Generate Context<br><span class="dim">&ldquo;Where does this chunk fit?&rdquo;</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: #4caf50;">Context + Chunk<br><span class="dim">enriched text</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color: var(--accent);">Embed &amp; Index</div>
+        </div>
+    </div>
+    <div class="two-col">
+        <div class="card">
+            <h3>Option A: Rule-Based <span class="badge badge-key">FREE</span></h3>
+            <p style="font-size:0.78em;">Prepend: <code>&ldquo;Document: {title} | Section: {heading}&rdquo;</code></p>
+            <p class="dim">Works when docs have clear titles and section headers</p>
+        </div>
+        <div class="card">
+            <h3>Option B: LLM-Generated <span class="badge badge-new">BETTER</span></h3>
+            <p style="font-size:0.78em;">Ask LLM: <em>&ldquo;Given the full doc and this chunk, write 2&ndash;3 sentences explaining where this chunk fits.&rdquo;</em></p>
+            <p class="dim">Cost: 1 LLM call per chunk at index time (not query time)</p>
+        </div>
+    </div>
+    <div class="takeaway"><strong>You do this once</strong> when building the index, not on every search. The enriched chunks produce better embeddings permanently.</div>
+</section>
+
+<!-- Slide: Contextual Retrieval — Before/After -->
+<section>
+    <h2>Contextual Retrieval &mdash; Before &amp; After</h2>
+    <div class="two-col">
+        <div class="card" style="border-left: 3px solid var(--accent2);">
+            <h3>&cross; Naive Chunk</h3>
+            <div style="font-size:0.75em; background:rgba(0,0,0,0.3); padding:0.5em; border-radius:6px; font-family:var(--r-code-font);">
+                &ldquo;Employees are entitled to 15 days of paid leave per year.&rdquo;
+            </div>
+            <p style="font-size:0.7em; color:var(--accent2); margin-top:0.3em;">Matches any query about &ldquo;leave&rdquo; &mdash; annual, sick, parental, unpaid...</p>
+        </div>
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>&check; Contextual Chunk</h3>
+            <div style="font-size:0.75em; background:rgba(0,0,0,0.3); padding:0.5em; border-radius:6px; font-family:var(--r-code-font);">
+                <span style="color:var(--accent3);">[HR Policy Manual &gt; Section 4: Annual Leave &gt; Full-Time Employees]</span><br>
+                &ldquo;Employees are entitled to 15 days of paid leave per year.&rdquo;
+            </div>
+            <p style="font-size:0.7em; color:#4caf50; margin-top:0.3em;">Matches only &ldquo;full-time annual leave&rdquo; queries &mdash; precise!</p>
+        </div>
+    </div>
+    <div class="card" style="margin-top:0.4em;">
+        <h3>Results</h3>
+        <table style="font-size:0.8em;">
+            <tr><th>Metric</th><th>Without Context</th><th>With Context</th></tr>
+            <tr><td>Retrieval failures</td><td>Baseline</td><td style="color:#4caf50;"><strong>&minus;49%</strong> (Anthropic, 2024)</td></tr>
+            <tr><td>When to apply</td><td>&mdash;</td><td><strong>Always</strong> &mdash; cheapest win</td></tr>
+            <tr><td>Cost</td><td>&mdash;</td><td>Rule-based: free / LLM: 1 call per chunk at index time</td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>The simplest technique with the biggest payoff.</strong> If you do only two things from this section: contextual retrieval + re-ranking.</div>
+</section>
+
+<!-- Slide: Lost in the Middle -->
+<section>
+    <h2>Lost in the Middle</h2>
+    <p style="font-size:0.75em; color:#aaa;">Even correct retrieval can fail at generation time</p>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>The Finding <span class="badge badge-warn">Liu et al. 2023</span></h3>
+        <p style="font-size:0.8em;">LLMs pay <strong>most attention</strong> to information at the <span class="highlight">beginning</span> and <span class="highlight">end</span> of the context window. Information in the <span class="warn">middle is often ignored</span>.</p>
+    </div>
+    <div class="two-col" style="margin-top:0.5em;">
+        <div class="card">
+            <h3>Why It Matters</h3>
+            <ul>
+                <li>You retrieve 10 chunks</li>
+                <li>The answer is in chunk #5</li>
+                <li>The LLM focuses on chunks #1-2 and #9-10</li>
+                <li>Result: <strong>wrong answer despite correct retrieval</strong></li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>&check; The Fixes</h3>
+            <ul>
+                <li><strong>Fewer chunks</strong> &mdash; K=3&ndash;5 not K=20</li>
+                <li><strong>Re-rank first</strong> &mdash; best chunk goes to position #1</li>
+                <li><strong>Summarize</strong> &mdash; compress chunks before injecting</li>
+                <li><strong>Cite position</strong> &mdash; put key info first in prompt</li>
+            </ul>
+        </div>
+    </div>
+    <div class="takeaway">This is why <strong>re-ranking matters beyond precision</strong>. It doesn&rsquo;t just find better chunks &mdash; it puts the best chunk <em>first</em>, where the LLM actually reads it.</div>
+</section>
+
+<!-- Slide: Summary of Section 2: -->
+<section>
+    <h2>Section 2: Summary &mdash; Your Retrieval Toolkit</h2>
+    <table>
+        <tr><th>Technique</th><th>What It Does</th><th>When to Use</th><th>Cost</th></tr>
+        <tr><td><span class="highlight">Re-ranking</span></td><td>Precision pass after coarse retrieval</td><td>Always (highest ROI)</td><td>+100&ndash;200ms</td></tr>
+        <tr><td><span class="highlight">HyDE</span></td><td>Bridges vocabulary gap</td><td>Domain-specific jargon mismatch</td><td>+1 LLM call</td></tr>
+        <tr><td><span class="highlight">Parent-child chunking</span></td><td>Search small, read big</td><td>Structured docs with sections</td><td>2× index size</td></tr>
+        <tr><td><span class="highlight">Hybrid search</span></td><td>BM25 + dense combined</td><td>Mixed exact + semantic queries</td><td>+BM25 index</td></tr>
+        <tr><td><span class="highlight">Query rewriting</span></td><td>Fix bad queries before search</td><td>Always (cheapest win)</td><td>+1 LLM call</td></tr>
+        <tr><td><span class="highlight">Hierarchical indexing</span></td><td>Doc &rarr; Section &rarr; Paragraph</td><td>Large collections (1000+ docs)</td><td>3&times; index</td></tr>
+        <tr><td><span class="highlight">Contextual retrieval</span></td><td>Prepend doc context to chunks</td><td>Always (cheapest win)</td><td>~Free</td></tr>
+    </table>
+    <div class="takeaway"><strong>Stack them:</strong> Contextual chunks → Hybrid search → Re-rank → Parent expansion. Each fixes a different failure mode.</div>
+</section>
+
+
+<!-- ============================================ -->
+<!-- BREAK -->
+<!-- ============================================ -->
+<section>
+    <div style="text-align:center;">
+        <p style="font-size:3em;">☕</p>
+        <h2>Break</h2>
+        <p style="font-size:0.8em; color:#888;">10 minutes</p>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 3: QUERY DECOMPOSITION -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
+        <p class="section-title">Section 3 of 4</p>
+        <h1>Query Decomposition</h1>
+        <p style="font-size:0.75em; color:#aaa;">Breaking complex questions into answerable sub-queries</p>
+    </section>
+</section>
+
+<!-- Slide: The Problem -->
+<section>
+    <h2>The Multi-Hop Problem</h2>
+    <div class="card" style="border-left: 3px solid var(--accent2); font-size:0.9em;">
+        <h3>User asks:</h3>
+        <p><em>&ldquo;Compare the sick leave policies for full-time vs part-time employees hired after 2022.&rdquo;</em></p>
+    </div>
+    <p style="font-size:0.82em; color:#aaa; margin:0.6em 0;">This single query requires information from <strong>at least 3 different places</strong>:</p>
+    <div class="three-col" style="font-size:0.78em;">
+        <div class="card">
+            <h3>Sub-query 1</h3>
+            <p>Sick leave policy for <strong>full-time</strong> employees</p>
+        </div>
+        <div class="card">
+            <h3>Sub-query 2</h3>
+            <p>Sick leave policy for <strong>part-time</strong> employees</p>
+        </div>
+        <div class="card">
+            <h3>Sub-query 3</h3>
+            <p>Rules specific to employees <strong>hired after 2022</strong></p>
+        </div>
+    </div>
+    <div class="takeaway">No single chunk contains the full answer. Naive RAG retrieves one partial chunk and gives an incomplete or wrong response.</div>
+</section>
+
+<!-- Slide: Strategy 1 — Sequential -->
+<section>
+    <h2>Strategy 1: Sequential <span class="badge badge-key">DEPENDENT</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">Each sub-query depends on the answer to the previous one</p>
+    <div class="card" style="margin-bottom:0.4em;">
+        <h3>The Flow</h3>
+        <div class="pipeline">
+            <div class="box">Sub-query 1</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:#4caf50;">Answer 1</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box">Sub-query 2<br><span class="dim">(uses Answer 1)</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:#4caf50;">Answer 2</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent);">Final Answer</div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Example</h3>
+        <p style="font-size:0.8em;"><em>&ldquo;What is the sick leave policy for Mario&rsquo;s department?&rdquo;</em></p>
+        <table style="font-size:0.78em;">
+            <tr><th>Step</th><th>Sub-query</th><th>Answer</th></tr>
+            <tr><td>1</td><td>&ldquo;What department does Mario work in?&rdquo;</td><td>Engineering</td></tr>
+            <tr><td>2</td><td>&ldquo;What is the sick leave policy for <strong>Engineering</strong>?&rdquo;</td><td>15 days/year</td></tr>
+        </table>
+        <p class="dim">Step 2 can&rsquo;t run until Step 1 finishes &mdash; it needs the department name.</p>
+    </div>
+    <div class="takeaway"><strong>Use when:</strong> chain of reasoning where each step builds on the previous. <strong>Trade-off:</strong> slower (sequential), but handles dependent information.</div>
+</section>
+
+<!-- Slide: Strategy 2 — Parallel -->
+<section>
+    <h2>Strategy 2: Parallel <span class="badge badge-new">INDEPENDENT</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">All sub-queries run at the same time &mdash; no dependencies</p>
+    <div class="card" style="margin-bottom:0.4em;">
+        <h3>The Flow</h3>
+        <div style="text-align:center; font-size:0.8em;">
+            <div class="pipeline">
+                <div class="box" style="border-color:var(--accent2);">Original<br>Query</div>
+                <div class="arrow">&rarr;</div>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <div class="box">Sub-query 1 &rarr; Docs</div>
+                    <div class="box">Sub-query 2 &rarr; Docs</div>
+                    <div class="box">Sub-query 3 &rarr; Docs</div>
+                </div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color:var(--accent);">LLM<br>Synthesize</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color:#4caf50;">Final<br>Answer</div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Example</h3>
+        <p style="font-size:0.8em;"><em>&ldquo;Compare sick leave for full-time vs part-time employees&rdquo;</em></p>
+        <table style="font-size:0.78em;">
+            <tr><th>Sub-query</th><th>Runs</th><th>Result</th></tr>
+            <tr><td>&ldquo;Sick leave policy for full-time employees&rdquo;</td><td>Simultaneously</td><td>15 days/year</td></tr>
+            <tr><td>&ldquo;Sick leave policy for part-time employees&rdquo;</td><td>Simultaneously</td><td>8 days/year</td></tr>
+        </table>
+        <p class="dim">Both queries are independent &mdash; they can run at the same time.</p>
+    </div>
+    <div class="takeaway"><strong>Use when:</strong> comparison queries, multi-entity lookups. <strong>Advantage:</strong> fast (concurrent). <strong>Most common</strong> in enterprise use cases.</div>
+</section>
+
+<!-- Slide: Strategy 3 — Conditional -->
+<section>
+    <h2>Strategy 3: Conditional <span class="badge badge-warn">BRANCHING</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">The next sub-query depends on the answer &mdash; like a decision tree</p>
+    <div class="card" style="margin-bottom:0.4em;">
+        <h3>The Flow</h3>
+        <div style="text-align:center; font-size:0.8em;">
+            <div class="pipeline">
+                <div class="box">Sub-query 1</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color:#4caf50;">Answer</div>
+                <div class="arrow">&rarr;</div>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <div class="box" style="border-color:var(--accent3);">If YES &rarr; Sub-query 2a</div>
+                    <div class="box" style="border-color:var(--accent2);">If NO &rarr; Sub-query 2b</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Example &mdash; IT Troubleshooting</h3>
+        <p style="font-size:0.8em;"><em>&ldquo;My application keeps crashing&rdquo;</em></p>
+        <table style="font-size:0.78em;">
+            <tr><th>Step</th><th>Sub-query</th><th>Branch</th></tr>
+            <tr><td>1</td><td>&ldquo;Is this a known bug in version 3.2?&rdquo;</td><td>&mdash;</td></tr>
+            <tr><td>2a</td><td>If YES: &ldquo;What is the fix for bug #3847?&rdquo;</td><td style="color:var(--accent3);">Known bug path</td></tr>
+            <tr><td>2b</td><td>If NO: &ldquo;Common crash causes for this application?&rdquo;</td><td style="color:var(--accent2);">General troubleshooting</td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>Use when:</strong> diagnostic flows, troubleshooting, eligibility checks. <strong>Trade-off:</strong> most complex to implement, but handles &ldquo;it depends&rdquo; queries.</div>
+</section>
+
+<!-- Slide: How to Decompose -->
+<section>
+    <h2>Implementation: LLM as Decomposer</h2>
+    <div style="font-size:0.82em;">
+        <div class="card">
+            <h3>The Prompt <span class="badge badge-key">ONE CALL DOES BOTH</span></h3>
+            <pre style="font-size:0.75em; background:rgba(255,255,255,0.03); padding:0.6em; border-radius:8px;"><code>Analyze the user's question.
+If it can be answered with a single search, return it
+unchanged as a list with one item.
+If it requires information from multiple sources, break
+it into 2-5 independent sub-queries.
+
+User question: "{original_question}"
+
+Return a JSON list of queries:
+[
+  "query 1",
+  "query 2 (only if needed)",
+  ...
+]</code></pre>
+        </div>
+        <div class="card" style="margin-top:0.3em;">
+            <h3>What happens</h3>
+            <table style="font-size:0.8em;">
+                <tr><th>Input</th><th>LLM returns</th><th>Result</th></tr>
+                <tr><td><em>&ldquo;What is sick leave?&rdquo;</em></td><td>1 query (same)</td><td>Direct search &mdash; no extra cost</td></tr>
+                <tr><td><em>&ldquo;Compare FT vs PT after 2022&rdquo;</em></td><td>3 sub-queries</td><td>3 parallel searches &rarr; synthesize</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="takeaway"><strong>One LLM call handles both:</strong> if the query is simple, it passes through unchanged. If complex, it decomposes. No separate classification step needed.</div>
+</section>
+
+
+<!-- ============================================ -->
+<!-- SECTION 4: SEMANTIC ROUTING -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div></div>
+        <p class="section-title">Section 4 of 4</p>
+        <h1>Semantic Routing</h1>
+        <p style="font-size:0.75em; color:#aaa;">Sending queries to the right data source</p>
+    </section>
+</section>
+
+<!-- Slide: The Multi-Source Challenge -->
+<section>
+    <h2>The Multi-Source Challenge</h2>
+    <p style="font-size:0.82em; color:#aaa;">Real enterprise data lives in many places. A single vector DB isn&rsquo;t enough.</p>
+    <div class="three-col" style="font-size:0.78em;">
+        <div class="card" style="text-align:center;">
+            <p style="font-size:2em; margin:0;">📚</p>
+            <h3>Vector DB</h3>
+            <p>Policy documents, manuals, FAQs</p>
+            <p class="dim">&ldquo;What is our vacation policy?&rdquo;</p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <p style="font-size:2em; margin:0;">🗃️</p>
+            <h3>SQL Database</h3>
+            <p>Employee records, transactions, metrics</p>
+            <p class="dim">&ldquo;How many employees joined in Q3?&rdquo;</p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <p style="font-size:2em; margin:0;">🌐</p>
+            <h3>API / Live Data</h3>
+            <p>Stock prices, weather, real-time status</p>
+            <p class="dim">&ldquo;What is the current system status?&rdquo;</p>
+        </div>
+    </div>
+    <div class="takeaway">A <strong>semantic router</strong> classifies the query and sends it to the right system before any retrieval happens.</div>
+</section>
+
+<!-- Slide: Approach 1 — Embedding-Based Router -->
+<section>
+    <h2>Approach 1: Embedding-Based Router <span class="badge badge-key">FAST</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">Use cosine similarity to match queries to routes &mdash; no LLM needed</p>
+    <div class="card" style="margin-bottom:0.4em;">
+        <h3>How It Works</h3>
+        <div class="pipeline">
+            <div class="box">Define Route<br><span class="dim">Descriptions</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent);">Embed Each<br><span class="dim">Route Description</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box">At Query Time:<br><span class="dim">Embed Query</span></div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:#4caf50;">Cosine Similarity<br><span class="dim">Pick Nearest Route</span></div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Example</h3>
+        <table style="font-size:0.78em;">
+            <tr><th>Route</th><th>Example Descriptions (embedded at setup)</th></tr>
+            <tr><td><span class="highlight">Vector DB</span></td><td>&ldquo;company policy&rdquo;, &ldquo;employee handbook&rdquo;, &ldquo;HR guidelines&rdquo;</td></tr>
+            <tr><td><span class="highlight">SQL</span></td><td>&ldquo;how many employees&rdquo;, &ldquo;total revenue&rdquo;, &ldquo;average salary&rdquo;</td></tr>
+            <tr><td><span class="highlight">API</span></td><td>&ldquo;current system status&rdquo;, &ldquo;live stock price&rdquo;, &ldquo;weather now&rdquo;</td></tr>
+        </table>
+    </div>
+    <div class="formula" style="font-size:0.8em;">
+        route* = argmax<sub>r</sub> cos(embed(query), embed(route_r))
+    </div>
+    <div class="takeaway"><strong>Speed: ~1ms.</strong> No LLM call. Just cosine similarity. Best when routes are well-defined and don&rsquo;t overlap.</div>
+</section>
+
+<!-- Slide: Approach 2 — LLM-Based Router -->
+<section>
+    <h2>Approach 2: LLM-Based Router <span class="badge badge-new">FLEXIBLE</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">Ask the LLM to classify the query &mdash; handles edge cases</p>
+    <div class="card" style="margin-bottom:0.4em;">
+        <h3>The Prompt</h3>
+        <pre style="font-size:0.72em; background:rgba(255,255,255,0.03); padding:0.5em; border-radius:6px;"><code>Classify this query into one of:
+- VECTOR_DB (policy/document questions)
+- SQL (data/numbers/counting questions)
+- API (real-time/live data)
+
+Query: "{query}"
+Return: route name + confidence (0-1)</code></pre>
+    </div>
+    <div class="card">
+        <h3>When to Use Which?</h3>
+        <table style="font-size:0.78em;">
+            <tr><th></th><th>Embedding Router</th><th>LLM Router</th></tr>
+            <tr><td><strong>Speed</strong></td><td style="color:#4caf50;">~1ms</td><td>~500ms</td></tr>
+            <tr><td><strong>Cost</strong></td><td style="color:#4caf50;">Free (no LLM)</td><td>1 LLM call</td></tr>
+            <tr><td><strong>Edge cases</strong></td><td>Struggles</td><td style="color:#4caf50;">Handles with reasoning</td></tr>
+            <tr><td><strong>Ambiguous queries</strong></td><td>Picks closest</td><td style="color:#4caf50;">Can output confidence + reason</td></tr>
+            <tr><td><strong>Best for</strong></td><td>Clear-cut categories</td><td>Complex/overlapping categories</td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>Start with embedding router</strong> (fast, free). Switch to LLM router when you see misrouting on ambiguous queries.</div>
+</section>
+
+<!-- Slide: Router Architecture -->
+<section>
+    <h2>Router Architecture</h2>
+    <p style="font-size:0.75em; color:#aaa;">The full picture: classify &rarr; route &rarr; retrieve &rarr; answer</p>
+    <div class="card" style="margin-bottom:0.4em;">
+        <table style="font-size:0.78em;">
+            <tr>
+                <th style="width:15%;">Route</th>
+                <th style="width:40%;">Pipeline</th>
+                <th style="width:45%;">Example Queries</th>
+            </tr>
+            <tr style="border-left: 3px solid var(--accent3);">
+                <td><strong>📚 Vector DB</strong></td>
+                <td>Embed &rarr; Search &rarr; Re-rank &rarr; LLM</td>
+                <td class="dim">&ldquo;What does the policy say about...&rdquo;</td>
+            </tr>
+            <tr style="border-left: 3px solid var(--accent);">
+                <td><strong>🗃️ SQL</strong></td>
+                <td>Text-to-SQL &rarr; Execute &rarr; LLM</td>
+                <td class="dim">&ldquo;How many / total / average...&rdquo;</td>
+            </tr>
+            <tr style="border-left: 3px solid #ff9800;">
+                <td><strong>🌐 API</strong></td>
+                <td>API Call &rarr; Parse JSON &rarr; LLM</td>
+                <td class="dim">&ldquo;Current status of / right now...&rdquo;</td>
+            </tr>
+        </table>
+    </div>
+    <div class="card">
+        <h3>Fallback Strategies <span class="badge badge-warn">IMPORTANT</span></h3>
+        <div class="three-col" style="font-size:0.78em;">
+            <div>
+                <p><strong>Multi-route</strong></p>
+                <p class="dim">Confidence low? Try multiple routes in parallel, LLM picks best answer</p>
+            </div>
+            <div>
+                <p><strong>Threshold</strong></p>
+                <p class="dim">Confidence &lt; 0.6? Ask user to clarify: &ldquo;Policy or data?&rdquo;</p>
+            </div>
+            <div>
+                <p><strong>Default route</strong></p>
+                <p class="dim">Can&rsquo;t decide? Fall back to Vector DB &mdash; safest default</p>
+            </div>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Don&rsquo;t let the router silently pick the wrong route.</strong> A wrong route is worse than no routing at all.</div>
+</section>
+
+<!-- Slide: Routing Walk-Through -->
+<section>
+    <h2>Routing Walk-Through</h2>
+    <p style="font-size:0.75em; color:#aaa;">Same topic, different queries &mdash; different routes</p>
+    <div class="card">
+        <h3>Topic: Employee Leave</h3>
+        <table style="font-size:0.78em;">
+            <tr><th>User Query</th><th>Route</th><th>Why</th></tr>
+            <tr><td><em>&ldquo;What is our vacation policy?&rdquo;</em></td><td><span class="highlight">Vector DB</span></td><td>Document question &mdash; search policy text</td></tr>
+            <tr><td><em>&ldquo;How many sick days were taken in Q3?&rdquo;</em></td><td><span class="highlight">SQL</span></td><td>Counting/aggregation &mdash; needs database query</td></tr>
+            <tr><td><em>&ldquo;Who is on leave right now?&rdquo;</em></td><td><span class="highlight">API</span></td><td>Real-time data &mdash; needs live HR system</td></tr>
+        </table>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--accent2); margin-top:0.4em;">
+        <h3>&cross; Misrouting Example</h3>
+        <p style="font-size:0.8em;"><em>&ldquo;What is the average sick leave per department?&rdquo;</em></p>
+        <div class="two-col" style="font-size:0.85em; margin-top:0.3em;">
+            <div>
+                <p><strong>Embedding router says:</strong> Vector DB<br><span class="dim">(matched &ldquo;sick leave&rdquo; &rarr; policy docs)</span></p>
+            </div>
+            <div>
+                <p><strong>Correct route:</strong> SQL<br><span style="color:#4caf50;">(needs aggregation: AVG + GROUP BY)</span></p>
+            </div>
+        </div>
+        <p class="dim">This is when you switch from embedding router to LLM router &mdash; the LLM understands &ldquo;average per department&rdquo; means data, not documents.</p>
+    </div>
+</section>
+
+<!-- Slide: Routing + Decomposition Combined -->
+<section>
+    <h2>Routing + Decomposition</h2>
+    <p style="font-size:0.75em; color:#aaa;">Some queries need BOTH &mdash; split AND route to different sources</p>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>The Query</h3>
+        <p style="font-size:0.85em;"><em>&ldquo;Compare our vacation policy with how many days employees actually took last year.&rdquo;</em></p>
+    </div>
+    <div class="two-col" style="margin-top:0.4em;">
+        <div class="card" style="border-top: 3px solid var(--accent3);">
+            <h3>Sub-query 1 &rarr; Vector DB</h3>
+            <p style="font-size:0.78em;"><em>&ldquo;What is the company vacation policy?&rdquo;</em></p>
+            <p class="dim">Search policy documents &rarr; &ldquo;20 days per year&rdquo;</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent);">
+            <h3>Sub-query 2 &rarr; SQL</h3>
+            <p style="font-size:0.78em;"><em>&ldquo;Average vacation days taken per employee last year&rdquo;</em></p>
+            <p class="dim">SELECT AVG(days_taken) &rarr; &ldquo;14.2 days&rdquo;</p>
+        </div>
+    </div>
+    <div class="card" style="margin-top:0.3em; border-left: 3px solid #4caf50;">
+        <h3>LLM Synthesizes</h3>
+        <p style="font-size:0.8em;"><em>&ldquo;The policy allows 20 days. On average, employees used 14.2 days (71%). Engineering used the least at 11.3 days.&rdquo;</em></p>
+    </div>
+    <div class="takeaway"><strong>This is the full picture:</strong> Decompose &rarr; Route each sub-query &rarr; Retrieve from different sources &rarr; Synthesize. Neither Section 3 nor Section 4 alone could answer this.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- KEY TAKEAWAYS -->
+<!-- ============================================ -->
+<section>
+    <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div></div>
+    <h2>Lecture 5 &mdash; Key Takeaways</h2>
+    <div style="font-size:0.85em;">
+        <div class="card">
+            <p><span class="highlight">1.</span> Most RAG failures are <strong>retrieval failures</strong> &mdash; diagnose the failure mode first</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">2.</span> <strong>Re-ranking</strong> with cross-encoders is the highest-ROI improvement (+15&ndash;30% precision)</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">3.</span> <strong>HyDE</strong> bridges vocabulary gaps by generating a hypothetical answer to search with</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">4.</span> <strong>Parent-child chunking</strong> = search on small, read on big. Best of both granularities</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">5.</span> <strong>Query decomposition</strong> breaks multi-hop questions into independent sub-queries</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">6.</span> <strong>Semantic routing</strong> sends queries to the right data source (vector DB, SQL, API)</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">7.</span> <strong>Stack techniques:</strong> Hybrid search → Re-rank → Parent expansion → Route</p>
+        </div>
+    </div>
+</section>
+
+<!-- QUESTIONS -->
+<section>
+    <div style="text-align:center;">
+        <p style="font-size:3em; margin-bottom:0.3em;">&#10067;</p>
+        <h1>Questions?</h1>
+        <p class="subtitle" style="margin-top:1em;">Thank you!</p>
+        <br>
+        <p style="font-size:0.55em; color:#555;">Kamyar Zeinalipour &mdash; Zucchetti LLM Course</p>
+        <div style="margin-top:1.5em; font-size:0.5em; color:#444;">
+            <p>Next &rarr; <span class="highlight">Lecture 6: Graph RAG &amp; Knowledge Graphs</span></p>
+            <p style="color:#555; margin-top:0.3em;">Theory: Entity extraction &middot; Graph traversal &middot; Community detection</p>
+            <p style="color:var(--accent); margin-top:0.4em; font-weight:500;">🔬 Mega-Lab: RAG Pipeline (L4) + Advanced Retrieval (L5) + Graph RAG (L6)</p>
+        </div>
+    </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        width: 960,
+        height: 700,
+        margin: 0.04,
+        minScale: 0.5,
+        maxScale: 1.2,
+        transition: 'slide',
+        transitionSpeed: 'default',
+        autoAnimateEasing: 'ease',
+        autoAnimateUnmatched: false,
+        autoAnimateDuration: 0.6,
+        plugins: [RevealHighlight],
+        navigationMode: 'linear',
+        highlight: {
+            highlightOnLoad: true,
+        },
+    });
+</script>
+</body>
+</html>

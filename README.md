@@ -14,7 +14,7 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 ```
 📘 FOUNDATIONS (Lectures 1–4)                📙 ADVANCED (Lectures 5–10)
 ┌──────────────────────────────┐      ┌──────────────────────────────────────┐
-│ ✅ L1  Transformer Blueprint  │      │ 🔒 L5  Advanced RAG & Routing        │
+│ ✅ L1  Transformer Blueprint  │      │ ✅ L5  Advanced RAG & Routing        │
 │ ✅ L2  Tokenization & Embed.  │      │ 🔒 L6  Graph RAG & Knowledge Graphs  │
 │ ✅ L3  Prompt Engineering     │      │ 🔒 L7  Agentic RAG & Autonomous      │
 │ ✅ L4  RAG & Decision Matrix  │      │ 🔒 L8  RAG Evaluation & Observability│
@@ -174,7 +174,51 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 | 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_04_rag_foundations.html) | Click to view slides in your browser |
 | 🔬 **Lab** | Coming in Lecture 5 | Combined Lab 4 + Lab 5 hands-on RAG pipeline |
 
-> **Note:** This is a pure-theory lecture. The full RAG pipeline implementation (ChromaDB + MiniLM + Gemini) is built hands-on in the **Lecture 5 combined lab**.
+> **Note:** This is a pure-theory lecture. The full RAG pipeline implementation (ChromaDB + MiniLM + Gemini) is built hands-on in the **Lecture 6 combined lab**.
+
+---
+
+## 📖 Lecture 5: Advanced RAG & Intelligent Routing
+
+**Duration:** 2 hours · Pure theory — hands-on lab in Lecture 6 (combined Lab 4 + Lab 5 + Lab 6)
+
+### 🎯 What You'll Learn
+
+- **Why naive RAG fails** — six failure modes you'll hit in production and how to diagnose them
+- **Re-ranking** — bi-encoder vs cross-encoder, two-stage retrieval pipelines, 15–30% precision boost
+- **HyDE** — Hypothetical Document Embeddings to bridge vocabulary gaps between queries and documents
+- **Query rewriting** — transforming vague user input into precise search queries
+- **Parent-child chunking** — search on small chunks for precision, read the parent for context
+- **Hybrid search revisited** — Reciprocal Rank Fusion (RRF) to combine rankers without normalization headaches
+- **Hierarchical indexing** — multi-level search for large document collections (1,000+ docs)
+- **Contextual retrieval** — prepending document/section context to chunks before embedding (49% fewer failures)
+- **Lost in the Middle** — why LLMs ignore information in the middle of the context window
+- **Query decomposition** — breaking multi-hop questions into sub-queries (sequential, parallel, conditional)
+- **Semantic routing** — embedding-based and LLM-based routers to send queries to the right data source
+
+### 📐 Key Formulas
+
+| Concept | Formula |
+|---------|--------|
+| RRF Score | `RRF(d) = Σ 1/(k + rank_i(d))` where k=60 |
+| Embedding Router | `route* = argmax_r cos(embed(query), embed(route_r))` |
+| Re-ranking | `score = CrossEncoder(query ⊕ document) → [0, 1]` |
+
+### 📄 Key Papers Covered
+
+| Year | Paper | Venue |
+|------|-------|-------|
+| 2019 | *Sentence-BERT* (Reimers & Gurevych) | EMNLP |
+| 2023 | *Precise Zero-Shot Dense Retrieval without Relevance Labels* — HyDE (Gao et al.) | ACL |
+| 2023 | *Lost in the Middle* (Liu et al.) | TACL |
+| 2024 | *Contextual Retrieval* (Anthropic) | Blog |
+
+### 📂 Materials
+
+| Resource | Path | Description |
+|----------|------|-------------|
+| 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_05_advanced_rag.html) | Click to view slides in your browser |
+| 🔬 **Lab** | Coming in Lecture 6 | Combined Lab 4 + Lab 5 + Lab 6 mega-lab |
 
 ---
 
@@ -228,7 +272,7 @@ Open `slides/lecture_01_llm_embeddings.html` in your browser.
 | Lecture 2 | Tokenization, Embeddings & Similarity | ✅ **Available** |
 | Lecture 3 | Prompt Engineering | ✅ **Available** |
 | Lecture 4 | RAG Foundations & Decision Matrix | ✅ **Available** |
-| Lecture 5 | Advanced RAG & Intelligent Routing | 🔒 Coming soon |
+| Lecture 5 | Advanced RAG & Intelligent Routing | ✅ **Available** |
 | Lecture 6 | Graph RAG & Knowledge Graphs | 🔒 Coming soon |
 | Lecture 7 | Agentic RAG & Autonomous Systems | 🔒 Coming soon |
 | Lecture 8 | RAG Evaluation & Observability | 🔒 Coming soon |
@@ -252,6 +296,7 @@ zucchetti-llm-course/
 │   ├── lecture_02_tokenization_embeddings.html ← L2 slides
 │   ├── lecture_03_prompt_engineering.html     ← L3 slides
 │   ├── lecture_04_rag_foundations.html        ← L4 slides
+│   ├── lecture_05_advanced_rag.html           ← L5 slides
 │   └── img_*.png / img_*.svg                  ← Slide images
 │
 ├── lab_01_embeddings/               ← Hands-on lab (L1 & L2)

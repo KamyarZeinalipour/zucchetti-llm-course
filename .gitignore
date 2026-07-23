@@ -45,8 +45,7 @@ lab_08_*/
 lab_09_*/
 lab_10_*/
 
-# Lecture 5+ slides (not yet released)
-slides/lecture_05_*
+# Lecture 6+ slides (not yet released)
 slides/lecture_06_*
 slides/lecture_07_*
 slides/lecture_08_*
@@ -54,10 +53,8 @@ slides/lecture_09_*
 slides/lecture_10_*
 
 # All speaker notes (instructor only — not for students)
-slides/*_notes.md
-slides/*_notes.pdf
-lab_*/*_notes.md
-lab_*/*_notes.pdf
+slides/*_notes.*
+lab_*/*_notes.*
 
 # Course planning docs (instructor only)
 LLM_Course_Plan_20h.md
