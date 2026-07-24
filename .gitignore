@@ -45,8 +45,7 @@ lab_08_*/
 lab_09_*/
 lab_10_*/
 
-# Lecture 6+ slides (not yet released)
-slides/lecture_06_*
+# Lecture 7+ slides (not yet released)
 slides/lecture_07_*
 slides/lecture_08_*
 slides/lecture_09_*
@@ -66,3 +65,4 @@ tests/
 
 # Teleprompter / instructor notes (private)
 slides/*_teleprompter.md
+slides/*_teleprompter.html

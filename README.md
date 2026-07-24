@@ -15,7 +15,7 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 📘 FOUNDATIONS (Lectures 1–4)                📙 ADVANCED (Lectures 5–10)
 ┌──────────────────────────────┐      ┌──────────────────────────────────────┐
 │ ✅ L1  Transformer Blueprint  │      │ ✅ L5  Advanced RAG & Routing        │
-│ ✅ L2  Tokenization & Embed.  │      │ 🔒 L6  Graph RAG & Knowledge Graphs  │
+│ ✅ L2  Tokenization & Embed.  │      │ ✅ L6  Graph RAG & Knowledge Graphs  │
 │ ✅ L3  Prompt Engineering     │      │ 🔒 L7  Agentic RAG & Autonomous      │
 │ ✅ L4  RAG & Decision Matrix  │      │ 🔒 L8  RAG Evaluation & Observability│
 └──────────────────────────────┘      │ 🔒 L9  Fine-Tuning (LoRA / QLoRA)   │
@@ -222,6 +222,42 @@ A comprehensive, theory-heavy course designed for software engineers who want to
 
 ---
 
+## 📖 Lecture 6: Graph RAG & Knowledge Graphs
+
+**Duration:** 2 hours · Pure theory — hands-on lab in combined mega-lab (Lab 4 + Lab 5 + Lab 6)
+
+### 🎯 What You'll Learn
+
+- **When vector search isn't enough** — the relationship problem and why cosine similarity can't follow connections
+- **Knowledge graph fundamentals** — nodes, edges, triples, and the formal definition G = (V, E, R)
+- **LLM-powered KG construction** — entity extraction, relation extraction, deduplication, and schema design
+- **Graph RAG retrieval** — four traversal strategies: 1-hop, 2-hop, subgraph extraction, path finding
+- **Graph + Vector hybrid** — running both in parallel, entity-conditional graph traversal
+- **Microsoft GraphRAG** — community detection (Leiden algorithm), global summarization queries
+- **RAPTOR** — tree-based summarization for global queries without a graph
+- **LightRAG** — incremental updates, dual-level retrieval with key-value pairs, five query modes
+- **HippoRAG** — brain-inspired retrieval with Personalized PageRank, one-shot multi-hop
+- **Framework selection** — decision matrix for choosing the right Graph RAG approach
+
+### 📄 Key Papers Covered
+
+| Year | Paper | Venue |
+|------|-------|-------|
+| 2024 | *From Local to Global: A Graph RAG Approach to Query-Focused Summarization* (Edge et al.) | Microsoft Research |
+| 2024 | *RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval* (Sarthi et al.) | ICLR 2024 |
+| 2024 | *LightRAG: Simple and Fast Retrieval-Augmented Generation* (Guo et al.) | EMNLP 2025 Findings |
+| 2024 | *HippoRAG: Neurobiologically Inspired Long-Term Memory for LLMs* (Gutiérrez et al.) | NeurIPS 2024 |
+| 2025 | *PathRAG: Pruning Graph-based RAG with Relational Paths* (Chen et al.) | arXiv |
+
+### 📂 Materials
+
+| Resource | Path | Description |
+|----------|------|-------------|
+| 🎨 **Slides** | [**▶ Open Presentation**](https://kamyarzeinalipour.github.io/zucchetti-llm-course/slides/lecture_06_graph_rag.html) | Click to view slides in your browser |
+| 🔬 **Lab** | Coming in mega-lab | Combined Lab 4 + Lab 5 + Lab 6 hands-on pipeline |
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
@@ -273,7 +309,7 @@ Open `slides/lecture_01_llm_embeddings.html` in your browser.
 | Lecture 3 | Prompt Engineering | ✅ **Available** |
 | Lecture 4 | RAG Foundations & Decision Matrix | ✅ **Available** |
 | Lecture 5 | Advanced RAG & Intelligent Routing | ✅ **Available** |
-| Lecture 6 | Graph RAG & Knowledge Graphs | 🔒 Coming soon |
+| Lecture 6 | Graph RAG & Knowledge Graphs | ✅ **Available** |
 | Lecture 7 | Agentic RAG & Autonomous Systems | 🔒 Coming soon |
 | Lecture 8 | RAG Evaluation & Observability | 🔒 Coming soon |
 | Lecture 9 | Efficient Fine-Tuning (LoRA / QLoRA) | 🔒 Coming soon |
@@ -297,6 +333,7 @@ zucchetti-llm-course/
 │   ├── lecture_03_prompt_engineering.html     ← L3 slides
 │   ├── lecture_04_rag_foundations.html        ← L4 slides
 │   ├── lecture_05_advanced_rag.html           ← L5 slides
+│   ├── lecture_06_graph_rag.html              ← L6 slides
 │   └── img_*.png / img_*.svg                  ← Slide images
 │
 ├── lab_01_embeddings/               ← Hands-on lab (L1 & L2)

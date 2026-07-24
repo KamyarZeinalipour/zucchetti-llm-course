@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 6: Graph RAG &amp; Knowledge Graphs</title>
+    <meta name="description" content="Lecture 6 of the Zucchetti LLM Course: Graph RAG and Knowledge Graphs. Covers knowledge graph fundamentals, LLM-powered entity extraction, graph traversal strategies, and the Graph RAG landscape: Microsoft GraphRAG, RAPTOR, LightRAG, and HippoRAG.">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --r-background-color: #0a0a1a;
+            --r-main-font: 'Inter', sans-serif;
+            --r-heading-font: 'Inter', sans-serif;
+            --r-code-font: 'JetBrains Mono', monospace;
+            --r-main-font-size: 22px;
+            --r-heading-color: #fff;
+            --r-main-color: #e0e0e8;
+            --r-link-color: #64b5f6;
+            --accent: #6c63ff;
+            --accent2: #e94560;
+            --accent3: #00d9ff;
+            --accent4: #4caf50;
+            --surface: rgba(255,255,255,0.05);
+        }
+        .reveal { font-weight: 300; }
+        .reveal .slides > section, .reveal .slides > section > section { padding: 8px 18px; box-sizing: border-box; }
+        .reveal .slides > section > *, .reveal .slides > section > section > * { max-width: 100%; box-sizing: border-box; }
+        .reveal h1 { font-size: 1.9em; font-weight: 700; background: linear-gradient(135deg, #6c63ff, #00d9ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.2em; }
+        .reveal h2 { font-size: 1.3em; font-weight: 600; color: #fff; margin-bottom: 0.3em; }
+        .reveal h3 { font-size: 0.95em; font-weight: 500; color: var(--accent3); margin-bottom: 0.2em; }
+        .reveal .subtitle { font-size: 0.65em; color: #888; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
+        .reveal .highlight { color: var(--accent3); font-weight: 500; }
+        .reveal .warn { color: var(--accent2); font-weight: 500; }
+        .reveal ul { list-style: none; padding-left: 0; margin: 0.2em 0; }
+        .reveal ul li { padding: 0.15em 0; padding-left: 1.3em; position: relative; font-size: 0.78em; }
+        .reveal ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+        .reveal .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; text-align: left; max-width: 100%; overflow: hidden; }
+        .reveal .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7em; text-align: left; }
+        .reveal .card { background: var(--surface); border: 1px solid rgba(108,99,255,0.2); border-radius: 10px; padding: 0.4em 0.7em; margin: 0.15em 0; }
+        .reveal .card h3 { margin-top: 0; margin-bottom: 0.2em; }
+        .reveal .formula { background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; padding: 0.4em 0.8em; font-family: var(--r-code-font); font-size: 0.85em; margin: 0.3em 0; text-align: center; }
+        .reveal .takeaway { background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,217,255,0.1)); border: 1px solid rgba(108,99,255,0.3); border-radius: 10px; padding: 0.35em 0.7em; margin-top: 0.3em; text-align: left; font-size: 0.72em; }
+        .reveal .takeaway::before { content: '\1F4A1 KEY TAKEAWAY'; display: block; font-size: 0.55em; font-weight: 600; color: var(--accent); letter-spacing: 0.15em; margin-bottom: 0.15em; }
+        .reveal .section-title { font-size: 0.5em; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 0.2em; }
+        .reveal .progress-bar { display: flex; gap: 4px; margin: 0.6em 0; }
+        .reveal .progress-bar .step { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); }
+        .reveal .progress-bar .step.done { background: var(--accent3); }
+        .reveal .progress-bar .step.active { background: var(--accent); }
+        .slide-number { color: #555 !important; font-size: 14px !important; right: auto !important; left: 12px !important; top: 12px !important; bottom: auto !important; }
+        .reveal .footer-info { position: absolute; bottom: 1em; left: 1em; font-size: 0.4em; color: #555; }
+        .reveal .paper-ref { font-size: 0.5em; color: #888; margin-top: 8px; font-style: italic; }
+        .reveal .paper-ref a { color: var(--accent); }
+        .reveal p { margin: 0.2em 0; }
+        .reveal br { display: block; content: ''; margin: 0.2em 0; }
+        .reveal .section-intro { text-align: center; }
+        .reveal .section-intro h2 { font-size: 1.8em; background: linear-gradient(135deg, var(--accent), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .reveal .section-intro .subtitle { margin-top: 0.5em; }
+        .reveal table { width: 100%; border-collapse: collapse; font-size: 0.68em; margin: 0.3em 0; }
+        .reveal th { background: rgba(108,99,255,0.2); padding: 0.35em 0.5em; text-align: left; font-weight: 600; border-bottom: 2px solid var(--accent); }
+        .reveal td { padding: 0.3em 0.5em; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .reveal .pipeline { display: flex; align-items: center; gap: 0.3em; justify-content: center; flex-wrap: wrap; margin: 0.4em 0; }
+        .reveal .pipeline .box { background: var(--surface); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; padding: 0.3em 0.6em; font-size: 0.72em; font-weight: 500; }
+        .reveal .pipeline .arrow { color: var(--accent); font-size: 1.2em; }
+        .reveal .badge { display: inline-block; padding: 0.15em 0.6em; border-radius: 20px; font-size: 0.65em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .reveal .badge-new { background: rgba(0,217,255,0.2); color: var(--accent3); border: 1px solid rgba(0,217,255,0.3); }
+        .reveal .badge-key { background: rgba(108,99,255,0.2); color: #a9a4ff; border: 1px solid rgba(108,99,255,0.3); }
+        .reveal .badge-warn { background: rgba(233,69,96,0.2); color: var(--accent2); border: 1px solid rgba(233,69,96,0.3); }
+        .reveal .badge-graph { background: rgba(76,175,80,0.2); color: #81c784; border: 1px solid rgba(76,175,80,0.3); }
+        .reveal code { font-family: var(--r-code-font); font-size: 0.9em; background: rgba(255,255,255,0.06); padding: 0.1em 0.3em; border-radius: 4px; }
+        .reveal .dim { color: #666; font-size: 0.78em; }
+        .reveal .graph-node { display: inline-block; background: rgba(108,99,255,0.15); border: 2px solid var(--accent); border-radius: 50%; padding: 0.2em 0.5em; font-size: 0.72em; font-weight: 500; }
+        .reveal .graph-edge { color: var(--accent3); font-size: 0.65em; font-style: italic; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================ -->
+<!-- TITLE -->
+<!-- ============================================ -->
+<section>
+    <p class="subtitle">Zucchetti LLM Course &mdash; Lecture 6</p>
+    <h1>Graph RAG<br>&amp; Knowledge Graphs</h1>
+    <p style="font-size:0.6em; color:#888; margin-top:1em;">When vector search isn&rsquo;t enough &mdash; follow the relationships</p>
+    <p style="font-size:0.5em; color:#555; margin-top:2em;">Kamyar Zeinalipour</p>
+</section>
+
+<!-- Slide: Agenda -->
+<section>
+    <h2>Today&rsquo;s Agenda</h2>
+    <div style="font-size:0.82em;">
+        <div class="card">
+            <p><span class="highlight">Section 1</span> &mdash; When Vector Search Isn&rsquo;t Enough</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">Section 2</span> &mdash; Knowledge Graph Fundamentals</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">Section 3</span> &mdash; Building a KG from Documents (LLM-Powered)</p>
+        </div>
+        <div class="card" style="border-color: rgba(233,69,96,0.3);">
+            <p>☕ <strong>Break</strong></p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">Section 4</span> &mdash; Graph RAG &mdash; Retrieval That Follows Relationships</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">Section 5</span> &mdash; The Graph RAG Landscape</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 1: WHEN VECTOR SEARCH ISN'T ENOUGH -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 1 of 5</p>
+        <h1>When Vector Search<br>Isn&rsquo;t Enough</h1>
+        <p style="font-size:0.75em; color:#aaa;">The relationship problem</p>
+    </section>
+</section>
+
+<!-- Slide: The Relationship Problem -->
+<section>
+    <h2>The Relationship Problem</h2>
+    <p style="font-size:0.82em; color:#aaa;">Some questions can&rsquo;t be answered by finding similar documents</p>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>The Question</h3>
+        <p style="font-size:0.85em;"><em>&ldquo;Which employees in the Rome office report to managers hired before 2020?&rdquo;</em></p>
+    </div>
+    <div class="card" style="margin-top:0.4em;">
+        <h3>What This Requires</h3>
+        <div class="pipeline">
+            <div class="box">Rome Office</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box">Employees</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box">Their Managers</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:#4caf50;">hire_date &lt; 2020</div>
+        </div>
+        <p class="dim">4 hops across different entities. No single chunk contains this.</p>
+    </div>
+    <div class="takeaway">In L5 we called this a <strong>multi-hop failure</strong> and solved it with query decomposition. But decomposition still searches for documents &mdash; it can&rsquo;t <strong>follow relationships</strong>. That&rsquo;s a graph problem.</div>
+</section>
+
+<!-- Slide: Vector Search vs Graph Search -->
+<section>
+    <h2>Vector Search vs Graph Search</h2>
+    <table>
+        <tr><th>Query Type</th><th>Vector Search</th><th>Graph Search</th></tr>
+        <tr><td><em>&ldquo;What is the sick leave policy?&rdquo;</em></td><td style="color:#4caf50;">✅ Finds the document</td><td>Overkill</td></tr>
+        <tr><td><em>&ldquo;Who reports to Mario?&rdquo;</em></td><td style="color:var(--accent2);">❌ Finds docs mentioning Mario</td><td style="color:#4caf50;">✅ Follows reports_to edge</td></tr>
+        <tr><td><em>&ldquo;Which drugs interact with Patient X&rsquo;s medications?&rdquo;</em></td><td style="color:var(--accent2);">❌ Can&rsquo;t chain: Patient &rarr; Meds &rarr; Interactions</td><td style="color:#4caf50;">✅ Multi-hop traversal</td></tr>
+        <tr><td><em>&ldquo;What changed in the policy since last year?&rdquo;</em></td><td style="color:var(--accent2);">❌ Finds both versions</td><td style="color:#4caf50;">✅ Temporal edges</td></tr>
+    </table>
+    <div class="takeaway">Remember from L2: embeddings capture <strong>meaning</strong> (cosine similarity). Graphs capture <strong>structure</strong> (who connects to whom). Both live in your retrieval stack.</div>
+</section>
+
+<!-- Slide: The Retrieval Spectrum -->
+<section>
+    <h2>The Retrieval Spectrum</h2>
+    <p style="font-size:0.75em; color:#aaa;">Where Graph RAG fits in the techniques you&rsquo;ve learned</p>
+    <div style="font-size:0.82em;">
+        <div class="card" style="border-left: 3px solid #555;">
+            <p><span class="dim">L4</span> &nbsp; Simple factual &rarr; <strong>Vector Search</strong></p>
+        </div>
+        <div class="card" style="border-left: 3px solid #555;">
+            <p><span class="dim">L5</span> &nbsp; Vocabulary mismatch &rarr; <strong>HyDE / Query Rewriting</strong></p>
+        </div>
+        <div class="card" style="border-left: 3px solid #555;">
+            <p><span class="dim">L5</span> &nbsp; Multi-source &rarr; <strong>Semantic Routing</strong></p>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent); background: rgba(108,99,255,0.08);">
+            <p><span class="highlight">L6</span> &nbsp; Relationship reasoning &rarr; <strong>Knowledge Graphs</strong> &nbsp;<span class="badge badge-new">YOU ARE HERE</span></p>
+        </div>
+        <div class="card" style="border-left: 3px solid #333;">
+            <p><span class="dim">L7</span> &nbsp; Multi-step autonomous &rarr; <strong>Agentic RAG</strong></p>
+        </div>
+    </div>
+    <div class="takeaway">Each lecture adds a new capability. L6 teaches your system to <strong>follow connections</strong> that vector search can&rsquo;t see.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 2: KNOWLEDGE GRAPH FUNDAMENTALS -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 2 of 5</p>
+        <h1>Knowledge Graph<br>Fundamentals</h1>
+        <p style="font-size:0.75em; color:#aaa;">Nodes, edges, and triples</p>
+    </section>
+</section>
+
+<!-- Slide: What Is a Knowledge Graph? -->
+<section>
+    <h2>What Is a Knowledge Graph?</h2>
+    <p style="font-size:0.75em; color:#aaa;">Everything is a triple: <strong>(Subject, Predicate, Object)</strong></p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>Formal Definition</h3>
+        <p style="font-size:0.82em; text-align:center; margin:0.4em 0;">$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{R})$ &nbsp; where &nbsp; $\mathcal{V}$ = entities, &nbsp; $\mathcal{R}$ = relation types, &nbsp; $\mathcal{E} \subseteq \mathcal{V} \times \mathcal{R} \times \mathcal{V}$</p>
+        <p style="font-size:0.78em; text-align:center; color:#aaa;">Each edge is a triple: &nbsp; $(h, r, t) \in \mathcal{E}$ &nbsp; where &nbsp; $h$ = head, &nbsp; $r$ = relation, &nbsp; $t$ = tail</p>
+        <div style="text-align:center; font-size:0.85em; margin: 0.5em 0;">
+            <span class="graph-node">Mario</span>
+            <span class="graph-edge">&mdash; works_in &rarr;</span>
+            <span class="graph-node">Engineering</span>
+            <span class="graph-edge">&mdash; located_in &rarr;</span>
+            <span class="graph-node">Rome</span>
+        </div>
+    </div>
+    <div class="two-col">
+        <div class="card">
+            <h3>Nodes = Entities</h3>
+            <ul>
+                <li>People (Mario, Luigi)</li>
+                <li>Departments (Engineering, HR)</li>
+                <li>Documents (Remote Work Policy)</li>
+                <li>Concepts (Sick Leave, Training)</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Edges = Relationships</h3>
+            <ul>
+                <li><code>works_in</code> &mdash; employment</li>
+                <li><code>reports_to</code> &mdash; hierarchy</li>
+                <li><code>authored_by</code> &mdash; document ownership</li>
+                <li><code>eligible_for</code> &mdash; policy access</li>
+            </ul>
+        </div>
+    </div>
+    <div class="takeaway">A spreadsheet stores data in rows. A graph stores data in <strong>connections</strong>. You can walk the chain: Mario &rarr; Engineering &rarr; Rome &rarr; Italy.</div>
+</section>
+
+<!-- Slide: Example — An HR Knowledge Graph -->
+<section>
+    <h2>Example: An HR Knowledge Graph</h2>
+    <div class="card">
+        <h3>Triples Extracted from Documents</h3>
+        <table style="font-size:0.78em;">
+            <tr><th>Subject</th><th>Predicate</th><th>Object</th></tr>
+            <tr><td>Mario Rossi</td><td><code>works_in</code></td><td>Engineering</td></tr>
+            <tr><td>Mario Rossi</td><td><code>reports_to</code></td><td>Luigi Bianchi</td></tr>
+            <tr><td>Mario Rossi</td><td><code>hired_in</code></td><td>2019</td></tr>
+            <tr><td>Engineering</td><td><code>located_in</code></td><td>Rome Office</td></tr>
+            <tr><td>Mario Rossi</td><td><code>eligible_for</code></td><td>Remote Work Policy 2024</td></tr>
+            <tr><td>Luigi Bianchi</td><td><code>manages</code></td><td>Engineering</td></tr>
+        </table>
+    </div>
+    <div class="card" style="margin-top:0.4em;">
+        <h3>Now You Can Answer</h3>
+        <p style="font-size:0.8em;"><em>&ldquo;Who is Mario&rsquo;s manager?&rdquo;</em> &rarr; Mario <code>reports_to</code> &rarr; <strong>Luigi Bianchi</strong></p>
+        <p style="font-size:0.8em;"><em>&ldquo;Where does Mario work?&rdquo;</em> &rarr; Mario <code>works_in</code> &rarr; Engineering <code>located_in</code> &rarr; <strong>Rome</strong></p>
+    </div>
+</section>
+
+<!-- Slide: Types of Knowledge Graphs -->
+<section>
+    <h2>Types of Knowledge Graphs</h2>
+    <table>
+        <tr><th>Type</th><th>Structure</th><th>Best For</th><th>Example</th></tr>
+        <tr><td><strong>RDF / Triples</strong></td><td>(Subject, Predicate, Object)</td><td>Standards-based, semantic web</td><td>Wikidata, DBpedia</td></tr>
+        <tr><td><strong>Property Graph</strong></td><td>Nodes + edges with properties</td><td>Enterprise, flexible schemas</td><td>Neo4j, Neptune</td></tr>
+        <tr><td><strong>LLM-Extracted</strong> <span class="badge badge-new">OUR FOCUS</span></td><td>Triples from unstructured text</td><td>Quick prototyping, document KGs</td><td>What we&rsquo;ll build</td></tr>
+    </table>
+    <div class="takeaway">For enterprise RAG, <strong>property graphs</strong> are the sweet spot &mdash; flexible, queryable, and you can attach metadata to every relationship.</div>
+</section>
+
+<!-- Slide: Graph Database Landscape -->
+<section>
+    <h2>Graph Database Landscape</h2>
+    <table>
+        <tr><th>Tool</th><th>Type</th><th>When to Use</th><th>Query Language</th></tr>
+        <tr><td><strong>Neo4j</strong></td><td>Full graph DB</td><td>Production, complex queries</td><td>Cypher</td></tr>
+        <tr><td><strong>Amazon Neptune</strong></td><td>Managed cloud</td><td>AWS shops, no infra management</td><td>openCypher / Gremlin / SPARQL</td></tr>
+        <tr><td><strong>NetworkX</strong> <span class="badge badge-new">START HERE</span></td><td>Python library</td><td>Prototyping, small graphs</td><td>Python API</td></tr>
+        <tr><td><strong>In-memory dict</strong></td><td>Custom</td><td>Tiny graphs, embedded in pipeline</td><td>Python</td></tr>
+    </table>
+    <div class="takeaway"><strong>Start with NetworkX</strong> for prototyping. Move to Neo4j when the graph exceeds 100K nodes or you need concurrent access.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 3: BUILDING A KG FROM DOCUMENTS -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div></div>
+        <p class="section-title">Section 3 of 5</p>
+        <h1>Building a KG<br>from Documents</h1>
+        <p style="font-size:0.75em; color:#aaa;">LLM-powered entity and relation extraction</p>
+    </section>
+</section>
+
+<!-- Slide: The Extraction Pipeline — Problem -->
+<section>
+    <h2>From Documents to Graph &mdash; The Problem</h2>
+    <p style="font-size:0.82em; color:#aaa;">You have 10,000 documents. How do you turn them into a graph?</p>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>The Raw Text</h3>
+        <pre style="font-size:0.7em; background:rgba(255,255,255,0.03); padding:0.5em; border-radius:6px;"><code>Mario Rossi, hired in 2019, works in the Engineering department
+under the supervision of Luigi Bianchi. He is eligible for the
+2024 remote work policy. The Engineering department is located
+in the Rome office.</code></pre>
+    </div>
+    <div class="card" style="border-left: 3px solid #4caf50; margin-top:0.4em;">
+        <h3>What We Need</h3>
+        <div style="text-align:center; font-size:0.8em;">
+            <span class="graph-node">Mario</span>
+            <span class="graph-edge">&mdash; reports_to &rarr;</span>
+            <span class="graph-node">Luigi</span>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <span class="graph-node">Mario</span>
+            <span class="graph-edge">&mdash; works_in &rarr;</span>
+            <span class="graph-node">Engineering</span>
+            <span class="graph-edge">&mdash; located_in &rarr;</span>
+            <span class="graph-node">Rome</span>
+        </div>
+    </div>
+    <div class="takeaway">We need to extract <strong>entities</strong> (who/what) and <strong>relationships</strong> (how they&rsquo;re connected) from unstructured text.</div>
+</section>
+
+<!-- Slide: The Extraction Pipeline — Solution -->
+<section>
+    <h2>The Extraction Pipeline</h2>
+    <div class="pipeline">
+        <div class="box">Document</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Chunk</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color:var(--accent);">LLM: Extract<br>Entities</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color:var(--accent);">LLM: Extract<br>Relations</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color:var(--accent2);">Deduplicate<br>&amp; Merge</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color:#4caf50;">Knowledge<br>Graph</div>
+    </div>
+    <div class="two-col" style="margin-top:0.5em;">
+        <div class="card">
+            <h3>Old Way: Train NER Models</h3>
+            <ul>
+                <li>Need labeled training data</li>
+                <li>Domain-specific models</li>
+                <li>Months of development</li>
+                <li>Brittle on new entity types</li>
+            </ul>
+        </div>
+        <div class="card" style="border-color: rgba(76,175,80,0.3);">
+            <h3>New Way: Prompt the LLM <span class="badge badge-new">OUR APPROACH</span></h3>
+            <ul>
+                <li>Zero training data needed</li>
+                <li>Works across domains</li>
+                <li>Minutes to set up</li>
+                <li>Handles new entity types naturally</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide: Step 1 — Entity Extraction -->
+<section>
+    <h2>Step 1: Entity Extraction</h2>
+    <p style="font-size:0.75em; color:#aaa;">Ask the LLM to find all entities &mdash; using <strong>structured JSON output</strong> from L3</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>The Prompt</h3>
+        <pre style="font-size:0.68em; background:rgba(255,255,255,0.03); padding:0.5em; border-radius:6px;"><code>Extract all entities from this text.
+Return JSON: [{"entity": "...", "type": "PERSON|ORG|POLICY|DATE",
+               "description": "brief description"}]
+
+Text: "Mario Rossi, hired in 2019, works in Engineering..."</code></pre>
+    </div>
+    <div class="card">
+        <h3>LLM Output</h3>
+        <table style="font-size:0.78em;">
+            <tr><th>Entity</th><th>Type</th><th>Description</th></tr>
+            <tr><td>Mario Rossi</td><td><span class="badge badge-key">PERSON</span></td><td>Employee</td></tr>
+            <tr><td>Luigi Bianchi</td><td><span class="badge badge-key">PERSON</span></td><td>Supervisor</td></tr>
+            <tr><td>Engineering</td><td><span class="badge badge-new">ORG</span></td><td>Department</td></tr>
+            <tr><td>Remote Work Policy 2024</td><td><span class="badge badge-graph">POLICY</span></td><td>Policy document</td></tr>
+            <tr><td>2019</td><td><span class="badge badge-warn">DATE</span></td><td>Hire year</td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>No NER model training needed.</strong> The LLM handles it. This is the <strong>structured JSON output</strong> technique from L3 &mdash; same pattern, new use case. Cost: ~$0.01 per document.</div>
+</section>
+
+<!-- Slide: Step 2 — Relation Extraction -->
+<section>
+    <h2>Step 2: Relation Extraction</h2>
+    <p style="font-size:0.75em; color:#aaa;">Ask the LLM to find how entities connect</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>The Prompt</h3>
+        <pre style="font-size:0.68em; background:rgba(255,255,255,0.03); padding:0.5em; border-radius:6px;"><code>Given these entities and text, extract relationships as triples:
+[{"subject": "...", "predicate": "...", "object": "..."}]
+
+Entities: Mario Rossi, Luigi Bianchi, Engineering, ...
+Text: "Mario Rossi, hired in 2019, works in Engineering..."</code></pre>
+    </div>
+    <div class="card">
+        <h3>LLM Output</h3>
+        <table style="font-size:0.78em;">
+            <tr><th>Subject</th><th>Predicate</th><th>Object</th></tr>
+            <tr><td>Mario Rossi</td><td><code>works_in</code></td><td>Engineering</td></tr>
+            <tr><td>Mario Rossi</td><td><code>reports_to</code></td><td>Luigi Bianchi</td></tr>
+            <tr><td>Mario Rossi</td><td><code>eligible_for</code></td><td>Remote Work Policy 2024</td></tr>
+            <tr><td>Mario Rossi</td><td><code>hired_in</code></td><td>2019</td></tr>
+            <tr><td>Engineering</td><td><code>located_in</code></td><td>Rome Office</td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>Two LLM calls per chunk</strong> &mdash; one for entities, one for relations. You can also combine them into a single call.</div>
+</section>
+
+<!-- Slide: Step 3 — Deduplication (The Hard Part) -->
+<section>
+    <h2>Step 3: Deduplication <span class="badge badge-warn">THE HARD PART</span></h2>
+    <p style="font-size:0.72em; color:#aaa;">Extraction is easy. Cleaning is where projects fail.</p>
+    <div class="card">
+        <h3>Entity Resolution</h3>
+        <table style="font-size:0.72em;">
+            <tr><th>Problem</th><th>Doc A Says</th><th>Doc B Says</th><th>Solution</th></tr>
+            <tr><td><strong>Different names</strong></td><td>&ldquo;Mario Rossi&rdquo;</td><td>&ldquo;M. Rossi&rdquo;</td><td>Fuzzy matching + LLM</td></tr>
+            <tr><td><strong>Conflicting facts</strong></td><td>Mario in Engineering</td><td>Mario in Sales <span class="dim">(old)</span></td><td>Use timestamps</td></tr>
+            <tr><td><strong>Ambiguous refs</strong></td><td>&ldquo;the employee&rdquo;</td><td>&ldquo;he&rdquo;</td><td>Coreference resolution</td></tr>
+        </table>
+        <p style="font-size:0.72em; margin-top:0.3em;">&ldquo;The employee&rdquo; / &ldquo;he&rdquo; / &ldquo;Mr. Rossi&rdquo; / &ldquo;the engineer&rdquo; &rarr; all = <strong>Mario Rossi</strong> <span class="dim">&mdash; LLMs handle this with overlapping chunks (L4)</span></p>
+    </div>
+    <div class="card">
+        <h3>Entity Matching Score</h3>
+        <p style="font-size:0.78em; text-align:center;">$\text{sim}(e_1, e_2) = \frac{\text{embed}(e_1) \cdot \text{embed}(e_2)}{\|\text{embed}(e_1)\| \times \|\text{embed}(e_2)\|}$ &nbsp;&nbsp; If $\text{sim} > \tau$ &rarr; merge <span class="dim">&nbsp; ($\tau \approx 0.85$)</span></p>
+    </div>
+    <div class="takeaway"><strong>Attach confidence scores</strong> to each triple. Low confidence? Flag for human review. This is where graph quality is won or lost.</div>
+</section>
+
+<!-- Slide: One-Call Extraction (Practical) -->
+<section>
+    <h2>Practical: One-Call Extraction</h2>
+    <p style="font-size:0.75em; color:#aaa;">In practice, combine entity + relation extraction in a single prompt</p>
+    <div class="card">
+        <pre style="font-size:0.62em; background:rgba(255,255,255,0.03); padding:0.6em; border-radius:6px;"><code>You are a knowledge graph builder.
+Given this text, extract:
+1. All entities with their types
+2. All relationships between entities as triples
+
+Return JSON:
+{
+  "entities": [{"name": "...", "type": "...", "description": "..."}],
+  "triples": [{"subject": "...", "predicate": "...", "object": "..."}]
+}
+
+Rules:
+- Use consistent entity names (full names, not abbreviations)
+- Predicate should be a short verb phrase (works_in, reports_to)
+- Include temporal relationships (hired_in, valid_from)
+
+Text: """[CHUNK]"""</code></pre>
+    </div>
+    <div class="takeaway"><strong>One LLM call per chunk.</strong> Process all chunks &rarr; merge graphs &rarr; deduplicate. Budget: ~$0.50 for 1,000 documents.</div>
+</section>
+
+<!-- Slide: Step 0 — Schema Design (comes after showing the pipeline so students understand WHY they need a schema) -->
+<section>
+    <h2>Step 0: Schema Design <span class="badge badge-warn">DO THIS FIRST</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">Before extracting anything, define what you&rsquo;re looking for</p>
+    <div class="two-col">
+        <div class="card">
+            <h3>Entity Types</h3>
+            <table style="font-size:0.75em;">
+                <tr><th>Type</th><th>Examples</th></tr>
+                <tr><td><span class="badge badge-key">PERSON</span></td><td>Employees, managers, clients</td></tr>
+                <tr><td><span class="badge badge-new">DEPARTMENT</span></td><td>Engineering, HR, Sales</td></tr>
+                <tr><td><span class="badge badge-graph">POLICY</span></td><td>Remote work, sick leave</td></tr>
+                <tr><td><span class="badge badge-warn">LOCATION</span></td><td>Rome office, Milan HQ</td></tr>
+                <tr><td><span class="badge badge-key">ROLE</span></td><td>Senior Engineer, Team Lead</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Relation Types</h3>
+            <table style="font-size:0.75em;">
+                <tr><th>Predicate</th><th>Between</th></tr>
+                <tr><td><code>works_in</code></td><td>PERSON &rarr; DEPARTMENT</td></tr>
+                <tr><td><code>reports_to</code></td><td>PERSON &rarr; PERSON</td></tr>
+                <tr><td><code>located_in</code></td><td>DEPARTMENT &rarr; LOCATION</td></tr>
+                <tr><td><code>eligible_for</code></td><td>PERSON &rarr; POLICY</td></tr>
+                <tr><td><code>has_role</code></td><td>PERSON &rarr; ROLE</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Start with 5&ndash;7 entity types and 5&ndash;10 relation types.</strong> Too many types &rarr; inconsistent extraction. Too few &rarr; you miss connections. Iterate after reviewing the first 100 documents.</div>
+</section>
+
+<!-- Slide: Python Implementation -->
+<section>
+    <h2>Python Implementation</h2>
+    <p style="font-size:0.75em; color:#aaa;">From text to graph in ~15 lines of code</p>
+    <div class="card">
+        <pre style="font-size:0.58em; background:rgba(255,255,255,0.03); padding:0.6em; border-radius:6px;"><code class="language-python">import json, networkx as nx
+from google import genai
+
+client = genai.Client()
+graph = nx.DiGraph()
+
+def extract_and_add(chunk: str):
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=SCHEMA_PROMPT + chunk,  # our one-call prompt
+        config={"response_mime_type": "application/json"}
+    )
+    data = json.loads(response.text)
+
+    for e in data["entities"]:
+        graph.add_node(e["name"], type=e["type"],
+                       desc=e["description"])
+
+    for t in data["triples"]:
+        graph.add_edge(t["subject"], t["object"],
+                       relation=t["predicate"])
+
+# Process all chunks
+for chunk in chunks:
+    extract_and_add(chunk)</code></pre>
+    </div>
+    <div class="takeaway">That&rsquo;s it. <code>response_mime_type: "application/json"</code> forces the LLM to return valid JSON &mdash; no parsing errors. The graph grows as you process each chunk.</div>
+</section>
+
+<!-- Slide: Quality Validation & Common Pitfalls -->
+<section>
+    <h2>Common Pitfalls <span class="badge badge-warn">LEARN FROM OTHERS</span></h2>
+    <table style="font-size:0.72em;">
+        <tr><th>#</th><th>Pitfall</th><th>Example</th><th>Fix</th></tr>
+        <tr>
+            <td><strong>1</strong></td>
+            <td>Over-extraction</td>
+            <td>LLM extracts &ldquo;2024&rdquo; as an entity everywhere</td>
+            <td>Restrict entity types in schema</td>
+        </tr>
+        <tr>
+            <td><strong>2</strong></td>
+            <td>Inconsistent predicates</td>
+            <td><code>works_at</code> vs <code>works_in</code> vs <code>employed_by</code></td>
+            <td>Provide allowed predicate list in prompt</td>
+        </tr>
+        <tr>
+            <td><strong>3</strong></td>
+            <td>Hallucinated relations</td>
+            <td>LLM invents &ldquo;Mario manages Sales&rdquo; (not in text)</td>
+            <td>Add: &ldquo;only extract facts explicitly stated&rdquo;</td>
+        </tr>
+        <tr>
+            <td><strong>4</strong></td>
+            <td>Missing chunk overlap</td>
+            <td>Entity in chunk 1, relationship in chunk 2</td>
+            <td>Use overlapping chunks (L4)</td>
+        </tr>
+        <tr>
+            <td><strong>5</strong></td>
+            <td>No validation loop</td>
+            <td>Silently building a bad graph</td>
+            <td>Sample 50 triples &rarr; human review &rarr; fix prompt</td>
+        </tr>
+    </table>
+    <div class="takeaway"><strong>The 50-triple test:</strong> after processing 100 documents, randomly sample 50 triples. If accuracy is &lt;90%, fix your prompt or schema before processing the rest.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- BREAK -->
+<!-- ============================================ -->
+<section>
+    <div style="text-align:center;">
+        <p style="font-size:3em;">☕</p>
+        <h2>Break</h2>
+        <p style="font-size:0.8em; color:#888;">10 minutes</p>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 4: GRAPH RAG RETRIEVAL -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
+        <p class="section-title">Section 4 of 5</p>
+        <h1>Graph RAG</h1>
+        <p style="font-size:0.75em; color:#aaa;">Retrieval that follows relationships</p>
+    </section>
+</section>
+
+<!-- Slide: Graph RAG Pipeline — The Problem -->
+<section>
+    <h2>Graph RAG &mdash; The Problem</h2>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>The Query</h3>
+        <p style="font-size:0.85em;"><em>&ldquo;What training courses are required for Mario&rsquo;s role?&rdquo;</em></p>
+    </div>
+    <div class="two-col" style="margin-top:0.4em;">
+        <div class="card">
+            <h3>&cross; Naive RAG</h3>
+            <p style="font-size:0.8em;">Searches for &ldquo;training courses&rdquo; + &ldquo;Mario&rdquo;</p>
+            <p style="font-size:0.8em;">Finds general training documents</p>
+            <p style="font-size:0.8em; color:var(--accent2);"><strong>Doesn&rsquo;t know Mario is in Engineering</strong></p>
+            <p class="dim">Misses role-specific courses</p>
+        </div>
+        <div class="card" style="border-color:rgba(76,175,80,0.3);">
+            <h3>&check; Graph RAG</h3>
+            <p style="font-size:0.8em;">1. Find &ldquo;Mario&rdquo; node</p>
+            <p style="font-size:0.8em;">2. Mario &rarr; works_in &rarr; <strong>Engineering</strong></p>
+            <p style="font-size:0.8em;">3. Engineering &rarr; requires &rarr; <strong>[Java, Cloud, Security]</strong></p>
+            <p style="font-size:0.8em; color:#4caf50;"><strong>Finds role-specific courses</strong></p>
+        </div>
+    </div>
+    <div class="takeaway">Graph RAG doesn&rsquo;t search for documents &mdash; it <strong>follows connections</strong> to gather the exact context needed.</div>
+</section>
+
+<!-- Slide: Graph RAG Pipeline — The Solution -->
+<section>
+    <h2>The Graph RAG Pipeline</h2>
+    <div class="pipeline">
+        <div class="box">User Query</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color:var(--accent);">Entity<br>Linking</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color:var(--accent3);">Graph<br>Traversal</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color:var(--accent2);">Context<br>Enrichment</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box" style="border-color:#4caf50;">LLM<br>Synthesis</div>
+    </div>
+    <div class="card" style="margin-top:0.5em;">
+        <table style="font-size:0.78em;">
+            <tr><th>Step</th><th>What Happens</th><th>Example</th></tr>
+            <tr><td><strong>Entity Linking</strong></td><td>Find mentioned entity in the graph</td><td>&ldquo;Mario&rdquo; &rarr; node <code>Mario Rossi</code></td></tr>
+            <tr><td><strong>Graph Traversal</strong></td><td>Walk N hops to collect related entities</td><td>Mario &rarr; Engineering &rarr; [Java, Cloud, Security]</td></tr>
+            <tr><td><strong>Context Enrichment</strong></td><td>Retrieve documents for discovered entities</td><td>Fetch training policy docs for Java, Cloud, Security</td></tr>
+            <tr><td><strong>LLM Synthesis</strong></td><td>Generate answer from graph facts + documents</td><td>&ldquo;Mario needs Java Cert, Cloud Training, and Security Basics&rdquo;</td></tr>
+        </table>
+    </div>
+</section>
+
+<!-- Slide: Strategy 1 — 1-Hop -->
+<section>
+    <h2>Strategy 1: 1-Hop <span class="badge badge-new">DIRECT NEIGHBORS</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">&ldquo;Who is Mario&rsquo;s manager?&rdquo;</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>How It Works</h3>
+        <div style="text-align:center; font-size:0.85em; margin:0.5em 0;">
+            <span class="graph-node" style="opacity:0.4;">Rome</span>
+            <span class="graph-edge" style="opacity:0.4;">&larr; located_in &mdash;</span>
+            <span class="graph-node" style="opacity:0.4;">Engineering</span>
+            <span class="graph-edge" style="opacity:0.4;">&larr; works_in &mdash;</span>
+            <span class="graph-node" style="border-color:var(--accent3);">Mario</span>
+            <span class="graph-edge">&mdash; reports_to &rarr;</span>
+            <span class="graph-node" style="border-color:#4caf50;">Luigi</span>
+        </div>
+        <p style="font-size:0.78em; text-align:center;">Start at <strong>Mario</strong> &rarr; look at direct edges &rarr; find <strong>Luigi Bianchi</strong></p>
+    </div>
+    <div class="two-col">
+        <div class="card">
+            <h3>When to Use</h3>
+            <ul>
+                <li>Simple fact lookups</li>
+                <li>&ldquo;What department is X in?&rdquo;</li>
+                <li>&ldquo;Who manages Y?&rdquo;</li>
+                <li>Fast &mdash; O(degree) per node</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Limitations</h3>
+            <ul>
+                <li>Can&rsquo;t answer indirect questions</li>
+                <li>&ldquo;Who else is on Mario&rsquo;s team?&rdquo; needs 2 hops</li>
+                <li>Small context window</li>
+            </ul>
+        </div>
+    </div>
+    <div class="takeaway"><strong>1-hop is your SQL replacement.</strong> If the answer is a direct property or neighbor of one entity, use 1-hop. Fastest and cheapest.</div>
+</section>
+
+<!-- Slide: Strategy 2 — 2-Hop -->
+<section>
+    <h2>Strategy 2: 2-Hop <span class="badge badge-key">INDIRECT CONNECTIONS</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">&ldquo;Who else reports to Mario&rsquo;s manager?&rdquo;</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>How It Works</h3>
+        <div style="text-align:center; font-size:0.85em; margin:0.5em 0;">
+            <span class="graph-node" style="border-color:var(--accent3);">Mario</span>
+            <span class="graph-edge">&mdash; reports_to &rarr;</span>
+            <span class="graph-node" style="border-color:var(--accent);">Luigi</span>
+            <span class="graph-edge">&larr; reports_to &mdash;</span>
+            <span class="graph-node" style="border-color:#4caf50;">Anna</span>
+        </div>
+        <p style="font-size:0.78em; text-align:center;"><strong>Hop 1:</strong> Mario &rarr; Luigi &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Hop 2:</strong> Luigi &larr; Anna, Paolo, Sara</p>
+    </div>
+    <div class="two-col">
+        <div class="card">
+            <h3>When to Use</h3>
+            <ul>
+                <li>Indirect connections</li>
+                <li>&ldquo;What policies apply to Mario&rsquo;s department?&rdquo;</li>
+                <li>&ldquo;Who are Mario&rsquo;s colleagues?&rdquo;</li>
+                <li>The <strong>sweet spot</strong> for most Graph RAG queries</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Watch Out</h3>
+            <ul>
+                <li>Context grows exponentially with degree</li>
+                <li>$|\mathcal{N}_k(v)| \leq d^k$ &nbsp; where $d$ = avg degree</li>
+                <li>$d{=}50, k{=}2 \Rightarrow 50^2 = 2{,}500$ nodes!</li>
+                <li>Use <strong>edge type filtering</strong> to control explosion</li>
+            </ul>
+        </div>
+    </div>
+    <div class="takeaway"><strong>2-hop is the default for most Graph RAG systems.</strong> Filter by edge type to avoid explosion: &ldquo;follow only <code>reports_to</code> edges, not all edges.&rdquo;</div>
+</section>
+
+<!-- Slide: Strategy 3 — Subgraph Extraction -->
+<section>
+    <h2>Strategy 3: Subgraph Extraction <span class="badge badge-graph">FULL NEIGHBORHOOD</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">&ldquo;Tell me everything about Mario&rsquo;s team&rdquo;</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>How It Works</h3>
+        <div style="text-align:center; font-size:0.82em; margin:0.5em 0;">
+            <span class="graph-node" style="border-color:#4caf50;">Rome</span>
+            <span class="graph-edge">&larr;</span>
+            <span class="graph-node" style="border-color:#4caf50;">Engineering</span>
+            <span class="graph-edge">&larr;</span>
+            <span class="graph-node" style="border-color:var(--accent3);">Mario</span>
+            <span class="graph-edge">&rarr;</span>
+            <span class="graph-node" style="border-color:#4caf50;">Luigi</span>
+            <span class="graph-edge">&rarr;</span>
+            <span class="graph-node" style="border-color:#4caf50;">Policy 2024</span>
+        </div>
+        <p style="font-size:0.78em; text-align:center;">Extract the <strong>full connected neighborhood</strong> of Mario &mdash; all nodes, all edges, all types</p>
+    </div>
+    <div class="two-col">
+        <div class="card">
+            <h3>When to Use</h3>
+            <ul>
+                <li>Open-ended questions about an entity</li>
+                <li>&ldquo;Summarize everything about this employee&rdquo;</li>
+                <li>Building a &ldquo;profile page&rdquo; for an entity</li>
+                <li>Compliance audits requiring full context</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Implementation</h3>
+            <ul>
+                <li>NetworkX: <code>nx.ego_graph(G, "Mario", radius=2)</code></li>
+                <li>Neo4j: <code>MATCH (n)-[*..2]-(m) WHERE n.name = "Mario"</code></li>
+                <li>Set a <strong>max radius</strong> to control size</li>
+                <li>Limit total nodes (e.g., top 50 by PageRank)</li>
+            </ul>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Subgraph extraction gives the richest context</strong> but is the most expensive. Use it for open-ended questions where you don&rsquo;t know which edges matter.</div>
+</section>
+
+<!-- Slide: Strategy 4 — Path Finding -->
+<section>
+    <h2>Strategy 4: Path Finding <span class="badge badge-warn">CONNECTION DISCOVERY</span></h2>
+    <p style="font-size:0.75em; color:#aaa;">&ldquo;How is Mario connected to the CEO?&rdquo;</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>How It Works</h3>
+        <div style="text-align:center; font-size:0.82em; margin:0.5em 0;">
+            <span class="graph-node" style="border-color:var(--accent3);">Mario</span>
+            <span class="graph-edge">&mdash; reports_to &rarr;</span>
+            <span class="graph-node" style="border-color:var(--accent);">Luigi</span>
+            <span class="graph-edge">&mdash; reports_to &rarr;</span>
+            <span class="graph-node" style="border-color:var(--accent);">Sara (VP)</span>
+            <span class="graph-edge">&mdash; reports_to &rarr;</span>
+            <span class="graph-node" style="border-color:#4caf50;">CEO</span>
+        </div>
+        <p style="font-size:0.78em; text-align:center;">Find the <strong>shortest path</strong> between two entities &mdash; reveals the chain of connections</p>
+    </div>
+    <div class="two-col">
+        <div class="card">
+            <h3>When to Use</h3>
+            <ul>
+                <li>&ldquo;How is drug A related to side effect B?&rdquo;</li>
+                <li>Compliance: &ldquo;Who approved this decision?&rdquo;</li>
+                <li>Connection discovery and audit trails</li>
+                <li>Explaining <strong>why</strong> two things are related</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Implementation</h3>
+            <ul>
+                <li>NetworkX: <code>nx.shortest_path(G, "Mario", "CEO")</code></li>
+                <li>Neo4j: <code>MATCH p=shortestPath((a)-[*]-(b))</code></li>
+                <li>Can also find <strong>all paths</strong> up to length N</li>
+                <li>Weight edges by confidence for ranked paths</li>
+            </ul>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Path finding answers &ldquo;why&rdquo; questions:</strong> not just that two entities are related, but <strong>how</strong> they&rsquo;re connected. Essential for compliance and explainability.</div>
+</section>
+
+<!-- Slide: Graph + Vector Hybrid -->
+<section>
+    <h2>Graph + Vector Hybrid</h2>
+    <p style="font-size:0.75em; color:#aaa;">The real architecture &mdash; run <strong>both</strong> in parallel, then merge</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>Step 1: Parallel Retrieval</h3>
+        <div class="two-col" style="font-size:0.82em;">
+            <div class="card" style="border-top: 3px solid var(--accent);">
+                <p><strong>Vector Search</strong> <span class="dim">(always runs)</span></p>
+                <p class="dim">Embed query &rarr; find top-K similar chunks</p>
+                <p class="dim">Catches broad semantic matches</p>
+            </div>
+            <div class="card" style="border-top: 3px solid var(--accent3);">
+                <p><strong>Graph Traversal</strong> <span class="dim">(if entity detected)</span></p>
+                <p class="dim">Detect entity &rarr; traverse N hops &rarr; gather facts</p>
+                <p class="dim">Catches relationship-based context</p>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <table style="font-size:0.78em;">
+            <tr><th>Step</th><th>What Happens</th></tr>
+            <tr><td><strong>2. Merge</strong></td><td>Combine vector chunks + graph facts &rarr; deduplicate overlapping context</td></tr>
+            <tr><td><strong>3. Re-rank</strong></td><td>Cross-encoder <span class="dim">(L5)</span> scores all results together &rarr; best evidence to the top</td></tr>
+            <tr><td><strong>4. LLM</strong></td><td>Generate answer from enriched context <span style="color:#4caf50;">&rarr; final answer</span></td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>Always run vector search.</strong> If the query mentions a known entity, <strong>also</strong> run graph traversal. Merge both results. This way you never miss context &mdash; vectors catch semantics, graphs catch structure.</div>
+</section>
+
+<!-- Slide: When to Use Graph RAG -->
+<section>
+    <h2>When to Use Graph RAG</h2>
+    <div class="two-col" style="font-size:0.82em;">
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>✅ Use Graph RAG when</h3>
+            <ul>
+                <li>Questions involve <strong>named entities</strong> and their connections</li>
+                <li>Multi-hop reasoning is required</li>
+                <li>Domain has clear <strong>entity types</strong> (people, orgs, policies)</li>
+                <li>You need to discover <strong>indirect connections</strong></li>
+                <li>Compliance/audit trails matter</li>
+            </ul>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent2);">
+            <h3>❌ Skip Graph RAG when</h3>
+            <ul>
+                <li>Questions are about <strong>document content</strong>, not entities</li>
+                <li>Your corpus is small (&lt;100 docs)</li>
+                <li>Entities don&rsquo;t have meaningful relationships</li>
+                <li>Graph quality would be poor (messy data)</li>
+                <li>You need sub-second index updates (streaming data)</li>
+            </ul>
+        </div>
+    </div>
+    <div class="takeaway">Remember L5&rsquo;s rule: <strong>diagnose first, then pick the fix.</strong> If your RAG failures are relationship queries &rarr; add Graph RAG. If they&rsquo;re vocabulary mismatch &rarr; stick with HyDE.</div>
+</section>
+
+<!-- ============================================ -->
+<!-- SECTION 5: MICROSOFT GRAPHRAG & RAPTOR -->
+<!-- ============================================ -->
+<section>
+    <section>
+        <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div></div>
+        <p class="section-title">Section 5 of 5</p>
+        <h1>The Graph RAG<br>Landscape</h1>
+        <p style="font-size:0.75em; color:#aaa;">GraphRAG, RAPTOR, LightRAG, HippoRAG &amp; beyond</p>
+    </section>
+</section>
+
+<!-- Slide: The Global Query Problem -->
+<section>
+    <h2>The Global Query Problem</h2>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>The Question</h3>
+        <p style="font-size:0.85em;"><em>&ldquo;What are the main themes across all 10,000 HR policy documents?&rdquo;</em></p>
+    </div>
+    <div class="two-col" style="margin-top:0.4em;">
+        <div class="card">
+            <h3>&cross; Vector Search</h3>
+            <p style="font-size:0.8em;">Returns 5 individual chunks</p>
+            <p class="dim">Each chunk covers one topic. No global view.</p>
+        </div>
+        <div class="card">
+            <h3>&cross; Basic Graph RAG</h3>
+            <p style="font-size:0.8em;">No single entity to start from</p>
+            <p class="dim">&ldquo;Main themes&rdquo; isn&rsquo;t an entity in the graph.</p>
+        </div>
+    </div>
+    <div class="takeaway"><strong>Global questions</strong> don&rsquo;t start with a specific entity and can&rsquo;t be answered by any single chunk. You need to summarize the <strong>entire corpus</strong>.</div>
+</section>
+
+<!-- Slide: Three Unsolved Problems -->
+<section>
+    <h2>Three Unsolved Problems</h2>
+    <p style="font-size:0.72em; color:#aaa;">Basic Graph RAG (Section 4) can&rsquo;t handle these &mdash; each framework below was designed to solve one</p>
+    <div class="card" style="border-left: 3px solid var(--accent2);">
+        <h3>Problem 1: Global Summarization</h3>
+        <p style="font-size:0.78em;">&ldquo;What are the main themes across 10,000 documents?&rdquo;</p>
+        <p class="dim">No starting entity. Need to summarize the entire corpus.</p>
+        <p style="font-size:0.78em;">&rarr; Solved by <strong style="color:var(--accent3);">Microsoft GraphRAG</strong> (community detection) and <strong style="color:var(--accent3);">RAPTOR</strong> (tree summarization)</p>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--accent);">
+        <h3>Problem 2: Index Freshness</h3>
+        <p style="font-size:0.78em;">New documents arrive daily. GraphRAG requires <strong>full rebuild</strong> &mdash; hours of reprocessing.</p>
+        <p style="font-size:0.78em;">&rarr; Solved by <strong style="color:var(--accent3);">LightRAG</strong> (incremental updates)</p>
+    </div>
+    <div class="card" style="border-left: 3px solid #4caf50;">
+        <h3>Problem 3: Multi-Hop Cost</h3>
+        <p style="font-size:0.78em;">Iterative retrieval needs multiple LLM calls per query: retrieve &rarr; reason &rarr; retrieve again &rarr; reason&hellip;</p>
+        <p style="font-size:0.78em;">&rarr; Solved by <strong style="color:var(--accent3);">HippoRAG</strong> (single-step PageRank retrieval)</p>
+    </div>
+</section>
+
+<!-- Slide: Microsoft GraphRAG — How It Works -->
+<section>
+    <h2>Microsoft GraphRAG</h2>
+    <p style="font-size:0.72em; color:#aaa;">From Local to Global: the 2024 breakthrough</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>The Approach</h3>
+        <div class="pipeline">
+            <div class="box">Extract<br>Entities</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent);">Build<br>Graph</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent3);">Community<br>Detection</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent2);">Summarize<br>Communities</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:#4caf50;">Search<br>Summaries</div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Community Detection</h3>
+        <p style="font-size:0.78em;">The <strong>Leiden algorithm</strong> maximizes <strong>modularity</strong> $Q$:</p>
+        <p style="font-size:0.75em; text-align:center;">$Q = \frac{1}{2m} \sum_{ij} \left[ A_{ij} - \frac{k_i k_j}{2m} \right] \delta(c_i, c_j)$</p>
+        <p class="dim" style="font-size:0.65em; text-align:center;">$A_{ij}$ = adjacency, &nbsp; $k_i$ = degree of node $i$, &nbsp; $m$ = total edges, &nbsp; $\delta(c_i, c_j) = 1$ if same community</p>
+        <div class="three-col" style="font-size:0.75em; margin-top:0.2em;">
+            <div class="card" style="border-top:3px solid var(--accent3);">
+                <p><strong>Community A</strong></p>
+                <p class="dim">Mario, Luigi, Engineering, Rome &mdash; &ldquo;Engineering Team&rdquo;</p>
+            </div>
+            <div class="card" style="border-top:3px solid var(--accent);">
+                <p><strong>Community B</strong></p>
+                <p class="dim">Sick Leave, Annual Leave, HR Policy &mdash; &ldquo;Leave Policies&rdquo;</p>
+            </div>
+            <div class="card" style="border-top:3px solid var(--accent2);">
+                <p><strong>Community C</strong></p>
+                <p class="dim">Training, Certification, Java &mdash; &ldquo;Employee Development&rdquo;</p>
+            </div>
+        </div>
+    </div>
+    <p class="paper-ref">Edge et al. (2024) &mdash; &ldquo;From Local to Global: A Graph RAG Approach to Query-Focused Summarization&rdquo;</p>
+</section>
+
+<!-- Slide: GraphRAG — How Community Summarization Works -->
+<section>
+    <h2>GraphRAG &mdash; How It Answers Global Queries</h2>
+    <p style="font-size:0.72em; color:#aaa;">Step-by-step: from communities to answers</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>Step 1: Pre-compute community summaries (offline)</h3>
+        <p style="font-size:0.78em;">Each community gets an LLM-generated summary describing its members and relationships:</p>
+        <div class="two-col" style="font-size:0.75em; margin-top:0.2em;">
+            <div class="card" style="border-top:2px solid var(--accent3);">
+                <p><strong>Community A Summary:</strong></p>
+                <p class="dim">&ldquo;The Engineering team is based in Rome, led by Luigi Bianchi. Mario Rossi is a senior developer hired in 2019.&rdquo;</p>
+            </div>
+            <div class="card" style="border-top:2px solid var(--accent);">
+                <p><strong>Community B Summary:</strong></p>
+                <p class="dim">&ldquo;HR policies cover sick leave (10 days/year), annual leave (25 days), and parental leave. Updated in 2024.&rdquo;</p>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Step 2: At query time &mdash; search summaries, not raw graph</h3>
+        <p style="font-size:0.78em;"><em>&ldquo;What are the main themes?&rdquo;</em> &rarr; vector search over community summaries &rarr; returns top communities &rarr; LLM synthesizes global answer</p>
+    </div>
+    <div class="takeaway"><strong>The genius:</strong> global queries become local vector searches over pre-computed summaries. The graph is only used for community detection &mdash; retrieval is just vector search over summaries.</div>
+</section>
+
+<!-- Slide: Local vs Global Queries -->
+<section>
+    <h2>Local vs Global Queries</h2>
+    <table>
+        <tr><th>Query Type</th><th>Method</th><th>Example</th></tr>
+        <tr>
+            <td><strong>Local</strong> <span class="badge badge-key">ENTITY</span></td>
+            <td>Entity match + graph traversal</td>
+            <td><em>&ldquo;What is Mario&rsquo;s role?&rdquo;</em></td>
+        </tr>
+        <tr>
+            <td><strong>Global</strong> <span class="badge badge-new">THEME</span></td>
+            <td>Search community summaries</td>
+            <td><em>&ldquo;What are the main HR policy themes?&rdquo;</em></td>
+        </tr>
+        <tr>
+            <td><strong>Hybrid</strong> <span class="badge badge-graph">BOTH</span></td>
+            <td>Community + entity traversal</td>
+            <td><em>&ldquo;How does remote work affect Engineering?&rdquo;</em></td>
+        </tr>
+    </table>
+    <div class="two-col" style="margin-top:0.3em;">
+        <div class="card" style="border-left: 3px solid #4caf50;">
+            <h3>Strengths</h3>
+            <ul>
+                <li>Only system that handles <strong>global summarization</strong></li>
+                <li>Hierarchical communities = multi-resolution</li>
+                <li>Explainable &mdash; communities are inspectable</li>
+            </ul>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent2);">
+            <h3>Limitations</h3>
+            <ul>
+                <li><strong>Full rebuild</strong> required when corpus changes</li>
+                <li>High cost &mdash; many LLM calls for summaries</li>
+                <li>Slow indexing (hours for large corpora)</li>
+            </ul>
+        </div>
+    </div>
+    <div class="takeaway"><strong>This is the key contribution:</strong> it handles <strong>global summarization queries</strong> that no other RAG technique can answer. But you pay for it with rebuild cost.</div>
+</section>
+
+<!-- Slide: RAPTOR — Tree-Based Summarization -->
+<section>
+    <h2>RAPTOR &mdash; Tree-Based Summarization</h2>
+    <p style="font-size:0.72em; color:#aaa;">Same goal as GraphRAG (global queries) &mdash; but without a graph</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>How It Works</h3>
+        <div style="text-align:center; font-size:0.8em;">
+            <div class="pipeline">
+                <div class="box">Chunks<br><span class="dim">(leaves)</span></div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color:var(--accent);">Cluster &amp;<br>Summarize</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color:var(--accent3);">Cluster &amp;<br>Summarize</div>
+                <div class="arrow">&rarr;</div>
+                <div class="box" style="border-color:#4caf50;">Root<br><span class="dim">(corpus summary)</span></div>
+            </div>
+        </div>
+        <p style="font-size:0.75em; margin-top:0.2em;">Build a <strong>tree of summaries</strong>. Search at <strong>all levels</strong>. Detailed answers come from leaves, overview answers from higher levels.</p>
+    </div>
+    <div class="card">
+        <h3>Search at Every Level</h3>
+        <table style="font-size:0.75em;">
+            <tr><th>Level</th><th>Content</th><th>Answers</th></tr>
+            <tr><td><strong>Root</strong></td><td>Corpus summary</td><td>&ldquo;What are the main themes?&rdquo;</td></tr>
+            <tr><td><strong>L2</strong></td><td>Topic summaries</td><td>&ldquo;Summarize leave policies&rdquo;</td></tr>
+            <tr><td><strong>L1</strong></td><td>Cluster summaries</td><td>&ldquo;What types of sick leave exist?&rdquo;</td></tr>
+            <tr><td><strong>Leaves</strong></td><td>Original chunks</td><td>&ldquo;How many sick days for FT employees?&rdquo;</td></tr>
+        </table>
+    </div>
+    <p class="paper-ref">Sarthi et al. (2024) &mdash; &ldquo;RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval&rdquo; &mdash; ICLR 2024</p>
+</section>
+
+<!-- Slide: GraphRAG vs RAPTOR -->
+<section>
+    <h2>GraphRAG vs RAPTOR</h2>
+    <p style="font-size:0.72em; color:#aaa;">Both solve global queries &mdash; but through very different architectures</p>
+    <table>
+        <tr><th></th><th>GraphRAG</th><th>RAPTOR</th></tr>
+        <tr><td><strong>Builds on</strong></td><td>Knowledge graph + communities</td><td>Chunk clustering + summaries</td></tr>
+        <tr><td><strong>Best for</strong></td><td style="color:#4caf50;">Entity-rich domains (HR, medical)</td><td style="color:#4caf50;">Document-heavy domains</td></tr>
+        <tr><td><strong>Global queries</strong></td><td style="color:#4caf50;">✅ Community summaries</td><td style="color:#4caf50;">✅ Tree-level summaries</td></tr>
+        <tr><td><strong>Relationship queries</strong></td><td style="color:#4caf50;">✅ Graph traversal</td><td style="color:var(--accent2);">❌ No relationship awareness</td></tr>
+        <tr><td><strong>Incremental updates</strong></td><td>⚠️ Possible but complex</td><td style="color:var(--accent2);">❌ Full tree rebuild</td></tr>
+        <tr><td><strong>Setup complexity</strong></td><td>High (graph DB + extraction)</td><td>Medium (clustering + LLM calls)</td></tr>
+        <tr><td><strong>Cost</strong></td><td>High (many LLM calls)</td><td>Medium (fewer LLM calls)</td></tr>
+    </table>
+    <div class="takeaway"><strong>GraphRAG</strong> when you have entities and relationships. <strong>RAPTOR</strong> when you need multi-level summarization without a graph. Both solve the <strong>global query problem</strong>.</div>
+</section>
+
+<!-- Slide: RAPTOR — Limitations -->
+<section>
+    <h2>RAPTOR &mdash; Limitations</h2>
+    <div style="font-size:0.82em;">
+        <div class="card" style="border-left:3px solid var(--accent2);">
+            <h3>1. Hallucination Compounds Upward</h3>
+            <p class="dim">Each level summarizes the level below. Small errors at L1 get baked into L2, then L3. The &ldquo;telephone game&rdquo; problem.</p>
+        </div>
+        <div class="card" style="border-left:3px solid var(--accent2);">
+            <h3>2. No Incremental Updates</h3>
+            <p class="dim">Add one document? Rebuild the entire tree. No way to update a single branch.</p>
+        </div>
+        <div class="card" style="border-left:3px solid var(--accent2);">
+            <h3>3. Clustering Quality</h3>
+            <p class="dim">Diverse corpora (HR + IT + Finance) produce vague clusters. Works best with thematically coherent collections.</p>
+        </div>
+        <div class="card" style="border-left:3px solid var(--accent2);">
+            <h3>4. No Relationship Awareness</h3>
+            <p class="dim">Clusters by semantic similarity, not by entity connections. &ldquo;Mario works in Engineering&rdquo; and &ldquo;Engineering is in Rome&rdquo; may end up in different clusters.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide: LightRAG — The Problem It Solves -->
+<section>
+    <h2>LightRAG &mdash; Solving the Rebuild Problem <span class="badge badge-new">2024</span></h2>
+    <p style="font-size:0.72em; color:#aaa;">GraphRAG&rsquo;s biggest weakness: you must rebuild everything when documents change</p>
+    <div class="card" style="margin-bottom:0.2em; border-left: 3px solid var(--accent2);">
+        <h3>The Problem with GraphRAG</h3>
+        <div class="pipeline" style="font-size:0.9em;">
+            <div class="box">New<br>Document</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent2);">Re-extract<br><strong>ALL</strong> entities</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent2);">Rebuild<br><strong>entire</strong> graph</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent2);">Re-detect<br><strong>ALL</strong> communities</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent2);">Re-summarize<br><strong>ALL</strong></div>
+        </div>
+        <p style="font-size:0.75em; text-align:center; color:var(--accent2);">⏱ Hours of reprocessing. Hundreds of dollars in LLM calls.</p>
+    </div>
+    <div class="card" style="border-left: 3px solid #4caf50;">
+        <h3>LightRAG&rsquo;s Solution: Incremental Updates</h3>
+        <div class="pipeline" style="font-size:0.9em;">
+            <div class="box">New<br>Document</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:#4caf50;">Extract<br><strong>new</strong> entities</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:#4caf50;">Merge into<br><strong>existing</strong> graph</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:#4caf50;">Done ✓</div>
+        </div>
+        <p style="font-size:0.75em; text-align:center; color:#4caf50;">⏱ Seconds per document. Pennies in cost.</p>
+    </div>
+    <p class="paper-ref">Guo et al. (2024) &mdash; &ldquo;LightRAG: Simple and Fast Retrieval-Augmented Generation&rdquo;</p>
+</section>
+
+<!-- Slide: LightRAG — Dual-Level Retrieval -->
+<section>
+    <h2>LightRAG &mdash; Dual-Level Retrieval</h2>
+    <p style="font-size:0.72em; color:#aaa;">One graph, two retrieval strategies &mdash; no community detection needed</p>
+    <div class="two-col">
+        <div class="card" style="border-top: 3px solid var(--accent);">
+            <h3>Low-Level Retrieval</h3>
+            <p style="font-size:0.78em;"><strong>Entity-specific</strong> queries</p>
+            <p style="font-size:0.75em;"><em>&ldquo;What is Mario&rsquo;s hire date?&rdquo;</em></p>
+            <p class="dim">&rarr; Find entity &rarr; follow edges &rarr; exact answer</p>
+            <p class="dim">Same as basic Graph RAG (Section 4)</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent3);">
+            <h3>High-Level Retrieval</h3>
+            <p style="font-size:0.78em;"><strong>Theme-based</strong> queries</p>
+            <p style="font-size:0.75em;"><em>&ldquo;What are Engineering&rsquo;s goals?&rdquo;</em></p>
+            <p class="dim">&rarr; Search <strong>key-value pairs</strong> of conceptual relationships</p>
+            <p class="dim">Replaces community detection with indexed KV pairs</p>
+        </div>
+    </div>
+    <div class="card" style="margin-top:0.2em;">
+        <h3>Five Query Modes</h3>
+        <table style="font-size:0.72em;">
+            <tr><th>Mode</th><th>Uses</th><th>Best For</th></tr>
+            <tr><td><strong>Naive</strong></td><td>Vector search only</td><td>Simple factual queries</td></tr>
+            <tr><td><strong>Local</strong></td><td>Low-level KG retrieval</td><td>Entity-specific questions</td></tr>
+            <tr><td><strong>Global</strong></td><td>High-level KG retrieval</td><td>Theme/trend questions</td></tr>
+            <tr><td><strong>Hybrid</strong> <span class="badge badge-new">DEFAULT</span></td><td>Low + High combined</td><td>Most production queries</td></tr>
+            <tr><td><strong>Mix</strong></td><td>Vector + KG combined</td><td>Maximum coverage</td></tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>80% of GraphRAG&rsquo;s power, 10% of the operational headache.</strong> Start here for most Graph RAG projects.</div>
+</section>
+
+<!-- Slide: HippoRAG — The Problem It Solves -->
+<section>
+    <h2>HippoRAG &mdash; Solving Multi-Hop Cost <span class="badge badge-key">NeurIPS 2024</span></h2>
+    <p style="font-size:0.72em; color:#aaa;">Multi-hop retrieval is expensive. HippoRAG does it in one step.</p>
+    <div class="card" style="margin-bottom:0.2em; border-left: 3px solid var(--accent2);">
+        <h3>The Problem: Iterative Retrieval is Expensive</h3>
+        <p style="font-size:0.78em;"><em>&ldquo;What drugs interact with Patient X&rsquo;s medications?&rdquo;</em></p>
+        <div class="pipeline" style="font-size:0.9em;">
+            <div class="box">Retrieve<br>Patient X</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent2);">LLM<br>reasons</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box">Retrieve<br>medications</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box" style="border-color:var(--accent2);">LLM<br>reasons</div>
+            <div class="arrow">&rarr;</div>
+            <div class="box">Retrieve<br>interactions</div>
+        </div>
+        <p style="font-size:0.72em; text-align:center; color:var(--accent2);">3 retrieval steps × 3 LLM calls = slow and expensive</p>
+    </div>
+    <div class="card" style="border-left: 3px solid #4caf50;">
+        <h3>HippoRAG&rsquo;s Solution: Retrieve by Association</h3>
+        <div class="two-col" style="font-size:0.78em;">
+            <div>
+                <p><strong>Indexing</strong> (offline)</p>
+                <p class="dim">LLM extracts triples via <strong>Open IE</strong> &mdash; no schema needed. All triples merged into one KG.</p>
+            </div>
+            <div>
+                <p><strong>Query</strong> (online)</p>
+                <p class="dim">Extract query entities &rarr; run <strong>Personalized PageRank</strong> &rarr; all relevant nodes found in <strong>1 step</strong>.</p>
+            </div>
+        </div>
+        <p style="font-size:0.72em; text-align:center; color:#4caf50;">1 step, 1 LLM call &rarr; 6&ndash;13&times; faster, 10&ndash;30&times; cheaper</p>
+    </div>
+    <p class="paper-ref">Gutiérrez et al. (2024) &mdash; &ldquo;HippoRAG: Neurobiologically Inspired Long-Term Memory for LLMs&rdquo; &mdash; NeurIPS 2024</p>
+</section>
+
+<!-- Slide: HippoRAG — The Brain Analogy -->
+<section>
+    <h2>HippoRAG &mdash; Brain-Inspired Architecture</h2>
+    <p style="font-size:0.72em; color:#aaa;">Mimics how the human hippocampus indexes long-term memory</p>
+    <div class="card" style="margin-bottom:0.2em;">
+        <h3>The Analogy</h3>
+        <table style="font-size:0.75em;">
+            <tr><th>Brain Component</th><th>HippoRAG Component</th><th>Role</th></tr>
+            <tr><td><strong>Neocortex</strong></td><td>LLM</td><td>Processes and understands text</td></tr>
+            <tr><td><strong>Parahippocampal regions</strong></td><td>Knowledge Graph</td><td>Stores entities and relationships</td></tr>
+            <tr><td><strong>Hippocampus</strong></td><td>Personalized PageRank</td><td>Retrieves by association, not just similarity</td></tr>
+        </table>
+    </div>
+    <div class="card">
+        <h3>Personalized PageRank (PPR)</h3>
+        <p style="font-size:0.78em; text-align:center;">$\text{PPR}(v) = (1 - \alpha) \cdot \mathbf{e}_q + \alpha \sum_{u \in \mathcal{N}(v)} \frac{\text{PPR}(u)}{\deg(u)}$</p>
+        <p class="dim" style="font-size:0.65em; text-align:center;">$\alpha$ = damping factor, &nbsp; $\mathbf{e}_q$ = query entity indicator vector</p>
+        <p style="font-size:0.75em; margin-top:0.2em;">PPR scores <strong>all nodes</strong> by how strongly they associate with the query entity. More paths = stronger association = higher rank.</p>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--accent2); margin-top:0.2em;">
+        <h3>Key Trade-off</h3>
+        <p style="font-size:0.78em;">HippoRAG <strong style="color:var(--accent2);">cannot</strong> answer global &ldquo;what are the themes?&rdquo; queries (no community detection). But for <strong style="color:#4caf50;">multi-hop entity queries</strong> &mdash; fastest and cheapest option.</p>
+    </div>
+    <div class="takeaway"><strong>Key insight:</strong> your brain doesn&rsquo;t walk through memories step by step. It retrieves by association. HippoRAG does the same: <strong>PageRank replaces iterative LLM calls</strong>.</div>
+</section>
+
+<!-- Slide: Choosing Your Framework -->
+<section>
+    <h2>Choosing Your Framework</h2>
+    <p style="font-size:0.72em; color:#aaa;">Decision guide: start with your primary problem</p>
+    <div class="card" style="border-left:3px solid var(--accent3);">
+        <table style="font-size:0.72em;">
+            <tr><th>Your Primary Problem</th><th>Best Framework</th><th>Why</th></tr>
+            <tr>
+                <td><strong>&ldquo;I need global summarization&rdquo;</strong></td>
+                <td style="color:#4caf50;"><strong>Microsoft GraphRAG</strong></td>
+                <td>Community detection + summaries = only system for &ldquo;what are the themes?&rdquo;</td>
+            </tr>
+            <tr>
+                <td><strong>&ldquo;I need global queries without a graph&rdquo;</strong></td>
+                <td style="color:#4caf50;"><strong>RAPTOR</strong></td>
+                <td>Tree of summaries, works with any vector store</td>
+            </tr>
+            <tr>
+                <td><strong>&ldquo;My documents change frequently&rdquo;</strong></td>
+                <td style="color:#4caf50;"><strong>LightRAG</strong></td>
+                <td>Incremental updates &mdash; no full rebuild</td>
+            </tr>
+            <tr>
+                <td><strong>&ldquo;I need fast, cheap multi-hop&rdquo;</strong></td>
+                <td style="color:#4caf50;"><strong>HippoRAG</strong></td>
+                <td>One-shot PageRank &mdash; 6&ndash;13&times; faster than iterative</td>
+            </tr>
+            <tr>
+                <td><strong>&ldquo;I want the simplest setup&rdquo;</strong></td>
+                <td style="color:#4caf50;"><strong>LightRAG</strong></td>
+                <td>Easiest to set up, five query modes, good enough for most cases</td>
+            </tr>
+        </table>
+    </div>
+    <div class="takeaway"><strong>Default recommendation: start with LightRAG.</strong> Add GraphRAG if you need global summarization. Add HippoRAG if multi-hop accuracy matters. Use RAPTOR only if you truly can&rsquo;t maintain a graph database.</div>
+    <p class="paper-ref">Chen et al. (2025) &mdash; &ldquo;PathRAG: Pruning Graph-based RAG with Relational Paths&rdquo;</p>
+</section>
+
+<!-- ============================================ -->
+<!-- KEY TAKEAWAYS -->
+<!-- ============================================ -->
+<section>
+    <div class="progress-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div></div>
+    <h2>Lecture 6 &mdash; Key Takeaways</h2>
+    <div style="font-size:0.85em;">
+        <div class="card">
+            <p><span class="highlight">1.</span> Vector search finds <strong>similar documents</strong>. Graphs find <strong>connected entities</strong>. Different tools for different questions.</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">2.</span> <strong>LLMs are your extraction engine.</strong> No NER model training needed &mdash; prompt the LLM to extract triples.</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">3.</span> <strong>Entity resolution is the hard part.</strong> Extraction is easy. Deduplication and merging is where projects fail.</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">4.</span> Graph RAG <strong>augments</strong> vector RAG, doesn&rsquo;t replace it. Most queries still use vector search.</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">5.</span> <strong>Microsoft GraphRAG</strong> handles global queries through community detection and hierarchical summarization.</p>
+        </div>
+        <div class="card">
+            <p><span class="highlight">6.</span> <strong>Start simple:</strong> NetworkX + LLM extraction. Scale to Neo4j when you need it.</p>
+        </div>
+    </div>
+</section>
+
+<!-- QUESTIONS -->
+<section>
+    <div style="text-align:center;">
+        <p style="font-size:3em;">&#10067;</p>
+        <h1>Questions?</h1>
+        <p class="subtitle" style="margin-top:1em;">Thank you!</p>
+        <br>
+        <p style="font-size:0.55em; color:#555;">Kamyar Zeinalipour &mdash; Zucchetti LLM Course</p>
+        <div style="margin-top:1.5em; font-size:0.5em; color:#444;">
+            <p>Next &rarr; <span class="highlight">Lecture 7: Agentic RAG &amp; Autonomous Systems</span></p>
+            <p style="color:#555; margin-top:0.3em;">Theory: Function calling &middot; Tool use &middot; Multi-agent workflows</p>
+        </div>
+    </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        width: 960,
+        height: 700,
+        margin: 0.04,
+        minScale: 0.5,
+        maxScale: 1.2,
+        transition: 'slide',
+        transitionSpeed: 'default',
+        autoAnimateEasing: 'ease',
+        autoAnimateUnmatched: false,
+        autoAnimateDuration: 0.6,
+        plugins: [RevealHighlight],
+        navigationMode: 'linear',
+        highlight: {
+            highlightOnLoad: true,
+        },
+    });
+</script>
+</body>
+</html>
